@@ -116,17 +116,12 @@ html, body {
 
 }
 
-.wrapper{
-  display: flex;
+.wrapper {
+  display:flexbox;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: 50vh;
-  min-width: 50vh;
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%); 
-
+  min-height: auto;
   width: 420px;
   background: transparent;
   border: 2px solid #474747;
@@ -134,17 +129,22 @@ html, body {
   color: #ffffff;
   border-radius: 5px;
   padding: 30px 40px;
+  position: absolute;
+  left: 50%;
+  top: 170px;
+  transform: translatex(-50%);
 }
 
 .wrapper h2{
   font-size: 36px;
   text-align: center;
   font-family: 'Barlow', sans-serif; font-weight: 400; font-style: normal;
+  margin-bottom: 20px;
 }
 
-.wrapper .input-box{
+.input-box{
   position: relative;
-  width: 100%;
+  width: calc(100% - 20px);;
   height: 25px;
   margin: 50px 0px 70px 0px;
   
@@ -153,7 +153,7 @@ html, body {
 
 .input-box input{
   height: 100%;
-  width: 200px;
+  width: calc(100% - 20px);
   background: transparent;
   border: none;
   outline: none;
@@ -163,6 +163,8 @@ html, body {
   color: #ffffff;
   padding: 20px 10px 20px 10px;
   font-family: 'Barlow', sans-serif; font-weight: 400; font-style: normal;
+  margin: 0 auto; /* Center the input boxes */
+  
 }
 
 .input-box input::placeholder{
@@ -179,7 +181,7 @@ html, body {
 }
 
 .wrapper .btn{
-  width: 100%;
+  width: calc(100% - 20px);
   height: 45px;
   background: #c0c0c0;
   border: none;
@@ -216,6 +218,8 @@ html, body {
   text-decoration: underline;
   font-family: 'Barlow', sans-serif; font-weight: 400; font-style: normal;
 }
+
+.error { color: red; }
 
 
 
