@@ -153,6 +153,7 @@ html, body {
 
 .input-box input{
   height: 100%;
+  width: 200px;
   background: transparent;
   border: none;
   outline: none;
@@ -215,6 +216,7 @@ html, body {
   text-decoration: underline;
   font-family: 'Barlow', sans-serif; font-weight: 400; font-style: normal;
 }
+
 
 
   /* padding: wdsa */
