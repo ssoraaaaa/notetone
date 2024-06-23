@@ -1,0 +1,219 @@
+@import url('https://fonts.cdnfonts.com/css/old-english-five');
+@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;700&display=swap');
+
+
+
+body {
+    background: url("banner_1.png") no-repeat center center fixed;
+    background-size: cover;
+    font-family: 'Barlow', sans-serif; font-weight: 400; font-style: normal;
+}
+
+
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+.h1 {
+    font-family: 'Barlow', sans-serif; font-weight: 400; font-style: normal;
+    color: #ffffff;
+    text-align: center;
+    font-size: 50px;
+    
+    /* margin-bottom: 1920px; */
+}
+
+
+/* The navbar list */
+.header {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    /* padding: 40px 0px 40px 0px;  */
+    text-align: right;
+    background-color: #202020;
+    height: 120px;
+    line-height: 120px; /* Ensure content is vertically centered */
+}
+
+
+.header_logo { 
+    width:360px;
+    height: fit-content;
+    left: 0px;
+    top: 0px;
+    position: absolute;
+}
+
+/* The borders aka padding */
+.li_header{
+    display: inline;
+    padding: 100% 30px 45px 30px;
+}
+
+/* Text */
+.li_header a { 
+    font-size: 32px;
+    font-family: 'Barlow', sans-serif; font-weight: 400; font-style: normal;
+    color: #ffffff; /* Add text color to your links */
+    text-decoration: none; /* Remove underlines from links */
+    /* border-radius: 4px; */
+}
+
+
+.li_header:hover {
+    background-color: #404040; /* Change the background color on hover */
+    transition: background-color 0.3s; /* Add a smooth transition effect */
+}
+
+
+.footer {
+    list-style-type: none;
+    margin: 0;
+    padding: 45px 0px 45px 0px;
+    text-align: left ;
+    background-color: #800020;
+
+    position: absolute;
+    bottom: 0;
+    width: 100%; /* Make the footer span the entire width */
+}
+
+
+.li_footer{
+    display: inline;
+    padding: 78.5px 30px 45px;
+}
+
+
+.li_footer a {
+    font-size: 20px;
+    font-family: 'Barlow', sans-serif; font-weight: 400; font-style: normal;
+    color: #000000; /* Add text color to your links */
+    text-decoration: none; /* Remove underlines from links */
+}
+
+.li_footer:hover {
+    background-color: #FFD700; /* Change the background color on hover */
+    transition: background-color 0.3s; /* Add a smooth transition effect */
+}
+
+.insta_icon, .gmail_icon {
+    margin-right: 15px;
+    
+}
+
+.div1 {
+    padding: 20px 20px 20px 20px;
+
+}
+
+.product_image {
+    width:280px;
+    height:185px;
+    padding: 10px;
+
+}
+
+.wrapper{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 50vh;
+  min-width: 50vh;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%); /* Add this line for centering */
+
+  width: 420px;
+  background: transparent;
+  border: 2px solid #474747;
+  backdrop-filter: blur(9px);
+  color: #ffffff;
+  border-radius: 5px;
+  padding: 30px 40px;
+}
+
+.wrapper h2{
+  font-size: 36px;
+  text-align: center;
+  font-family: 'Barlow', sans-serif; font-weight: 400; font-style: normal;
+}
+
+.wrapper .input-box{
+  position: relative;
+  width: 100%;
+  height: 25px;
+  margin: 50px 0px 70px 0px;
+  
+  
+}
+
+.input-box input{
+  height: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 5px;
+  font-size: 16px;
+  color: #ffffff;
+  padding: 20px 10px 20px 10px;
+  font-family: 'Barlow', sans-serif; font-weight: 400; font-style: normal;
+}
+
+.input-box input::placeholder{
+  color: #c0c0c0;
+  font-family: 'Barlow', sans-serif; font-weight: 400; font-style: normal;
+}
+
+.wrapper .remember-me{
+  display: flex;
+  justify-content: space-between;
+  font-size: 16px;
+  margin: 0px 0px 25px;
+  font-family: 'Barlow', sans-serif; font-weight: 400; font-style: normal;
+}
+
+.wrapper .btn{
+  width: 100%;
+  height: 45px;
+  background: #c0c0c0;
+  border: none;
+  outline: none;
+  border-radius: 40px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  font-size: 16px;
+  color: #ffffff;
+  font-weight: 600;
+  font-family: 'Barlow', sans-serif; font-weight: 400; font-style: normal;
+}
+
+.wrapper .btn:hover{
+  background: #d8d8d8;
+}
+
+.wrapper .register-link{
+    font-size: 16px;
+    text-align: center;
+    margin: 20px 0 15px;
+    color: #c0c0c0;
+    font-family: 'Barlow', sans-serif; font-weight: 400; font-style: normal;
+}
+
+  .register-link p a{
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 600;
+    font-family: 'Barlow', sans-serif; font-weight: 400; font-style: normal;
+  }
+
+  .register-link p a:hover{
+    text-decoration: underline;
+    font-family: 'Barlow', sans-serif; font-weight: 400; font-style: normal;
+  }
+
+  /* padding: wdsa */
