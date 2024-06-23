@@ -125,7 +125,7 @@ html, body {
   position: absolute;
   left: 50%;
   top: 50%;
-  transform: translate(-50%, -50%); /* Add this line for centering */
+  transform: translate(-50%, -50%); 
 
   width: 420px;
   background: transparent;
@@ -204,16 +204,17 @@ html, body {
     font-family: 'Barlow', sans-serif; font-weight: 400; font-style: normal;
 }
 
-  .register-link p a{
-    color: #ffffff;
-    text-decoration: none;
-    font-weight: 600;
-    font-family: 'Barlow', sans-serif; font-weight: 400; font-style: normal;
-  }
+.register-link p a{
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 600;
+  font-family: 'Barlow', sans-serif; font-weight: 400; font-style: normal;
+}
 
-  .register-link p a:hover{
-    text-decoration: underline;
-    font-family: 'Barlow', sans-serif; font-weight: 400; font-style: normal;
-  }
+.register-link p a:hover{
+  text-decoration: underline;
+  font-family: 'Barlow', sans-serif; font-weight: 400; font-style: normal;
+}
+
 
   /* padding: wdsa */
