@@ -7,17 +7,11 @@ if (!isset($_SESSION['username'])) {
     exit;
 }
 
+// Fetch user details
 $username = $_SESSION['username'];
-
-// Fetch user's threads
-$sql = "SELECT * FROM threads WHERE createdby = (SELECT userid FROM users WHERE username='$username')";
-$result = $conn->query($sql);
-$threads = [];
-if ($result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        $threads[] = $row;
-    }
-}
+$user_sql = "SELECT * FROM users WHERE username='$username'";
+$user_result = $conn->query($user_sql);
+$user = $user_result->fetch_assoc();
 ?>
 
 <!DOCTYPE html>
@@ -25,7 +19,7 @@ if ($result->num_rows > 0) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Threads</title>
+    <title>Profile</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -38,19 +32,9 @@ if ($result->num_rows > 0) {
         <li class="li_header"><a class="a_header" href="logout.php">Logout</a></li>
     </ul>
     <div class="wrapper">
-        <h2>Your Threads</h2>
-        <button class="btn" onclick="location.href='add_thread.php'">Add Thread</button>
-        <div class="section">
-            <ul>
-                <?php foreach ($threads as $thread): ?>
-                    <li>
-                        <a href="thread_detail.php?id=<?php echo $thread['threadid']; ?>">
-                            <?php echo htmlspecialchars($thread['title']); ?>
-                        </a>
-                    </li>
-                <?php endforeach; ?>
-            </ul>
-        </div>
+        <h2>Profile</h2>
+        <p>Username: <?php echo htmlspecialchars($user['username']); ?></p>
+        <!-- Additional statistics can be added here -->
     </div>
 </body>
 </html>

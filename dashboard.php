@@ -1,11 +1,33 @@
 <?php
 session_start();
+include('db.php');
 
 if (!isset($_SESSION['username'])) {
     header('Location: login.php');
     exit;
 }
+
+// Fetch all notations
+$notation_sql = "SELECT * FROM notations";
+$notation_result = $conn->query($notation_sql);
+$notations = [];
+if ($notation_result->num_rows > 0) {
+    while ($row = $notation_result->fetch_assoc()) {
+        $notations[] = $row;
+    }
+}
+
+// Fetch all threads
+$thread_sql = "SELECT * FROM threads";
+$thread_result = $conn->query($thread_sql);
+$threads = [];
+if ($thread_result->num_rows > 0) {
+    while ($row = $thread_result->fetch_assoc()) {
+        $threads[] = $row;
+    }
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,40 +38,36 @@ if (!isset($_SESSION['username'])) {
 </head>
 <body>
     <ul class="header">
-        <a href="./dashboard.php"><img src="logo-gray.png" class="header_logo" alt="Logo"></a>
+        <a href="dashboard.php"><img src="logo-gray.png" class="header_logo" alt="Logo"></a>
         <li class="li_header"><a class="a_header" href="dashboard.php">Dashboard</a></li>
         <li class="li_header"><a class="a_header" href="threads.php">Threads</a></li>
         <li class="li_header"><a class="a_header" href="notations.php">Notations</a></li>
+        <li class="li_header"><a class="a_header" href="profile.php">Profile</a></li>
         <li class="li_header"><a class="a_header" href="logout.php">Logout</a></li>
     </ul>
-    <div class="wrapper">
-        <h2>Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?>!</h2>
-        <p>This is your dashboard. Here you can manage your account and access exclusive content.</p>
-        <div id="profile" class="section">
-            <h3>Your Profile</h3>
-            <p>Username: <?php echo htmlspecialchars($_SESSION['username']); ?></p>
-            <!-- Add more profile information as needed -->
-        </div>
-        <div id="notations" class="section">
-            <h3>Your Notations</h3>
-            <p>Manage your music notations here.</p>
-            <button class="btn" onclick="location.href='add_notation.php'">Add Notation</button>
-            <!-- List user notations here -->
+    <div class="wrapper1">
+        <div class="wrapper-left">
+            <h2>All Notations</h2>
             <ul>
-                <!-- Example notation -->
-                <li>Notation 1: [Link to notation]</li>
-                <!-- Add more notations dynamically -->
+                <?php foreach ($notations as $notation): ?>
+                    <li>
+                        <a href="notation.php?id=<?php echo $notation['notationid']; ?>">
+                            <?php echo htmlspecialchars($notation['content']); ?>
+                        </a>
+                    </li>
+                <?php endforeach; ?>
             </ul>
         </div>
-        <div id="threads" class="section">
-            <h3>Threads</h3>
-            <p>Participate in music-related threads.</p>
-            <button class="btn" onclick="location.href='add_thread.php'">Start Thread</button>
-            <!-- List thread threads here -->
+        <div class="wrapper-right">
+            <h2>All Threads</h2>
             <ul>
-                <!-- Example thread -->
-                <li>Thread 1: [Link to thread]</li>
-                <!-- Add more threads dynamically -->
+                <?php foreach ($threads as $thread): ?>
+                    <li>
+                        <a href="thread_detail.php?id=<?php echo $thread['threadid']; ?>">
+                            <?php echo htmlspecialchars($thread['title']); ?>
+                        </a>
+                    </li>
+                <?php endforeach; ?>
             </ul>
         </div>
     </div>
