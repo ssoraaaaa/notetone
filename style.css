@@ -463,11 +463,49 @@ margin: 0 auto;
 }
 
 
+/* General Box Style */
+.box {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid #474747;
+  border-radius: 5px;
+  padding: 20px;
+  box-sizing: border-box;
+  color: #ffffff;
+  text-align: left; /* Align text to the left for better readability */
+}
 
+.box a {
+  color: #ffffff;
+  text-decoration: none;
+}
 
+.box a:hover {
+  text-decoration: underline;
+}
 
+/* Notations Page Specific Styles */
+.notations-container-notations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px; /* Gap under the button */
+}
 
+.notations-container-notations .box {
+  width: calc(20% - 10px); /* Five boxes per row with gap */
+}
 
+/* Dashboard Page Specific Styles */
+.notations-container-dashboard, .threads-container-dashboard {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.notations-container-dashboard .box,
+.threads-container-dashboard .box {
+  width: calc(20% - 10px); /* Five boxes per row with gap */
+}
 
 
 

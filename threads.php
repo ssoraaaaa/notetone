@@ -7,14 +7,17 @@ if (!isset($_SESSION['username'])) {
     exit;
 }
 
-$username = $_SESSION['username'];
-
 // Fetch user's threads
-$sql = "SELECT * FROM threads WHERE createdby = (SELECT userid FROM users WHERE username='$username')";
-$result = $conn->query($sql);
+$username = $_SESSION['username'];
+$userid = $_SESSION['userid'];
+$thread_sql = "SELECT t.*, u.username AS user_name 
+               FROM threads t 
+               LEFT JOIN users u ON t.createdby = u.userid 
+               WHERE t.createdby = '$userid'";
+$thread_result = $conn->query($thread_sql);
 $threads = [];
-if ($result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
+if ($thread_result->num_rows > 0) {
+    while ($row = $thread_result->fetch_assoc()) {
         $threads[] = $row;
     }
 }
@@ -37,19 +40,20 @@ if ($result->num_rows > 0) {
         <li class="li_header"><a class="a_header" href="profile.php">Profile</a></li>
         <li class="li_header"><a class="a_header" href="logout.php">Logout</a></li>
     </ul>
-    <div class="wrapper">
-        <h2>Your Threads</h2>
-        <button class="btn" onclick="location.href='add_thread.php'">Add Thread</button>
-        <div class="section">
-            <ul>
+    <div class="container">
+        <div class="wrapper2">
+            <h2>Your Threads</h2>
+            <button class="btn" onclick="location.href='add_thread.php'">Add Thread</button>
+            <div class="threads-container-dashboard">
                 <?php foreach ($threads as $thread): ?>
-                    <li>
-                        <a href="thread_detail.php?id=<?php echo $thread['threadid']; ?>">
-                            <?php echo htmlspecialchars($thread['title']); ?>
+                    <div class="box">
+                        <a href="thread.php?id=<?php echo $thread['threadid']; ?>">
+                            <p><?php echo htmlspecialchars($thread['title']); ?></p>
+                            <p>Created by: <?php echo htmlspecialchars($thread['user_name']); ?></p>
                         </a>
-                    </li>
+                    </div>
                 <?php endforeach; ?>
-            </ul>
+            </div>
         </div>
     </div>
 </body>
