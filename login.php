@@ -61,10 +61,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <h2>Log in</h2>
         <form method="POST" action="login.php">
             <div class="input-box">
-                <input type="text" name="username" placeholder="Username">
+                <input type="text" name="username" placeholder="username">
             </div>
             <div class="input-box">
-                <input type="password" name="password" placeholder="Password">
+                <input type="password" name="password" placeholder="password">
             </div>
             <div class="error-messages">
                 <?php
