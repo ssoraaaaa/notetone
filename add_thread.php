@@ -42,6 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <li class="li_header"><a class="a_header" href="dashboard.php">Dashboard</a></li>
         <li class="li_header"><a class="a_header" href="threads.php">Threads</a></li>
         <li class="li_header"><a class="a_header" href="notations.php">Notations</a></li>
+        <li class="li_header"><a class="a_header" href="profile.php">Profile</a></li>
         <li class="li_header"><a class="a_header" href="logout.php">Logout</a></li>
     </ul>
     <div class="wrapper">

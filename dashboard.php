@@ -8,7 +8,11 @@ if (!isset($_SESSION['username'])) {
 }
 
 // Fetch all notations
-$notation_sql = "SELECT * FROM notations";
+$notation_sql = "SELECT n.*, s.title AS song_title, i.name AS instrument_name, u.username AS user_name 
+                 FROM notations n 
+                 LEFT JOIN songs s ON n.songid = s.songid 
+                 LEFT JOIN instruments i ON n.instrumentid = i.instrumentid
+                 LEFT JOIN users u ON n.userid = u.userid";
 $notation_result = $conn->query($notation_sql);
 $notations = [];
 if ($notation_result->num_rows > 0) {
@@ -18,7 +22,7 @@ if ($notation_result->num_rows > 0) {
 }
 
 // Fetch all threads
-$thread_sql = "SELECT * FROM threads";
+$thread_sql = "SELECT t.*, u.username AS user_name FROM threads t LEFT JOIN users u ON t.createdby = u.userid";
 $thread_result = $conn->query($thread_sql);
 $threads = [];
 if ($thread_result->num_rows > 0) {
@@ -48,27 +52,31 @@ if ($thread_result->num_rows > 0) {
     <div class="wrapper1">
         <div class="wrapper-left">
             <h2>All Notations</h2>
-            <ul>
+            <div class="notations-container-dashboard">
                 <?php foreach ($notations as $notation): ?>
-                    <li>
+                    <div class="notation-box">
                         <a href="notation.php?id=<?php echo $notation['notationid']; ?>">
-                            <?php echo htmlspecialchars($notation['content']); ?>
+                            <p><?php echo htmlspecialchars($notation['title']); ?></p>
+                            <p>Song: <?php echo htmlspecialchars($notation['song_title']); ?></p>
+                            <p>Instrument: <?php echo htmlspecialchars($notation['instrument_name']); ?></p>
+                            <p>Added by: <?php echo htmlspecialchars($notation['user_name']); ?></p>
                         </a>
-                    </li>
+                    </div>
                 <?php endforeach; ?>
-            </ul>
+            </div>
         </div>
         <div class="wrapper-right">
             <h2>All Threads</h2>
-            <ul>
+            <div class="threads-container-dashboard">
                 <?php foreach ($threads as $thread): ?>
-                    <li>
-                        <a href="thread_detail.php?id=<?php echo $thread['threadid']; ?>">
-                            <?php echo htmlspecialchars($thread['title']); ?>
+                    <div class="thread-box">
+                        <a href="thread.php?id=<?php echo $thread['threadid']; ?>">
+                            <p><?php echo htmlspecialchars($thread['title']); ?></p>
+                            <p>Created by: <?php echo htmlspecialchars($thread['user_name']); ?></p>
                         </a>
-                    </li>
+                    </div>
                 <?php endforeach; ?>
-            </ul>
+            </div>
         </div>
     </div>
 </body>

@@ -1,6 +1,6 @@
 <?php
-include('db.php');
 session_start();
+include('db.php');
 
 // Initialize error messages array
 $errors = [];
@@ -32,8 +32,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($result->num_rows > 0) {
             $user = $result->fetch_assoc();
             if (password_verify($password, $user['password'])) {
-                // Start session and redirect to dashboard
+                // Set session variables
                 $_SESSION['username'] = $username;
+                $_SESSION['userid'] = $user['userid'];
                 echo '<script>window.location.href="dashboard.php";</script>';
                 exit;
             } else {
@@ -51,11 +52,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Log in</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        .error { color: red; }
-    </style>
 </head>
 <body>
     <ul class="header">
