@@ -1,8 +1,16 @@
 <?php
 include('db.php');
+session_start();
 
 // Initialize error messages array
 $errors = [];
+
+// Display success message if it exists
+$success_message = '';
+if (isset($_SESSION['success_message'])) {
+    $success_message = $_SESSION['success_message'];
+    unset($_SESSION['success_message']);
+}
 
 // Check if form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -25,9 +33,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $user = $result->fetch_assoc();
             if (password_verify($password, $user['password'])) {
                 // Start session and redirect to dashboard
-                session_start();
                 $_SESSION['username'] = $username;
-                echo '<script>alert("Login successful!"); window.location.href="dashboard.php";</script>';
+                echo '<script>window.location.href="dashboard.php";</script>';
                 exit;
             } else {
                 $errors[] = "Incorrect username or password";
@@ -59,6 +66,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </ul>
     <div class="wrapper">
         <h2>Log in</h2>
+        <?php if (!empty($success_message)): ?>
+            <script>alert('<?php echo $success_message; ?>');</script>
+        <?php endif; ?>
         <form method="POST" action="login.php">
             <div class="input-box">
                 <input type="text" name="username" placeholder="username">
