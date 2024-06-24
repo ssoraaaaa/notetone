@@ -64,43 +64,47 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <li class="li_header"><a class="a_header" href="profile.php">Profile</a></li>
         <li class="li_header"><a class="a_header" href="logout.php">Logout</a></li>
     </ul>
-    <div class="wrapper">
-        <h2>Your Notations</h2>
-        <button class="btn" onclick="location.href='add_notation.php'">Add Notation</button>
-        <div class="section">
-            <ul>
-                <?php foreach ($notations as $notation): ?>
-                    <li>
-                        <a href="notation.php?id=<?php echo $notation['notationid']; ?>">
-                            <?php echo htmlspecialchars($notation['content']); ?>
-                        </a>
-                    </li>
-                <?php endforeach; ?>
-            </ul>
+    <div class="container">
+        <div class="wrapper2">
+            <h2>Your Notations</h2>
+            <button class="btn" onclick="location.href='add_notation.php'">Add Notation</button>
+            <div class="section">
+                <ul>
+                    <?php foreach ($notations as $notation): ?>
+                        <li>
+                            <a href="notation.php?id=<?php echo $notation['notationid']; ?>">
+                                <?php echo htmlspecialchars($notation['content']); ?>
+                            </a>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
         </div>
-        <div class="section">
-            <h2>Add a New Song</h2>
-            <form method="POST" action="notations.php">
-                <div class="input-box">
-                    <input type="text" name="title" placeholder="Song Title" required>
-                </div>
-                <div class="input-box">
-                    <input type="text" name="performer" placeholder="Performer" required>
-                </div>
-                <button type="submit" name="add_song" class="btn">Add Song</button>
-            </form>
-        </div>
-        <div class="section">
-            <h2>Add a New Instrument</h2>
-            <form method="POST" action="notations.php">
-                <div class="input-box">
-                    <input type="text" name="name" placeholder="Instrument Name" required>
-                </div>
-                <div class="input-box">
-                    <input type="text" name="type" placeholder="Instrument Type" required>
-                </div>
-                <button type="submit" name="add_instrument" class="btn">Add Instrument</button>
-            </form>
+        <div class="right-container">
+            <div class="wrapper3">
+                <h2>Add a New Song</h2>
+                <form method="POST" action="notations.php">
+                    <div class="input-box">
+                        <input type="text" name="title" placeholder="Song Title" required>
+                    </div>
+                    <div class="input-box">
+                        <input type="text" name="performer" placeholder="Performer" required>
+                    </div>
+                    <button type="submit" name="add_song" class="btn">Add Song</button>
+                </form>
+            </div>
+            <div class="wrapper4">
+                <h2>Add a New Instrument</h2>
+                <form method="POST" action="notations.php">
+                    <div class="input-box">
+                        <input type="text" name="name" placeholder="Instrument Name" required>
+                    </div>
+                    <div class="input-box">
+                        <input type="text" name="type" placeholder="Instrument Type" required>
+                    </div>
+                    <button type="submit" name="add_instrument" class="btn">Add Instrument</button>
+                </form>
+            </div>
         </div>
     </div>
 </body>
