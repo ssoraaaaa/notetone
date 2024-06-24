@@ -221,6 +221,64 @@ html, body {
 
 .error { color: red; }
 
+.section {
+  margin: 20px 0;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+}
+
+.section h3 {
+  font-size: 24px;
+  font-family: 'Barlow', sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  color: #ffffff;
+  margin-bottom: 10px;
+}
+
+.section p {
+  font-size: 16px;
+  font-family: 'Barlow', sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  color: #c0c0c0;
+  margin-bottom: 20px;
+}
+
+.section ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.section ul li {
+  font-size: 16px;
+  font-family: 'Barlow', sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  color: #ffffff;
+  margin-bottom: 10px;
+}
+
+.section .btn {
+  width: auto;
+  padding: 10px 20px;
+  margin-bottom: 20px;
+  background: #616161;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  color: #ffffff;
+  font-weight: 600;
+  font-family: 'Barlow', sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.section .btn:hover {
+  background: #989898;
+}
 
 
   /* padding: wdsa */
