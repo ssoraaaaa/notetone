@@ -14,14 +14,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (empty($username)) {
         $errors[] = "Username is required";
     } elseif (!preg_match('/^[\w\W]{3,}$/', $username)) {
-        $errors[] = "Username must be at least 3 characters and contain only letters, numbers, and symbols";
+        $errors[] = "Username must be at least 3 characters and contain only letters, numbers, or symbols";
     }
 
     // Validate password: only letters, numbers, and symbols; at least 8 characters
     if (empty($password)) {
         $errors[] = "Password is required";
     } elseif (!preg_match('/^[\w\W]{8,}$/', $password)) {
-        $errors[] = "Password must be at least 8 characters and contain only letters, numbers, and symbols";
+        $errors[] = "Password must be at least 8 characters and contain only letters, numbers, or symbols";
     }
 
     // Validate repeated password

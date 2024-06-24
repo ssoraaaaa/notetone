@@ -117,7 +117,7 @@ html, body {
 }
 
 .wrapper {
-  display:flexbox;
+  display: flexbox;
   flex-direction: column;
   justify-content: center;
   align-items: center;
