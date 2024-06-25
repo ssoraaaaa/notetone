@@ -48,7 +48,7 @@ if ($thread_result->num_rows > 0) {
                 <?php foreach ($threads as $thread): ?>
                     <div class="box">
                         <a href="thread.php?id=<?php echo $thread['threadid']; ?>">
-                            <p><?php echo htmlspecialchars($thread['title']); ?></p>
+                            <p class="bolded"><?php echo htmlspecialchars($thread['title']); ?></p>
                             <p>Created by: <?php echo htmlspecialchars($thread['user_name']); ?></p>
                         </a>
                     </div>

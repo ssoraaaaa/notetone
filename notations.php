@@ -93,7 +93,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_instrument'])) {
                 <?php foreach ($notations as $notation): ?>
                     <div class="box">
                         <a href="notation.php?id=<?php echo $notation['notationid']; ?>">
-                            <p><?php echo htmlspecialchars($notation['title']); ?></p>
+                            <p class="bolded"><?php echo htmlspecialchars($notation['title']); ?></p>
                             <p>Song: <?php echo htmlspecialchars($notation['song_title']); ?></p>
                             <p>Instrument: <?php echo htmlspecialchars($notation['instrument_name']); ?></p>
                         </a>

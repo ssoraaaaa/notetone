@@ -607,7 +607,10 @@ margin: 0 auto;
 }
 
 
-
+.bolded {
+  font-weight: bold;
+  font-size: larger;
+}
 
 
   /* padding: wdsa */

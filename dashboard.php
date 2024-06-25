@@ -56,7 +56,7 @@ if ($thread_result->num_rows > 0) {
                 <?php foreach ($notations as $notation): ?>
                     <div class="box">
                         <a href="notation.php?id=<?php echo $notation['notationid']; ?>">
-                            <p><?php echo htmlspecialchars($notation['title']); ?></p>
+                            <p class="bolded"><?php echo htmlspecialchars($notation['title']); ?></p>
                             <p>Song: <?php echo htmlspecialchars($notation['song_title']); ?></p>
                             <p>Instrument: <?php echo htmlspecialchars($notation['instrument_name']); ?></p>
                             <p>Added by: <?php echo htmlspecialchars($notation['user_name']); ?></p>
@@ -71,7 +71,7 @@ if ($thread_result->num_rows > 0) {
                 <?php foreach ($threads as $thread): ?>
                     <div class="box">
                         <a href="thread.php?id=<?php echo $thread['threadid']; ?>">
-                            <p><?php echo htmlspecialchars($thread['title']); ?></p>
+                            <p class="bolded"><?php echo htmlspecialchars($thread['title']); ?></p>
                             <p>Created by: <?php echo htmlspecialchars($thread['user_name']); ?></p>
                         </a>
                     </div>
