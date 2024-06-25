@@ -7,88 +7,62 @@ if (!isset($_SESSION['username'])) {
     exit;
 }
 
-if (!isset($_SESSION['userid'])) {
-    echo "User ID not set in session.";
-    exit;
-}
-
 // Fetch user's notations
 $username = $_SESSION['username'];
-$sql = "SELECT n.*, s.title AS song_title, i.name AS instrument_name 
-        FROM notations n 
-        LEFT JOIN songs s ON n.songid = s.songid 
-        LEFT JOIN instruments i ON n.instrumentid = i.instrumentid 
-        WHERE n.userid = (SELECT userid FROM users WHERE username='$username')";
-$result = $conn->query($sql);
+$userid = $_SESSION['userid'];
+$notation_sql = "SELECT n.*, s.title AS song_title, i.name AS instrument_name 
+                 FROM notations n 
+                 LEFT JOIN songs s ON n.songid = s.songid 
+                 LEFT JOIN instruments i ON n.instrumentid = i.instrumentid 
+                 WHERE n.userid = '$userid'";
+$notation_result = $conn->query($notation_sql);
 $notations = [];
-if ($result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
+if ($notation_result->num_rows > 0) {
+    while ($row = $notation_result->fetch_assoc()) {
         $notations[] = $row;
     }
 }
 
-// Fetch songs
-$song_sql = "SELECT * FROM songs";
-$song_result = $conn->query($song_sql);
-$songs = [];
-if ($song_result->num_rows > 0) {
-    while ($row = $song_result->fetch_assoc()) {
-        $songs[] = $row;
-    }
-}
+// Handle adding a new song
+$song_error = '';
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_song'])) {
+    $song_title = $_POST['song_title'];
+    $performer = $_POST['performer'];
 
-// Fetch instruments
-$instrument_sql = "SELECT * FROM instruments";
-$instrument_result = $conn->query($instrument_sql);
-$instruments = [];
-if ($instrument_result->num_rows > 0) {
-    while ($row = $instrument_result->fetch_assoc()) {
-        $instruments[] = $row;
-    }
-}
+    // Check for duplicates
+    $duplicate_check = "SELECT * FROM songs WHERE title = '$song_title' AND performer = '$performer'";
+    $duplicate_result = $conn->query($duplicate_check);
 
-// Initialize error and success messages
-$song_error_message = '';
-$song_success_message = '';
-$instrument_error_message = '';
-$instrument_success_message = '';
-
-// Handle form submissions
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    if (isset($_POST['add_song'])) {
-        $title = $_POST['title'];
-        $performer = $_POST['performer'];
-        $userid = $_SESSION['userid'];
-
-        // Check for duplicate song
-        $check_song_sql = "SELECT * FROM songs WHERE title='$title' AND performer='$performer'";
-        $check_song_result = $conn->query($check_song_sql);
-        if ($check_song_result->num_rows > 0) {
-            $song_error_message = "Song with this title and performer already exists.";
+    if ($duplicate_result->num_rows > 0) {
+        $song_error = 'This song already exists in the database.';
+    } else {
+        $song_sql = "INSERT INTO songs (title, performer, userid) VALUES ('$song_title', '$performer', '$userid')";
+        if ($conn->query($song_sql) === TRUE) {
+            $song_error = 'New song added successfully';
         } else {
-            $song_sql = "INSERT INTO songs (title, performer, userid) VALUES ('$title', '$performer', '$userid')";
-            if ($conn->query($song_sql) === TRUE) {
-                $song_success_message = "New song added successfully";
-            } else {
-                $song_error_message = "Error: " . $song_sql . "<br>" . $conn->error;
-            }
+            $song_error = 'Error: ' . $song_sql . '<br>' . $conn->error;
         }
-    } elseif (isset($_POST['add_instrument'])) {
-        $name = $_POST['name'];
-        $type = $_POST['type'];
+    }
+}
 
-        // Check for duplicate instrument
-        $check_instrument_sql = "SELECT * FROM instruments WHERE name='$name'";
-        $check_instrument_result = $conn->query($check_instrument_sql);
-        if ($check_instrument_result->num_rows > 0) {
-            $instrument_error_message = "Instrument with this name already exists.";
+// Handle adding a new instrument
+$instrument_error = '';
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_instrument'])) {
+    $instrument_name = $_POST['instrument_name'];
+    $instrument_type = $_POST['instrument_type'];
+
+    // Check for duplicates
+    $duplicate_check = "SELECT * FROM instruments WHERE name = '$instrument_name'";
+    $duplicate_result = $conn->query($duplicate_check);
+
+    if ($duplicate_result->num_rows > 0) {
+        $instrument_error = 'This instrument already exists in the database.';
+    } else {
+        $instrument_sql = "INSERT INTO instruments (name, type) VALUES ('$instrument_name', '$instrument_type')";
+        if ($conn->query($instrument_sql) === TRUE) {
+            $instrument_error = 'New instrument added successfully';
         } else {
-            $instrument_sql = "INSERT INTO instruments (name, type) VALUES ('$name', '$type')";
-            if ($conn->query($instrument_sql) === TRUE) {
-                $instrument_success_message = "New instrument added successfully";
-            } else {
-                $instrument_error_message = "Error: " . $instrument_sql . "<br>" . $conn->error;
-            }
+            $instrument_error = 'Error: ' . $instrument_sql . '<br>' . $conn->error;
         }
     }
 }
@@ -117,7 +91,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <button class="btn" onclick="location.href='add_notation.php'">Add Notation</button>
             <div class="notations-container-notations">
                 <?php foreach ($notations as $notation): ?>
-                    <div class="notation-box">
+                    <div class="box">
                         <a href="notation.php?id=<?php echo $notation['notationid']; ?>">
                             <p><?php echo htmlspecialchars($notation['title']); ?></p>
                             <p>Song: <?php echo htmlspecialchars($notation['song_title']); ?></p>
@@ -130,38 +104,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="right-container">
             <div class="wrapper3">
                 <h2>Add a New Song</h2>
-                <form method="POST" action="notations.php">
+                <?php if ($song_error): ?>
+                    <p class="error"><?php echo $song_error; ?></p>
+                <?php endif; ?>
+                <form method="POST" action="">
                     <div class="input-box">
-                        <input type="text" name="title" placeholder="Song Title" required>
+                        <input type="text" name="song_title" placeholder="Song Title">
                     </div>
                     <div class="input-box">
-                        <input type="text" name="performer" placeholder="Performer" required>
+                        <input type="text" name="performer" placeholder="Performer">
                     </div>
-                    <button type="submit" name="add_song" class="btn">Add Song</button>
-                    <?php if (!empty($song_error_message)): ?>
-                        <div class="error"><?php echo $song_error_message; ?></div>
-                    <?php endif; ?>
-                    <?php if (!empty($song_success_message)): ?>
-                        <div class="success"><?php echo $song_success_message; ?></div>
-                    <?php endif; ?>
+                    <button class="btn" type="submit" name="add_song">Add Song</button>
                 </form>
             </div>
             <div class="wrapper4">
                 <h2>Add a New Instrument</h2>
-                <form method="POST" action="notations.php">
+                <?php if ($instrument_error): ?>
+                    <p class="error"><?php echo $instrument_error; ?></p>
+                <?php endif; ?>
+                <form method="POST" action="">
                     <div class="input-box">
-                        <input type="text" name="name" placeholder="Instrument Name" required>
+                        <input type="text" name="instrument_name" placeholder="Instrument Name">
                     </div>
                     <div class="input-box">
-                        <input type="text" name="type" placeholder="Instrument Type" required>
+                        <input type="text" name="instrument_type" placeholder="Instrument Type">
                     </div>
-                    <button type="submit" name="add_instrument" class="btn">Add Instrument</button>
-                    <?php if (!empty($instrument_error_message)): ?>
-                        <div class="error"><?php echo $instrument_error_message; ?></div>
-                    <?php endif; ?>
-                    <?php if (!empty($instrument_success_message)): ?>
-                        <div class="success"><?php echo $instrument_success_message; ?></div>
-                    <?php endif; ?>
+                    <button class="btn" type="submit" name="add_instrument">Add Instrument</button>
                 </form>
             </div>
         </div>
