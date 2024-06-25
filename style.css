@@ -453,7 +453,8 @@ margin: 0 auto;
 }
 
 .notations-container-notations .notation-box {
-  width: calc(20% - 10px); /* Five boxes per row with gap */
+  max-width: calc(25% - 10px); /* Five boxes per row with gap */
+  min-width: min-content;
 }
 
 /* Dashboard Page Specific Styles */
@@ -477,7 +478,8 @@ margin: 0 auto;
     box-sizing: border-box;
     color: #ffffff;
     text-align: left; /* Align text to the left for better readability */
-    width: calc(20% - 10px); /* Five boxes per row with gap */
+    max-width: calc(25% - 10px); /* Five boxes per row with gap */
+    min-width: min-content;
 }
 
 .box a {
@@ -590,7 +592,8 @@ margin: 0 auto;
 }
 
 .notations-container-notations .box {
-    width: calc(20% - 10px); /* Five boxes per row with gap */
+    max-width: calc(25% - 10px); /* Five boxes per row with gap */
+    min-width: max-content;
 }
 
 /* Dashboard Page Specific Styles */
@@ -603,7 +606,8 @@ margin: 0 auto;
 
 .notations-container-dashboard .box,
 .threads-container-dashboard .box {
-    width: calc(20% - 10px); /* Five boxes per row with gap */
+    max-width: calc(25% - 10px); /* Five boxes per row with gap */
+    min-width: min-content;
 }
 
 
