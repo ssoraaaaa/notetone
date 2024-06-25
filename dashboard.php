@@ -8,7 +8,7 @@ if (!isset($_SESSION['username'])) {
 }
 
 // Fetch all notations
-$notation_sql = "SELECT n.*, s.title AS song_title, i.name AS instrument_name, u.username AS user_name 
+$notation_sql = "SELECT n.*, s.title AS song_title, i.name AS instrument_name, IFNULL(u.username, 'deleted user') AS user_name 
                  FROM notations n 
                  LEFT JOIN songs s ON n.songid = s.songid 
                  LEFT JOIN instruments i ON n.instrumentid = i.instrumentid
@@ -22,7 +22,7 @@ if ($notation_result->num_rows > 0) {
 }
 
 // Fetch all threads
-$thread_sql = "SELECT t.*, u.username AS user_name FROM threads t LEFT JOIN users u ON t.createdby = u.userid";
+$thread_sql = "SELECT t.*, IFNULL(u.username, 'deleted user') AS user_name FROM threads t LEFT JOIN users u ON t.createdby = u.userid";
 $thread_result = $conn->query($thread_sql);
 $threads = [];
 if ($thread_result->num_rows > 0) {
@@ -44,8 +44,8 @@ if ($thread_result->num_rows > 0) {
     <ul class="header">
         <a href="dashboard.php"><img src="logo-gray.png" class="header_logo" alt="Logo"></a>
         <li class="li_header"><a class="a_header" href="dashboard.php">Dashboard</a></li>
-        <li class="li_header"><a class="a_header" href="threads.php">Threads</a></li>
-        <li class="li_header"><a class="a_header" href="notations.php">Notations</a></li>
+        <li class="li_header"><a class="a_header" href="threads.php">My Threads</a></li>
+        <li class="li_header"><a class="a_header" href="notations.php">My Notations</a></li>
         <li class="li_header"><a class="a_header" href="profile.php">Profile</a></li>
         <li class="li_header"><a class="a_header" href="logout.php">Logout</a></li>
     </ul>

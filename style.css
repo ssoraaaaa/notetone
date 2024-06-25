@@ -200,7 +200,7 @@ html, body {
   font-family: 'Barlow', sans-serif; font-weight: 400; font-style: normal;
 }
 
-.wrapper .remember-me{
+.wrapper .remember-me {
   display: flex;
   justify-content: space-between;
   font-size: 16px;
@@ -208,7 +208,7 @@ html, body {
   font-family: 'Barlow', sans-serif; font-weight: 400; font-style: normal;
 }
 
-.btn{
+.btn {
   width: calc(100% );
   height: 45px;
   background: #616161;
@@ -435,14 +435,6 @@ margin: 0 auto;
   text-align: left; /* Align text to the left for better readability */
 }
 
-.notation-box a {
-  color: #ffffff;
-  text-decoration: none;
-}
-
-.notation-box a:hover {
-  text-decoration: underline;
-}
 
 /* Notations Page Specific Styles */
 .notations-container-notations {
@@ -464,11 +456,6 @@ margin: 0 auto;
   gap: 10px;
 }
 
-.notations-container-dashboard .notation-box {
-  width: calc(33.333% - 10px); /* Three boxes per row with gap */
-}
-
-
 /* General Box Style */
 .box {
     background: rgba(255, 255, 255, 0.1);
@@ -487,8 +474,8 @@ margin: 0 auto;
     text-decoration: none;
 }
 
-.box a:hover {
-    text-decoration: underline;
+.box:hover {
+    background: rgba(255, 255, 255, 0.3);
 }
 
 /* Notations and Threads Container Styles */
@@ -614,6 +601,64 @@ margin: 0 auto;
 .bolded {
   font-weight: bold;
   font-size: larger;
+}
+
+.notation-box {
+  margin-bottom: 20px;
+}
+
+.box, .notation-box {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid #474747;
+  border-radius: 5px;
+  padding: 20px;
+  box-sizing: border-box;
+  color: #ffffff;
+  text-align: left; /* Align text to the left for better readability */
+}
+
+.wrapper-profile, .wrapper-notation, .wrapper-thread{
+  display: flexbox;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: auto;
+  width: 90%;
+  background: transparent;
+  border: 2px solid #474747;
+  backdrop-filter: blur(9px);
+  color: #ffffff;
+  border-radius: 5px;
+  padding: 30px 40px;
+  position: absolute;
+  left: 50%;
+  top: 170px;
+  transform: translatex(-50%);
+  
+  
+}
+
+
+
+.btn-delete-profile, .btn-change-username, .btn-change-password, .btn-delete-notation, .btn-delete-thread{
+  width: calc(20%);
+  height: 45px;
+  background: #616161;
+  border: none;
+  outline: none;
+  border-radius: 40px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  font-size: 16px;
+  color: #ffffff;
+  font-weight: 600;
+  font-family: 'Barlow', sans-serif; font-weight: 400; font-style: normal;
+  margin-bottom: 20px;
+}
+
+
+em {
+  font-style: italic;
 }
 
 
