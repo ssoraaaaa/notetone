@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 25, 2024 at 04:23 AM
+-- Generation Time: Jun 25, 2024 at 05:12 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -162,6 +162,38 @@ INSERT INTO `users` (`userid`, `username`, `password`, `moderatorstatus`) VALUES
 (16, 'anceooo', '$2y$10$rod.O/5TzOMes2adPRFYwuAyDkHuGpiEovhgINiALx9nK6kXFd9NG', 0),
 (18, 'tomass', '$2y$10$SRjC9ScH73NU79CH4GgPsep3qLk4deRdzTquIcl.hxSOVS.OkJMwG', 0);
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `video`
+--
+
+CREATE TABLE `video` (
+  `video_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `song_id` int(11) NOT NULL,
+  `instrument_id` int(11) NOT NULL,
+  `caption` varchar(255) NOT NULL,
+  `like_count` int(11) DEFAULT 0,
+  `comment_count` int(11) DEFAULT 0,
+  `length` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `video_comment`
+--
+
+CREATE TABLE `video_comment` (
+  `video_comment_id` int(11) NOT NULL,
+  `video_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `like_count` int(11) DEFAULT 0,
+  `contains` text NOT NULL,
+  `replies_to` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 --
 -- Indexes for dumped tables
 --
@@ -203,6 +235,24 @@ ALTER TABLE `users`
   ADD PRIMARY KEY (`userid`);
 
 --
+-- Indexes for table `video`
+--
+ALTER TABLE `video`
+  ADD PRIMARY KEY (`video_id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `song_id` (`song_id`),
+  ADD KEY `instrument_id` (`instrument_id`);
+
+--
+-- Indexes for table `video_comment`
+--
+ALTER TABLE `video_comment`
+  ADD PRIMARY KEY (`video_comment_id`),
+  ADD KEY `video_id` (`video_id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `replies_to` (`replies_to`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -241,6 +291,38 @@ ALTER TABLE `threads`
 --
 ALTER TABLE `users`
   MODIFY `userid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+
+--
+-- AUTO_INCREMENT for table `video`
+--
+ALTER TABLE `video`
+  MODIFY `video_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `video_comment`
+--
+ALTER TABLE `video_comment`
+  MODIFY `video_comment_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `video`
+--
+ALTER TABLE `video`
+  ADD CONSTRAINT `video_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`userid`),
+  ADD CONSTRAINT `video_ibfk_2` FOREIGN KEY (`song_id`) REFERENCES `songs` (`songid`),
+  ADD CONSTRAINT `video_ibfk_3` FOREIGN KEY (`instrument_id`) REFERENCES `instruments` (`instrumentid`);
+
+--
+-- Constraints for table `video_comment`
+--
+ALTER TABLE `video_comment`
+  ADD CONSTRAINT `video_comment_ibfk_1` FOREIGN KEY (`video_id`) REFERENCES `video` (`video_id`),
+  ADD CONSTRAINT `video_comment_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`userid`),
+  ADD CONSTRAINT `video_comment_ibfk_3` FOREIGN KEY (`replies_to`) REFERENCES `video_comment` (`video_comment_id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
