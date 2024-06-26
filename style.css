@@ -614,7 +614,7 @@ margin: 0 auto;
   padding: 20px;
   box-sizing: border-box;
   color: #ffffff;
-  text-align: left; /* Align text to the left for better readability */
+  text-align: left; /* Align text to the left */
 }
 
 .wrapper-profile, .wrapper-notation, .wrapper-thread{
