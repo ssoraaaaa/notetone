@@ -14,34 +14,53 @@ if (isset($_SESSION['success_message'])) {
 
 // Check if form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = $_POST['username'];
+    // Sanitize and validate inputs
+    $username = trim($_POST['username']);
     $password = $_POST['password'];
 
-    // Validate username and password: both fields are required
     if (empty($username)) {
         $errors[] = "Username is required";
+    } elseif (!preg_match('/^[a-zA-Z0-9_]+$/', $username)) { // Allow only alphanumeric and underscore
+        $errors[] = "Invalid username format";
     }
+
     if (empty($password)) {
         $errors[] = "Password is required";
     }
 
-    // Check credentials in the database
+    // Check credentials in the database if no errors
     if (empty($errors)) {
-        $sql = "SELECT * FROM users WHERE username='$username'";
-        $result = $conn->query($sql);
-        if ($result->num_rows > 0) {
-            $user = $result->fetch_assoc();
-            if (password_verify($password, $user['password'])) {
-                // Set session variables
-                $_SESSION['username'] = $username;
-                $_SESSION['userid'] = $user['userid'];
-                echo '<script>window.location.href="dashboard.php";</script>';
-                exit;
+        try {
+            // Use prepared statements for SQL injection prevention
+            $stmt = $conn->prepare("SELECT * FROM users WHERE username = ?");
+            if ($stmt === false) {
+                throw new Exception("Database query failed.");
+            }
+
+            $stmt->bind_param("s", $username);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            if ($result->num_rows > 0) {
+                $user = $result->fetch_assoc();
+                if (password_verify($password, $user['password'])) {
+                    session_regenerate_id(true);
+
+                    $_SESSION['username'] = htmlspecialchars($username, ENT_QUOTES, 'UTF-8');
+                    $_SESSION['userid'] = $user['userid'];
+                    echo '<script>window.location.href="dashboard.php";</script>';
+                    exit;
+                } else {
+                    $errors[] = "Incorrect username or password";
+                }
             } else {
                 $errors[] = "Incorrect username or password";
             }
-        } else {
-            $errors[] = "Incorrect username or password";
+            $stmt->close();
+        } catch (Exception $e) {
+            // Log error for further analysis (ensure this path is secured and monitored)
+            error_log("Database error: " . $e->getMessage());
+            $errors[] = "An unexpected error occurred. Please try again.";
         }
     }
 }
@@ -57,7 +76,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </head>
 <body>
     <ul class="header">
-        <a href="./index.html" ><img src="logo-gray.png" class="header_logo"></a>
+        <a href="./index.html"><img src="logo-gray.png" class="header_logo"></a>
         <li class="li_header"><a class="a_header" href="./login.php">Log in</a></li>
         <li class="li_header"><a class="a_header" href="./register.php">Register</a></li>
         <li class="li_header"><a class="a_header">About us</a></li>
@@ -65,11 +84,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="wrapper">
         <h2>Log in</h2>
         <?php if (!empty($success_message)): ?>
-            <script>alert('<?php echo $success_message; ?>');</script>
+            <script>alert('<?php echo htmlspecialchars($success_message, ENT_QUOTES); ?>');</script>
         <?php endif; ?>
-        <form method="POST" action="login.php">
+        <form method="POST" saction="login.php">
             <div class="input-box">
-                <input type="text" name="username" placeholder="username">
+                <input type="text" name="username" placeholder="username" autofocus>
             </div>
             <div class="input-box">
                 <input type="password" name="password" placeholder="password">

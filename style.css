@@ -73,7 +73,7 @@ html, body {
     margin: 0;
     padding: 45px 0px 45px 0px;
     text-align: left ;
-    background-color: #800020;
+    background-color: green;
 
     position: absolute;
     bottom: 0;
@@ -95,7 +95,7 @@ html, body {
 }
 
 .li_footer:hover {
-    background-color: #FFD700; /* Change the background color on hover */
+    background-color: #404040; /* Change the background color on hover */
     transition: background-color 0.3s; /* Add a smooth transition effect */
 }
 

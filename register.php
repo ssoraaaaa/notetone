@@ -10,11 +10,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST['password'];
     $password_repeat = $_POST['password_repeat'];
 
-    // Validate username: only letters, numbers, and symbols; at least 3 characters
+    // Validate username: only letters, numbers, hyphens, and underscores; at least 3 characters
     if (empty($username)) {
         $errors[] = "Username is required";
-    } elseif (!preg_match('/^[\w\W]{3,}$/', $username)) {
-        $errors[] = "Username must be at least 3 characters and contain only letters, numbers, or symbols";
+    } elseif (!preg_match('/^[a-zA-Z0-9_-]{3,}$/', $username)) {
+        $errors[] = "Username must be at least 3 characters and contain only letters, numbers, hyphens, or underscores";
     }
 
     // Validate password: only letters, numbers, and symbols; at least 8 characters
@@ -24,7 +24,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $errors[] = "Password must be at least 8 characters and contain only letters, numbers, or symbols";
     }
 
-    // Validate repeated password
+    // Validate repeated password ???????????????????????????????????????????????????
     if ($password !== $password_repeat) {
         $errors[] = "Passwords do not match";
     }
@@ -75,7 +75,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <h2>Register</h2>
         <form method="POST" action="register.php">
             <div class="input-box">
-                <input type="text" name="username" placeholder="username">
+                <input type="text" name="username" placeholder="username" autofocus>
             </div>
             <div class="input-box">
                 <input type="password" name="password" placeholder="password">
