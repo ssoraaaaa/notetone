@@ -41,18 +41,27 @@ if ($thread_result->num_rows > 0) {
         <li class="li_header"><a class="a_header" href="logout.php">Logout</a></li>
     </ul>
     <div class="container">
-        <div class="wrapper2">
-            <h2>Your Threads</h2>
-            <button class="btn" onclick="location.href='add_thread.php'">Add Thread</button>
-            <div class="threads-container-dashboard">
+        <div class="wrapper" style="width: 80%; max-width: 1200px; margin: 0 auto;">
+            <h2 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin-bottom: 30px; color: #fff; font-size: 2rem;">My Threads</h2>
+            
+            <?php if (empty($threads)): ?>
+                <p style="color: #888; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1rem;">No threads found.</p>
+            <?php else: ?>
                 <?php foreach ($threads as $thread): ?>
-                    <div class="box">
-                        <a href="thread.php?id=<?php echo $thread['threadid']; ?>">
-                            <p class="bolded"><?php echo htmlspecialchars($thread['title']); ?></p>
-                            <p>Created by: <?php echo htmlspecialchars($thread['user_name']); ?></p>
-                        </a>
+                    <div style="background: #2a2a2a; border: 1px solid #464646; border-left: 5px solid #464646; padding: 20px; margin-bottom: 20px; border-radius: 4px;">
+                        <h3 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0 0 10px 0; color: #fff; font-size: 1.5rem;"><?php echo htmlspecialchars($thread['title']); ?></h3>
+                        <div style="background: #1a1a1a; padding: 15px; border-radius: 4px; margin-bottom: 15px;">
+                            <p style="color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; font-size: 1rem;"><?php echo nl2br(htmlspecialchars($thread['content'])); ?></p>
+                        </div>
+                        <div style="color: #888; font-size: 0.9rem; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+                            Created: <?php echo date('F j, Y', strtotime($thread['datecreated'])); ?>
+                        </div>
                     </div>
                 <?php endforeach; ?>
+            <?php endif; ?>
+
+            <div style="margin-top: 30px;">
+                <a href="add_thread.php" class="btn btn-primary" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-decoration: none; display: inline-block; text-align: center; line-height: 45px; height: 45px; font-size: 1rem;">Create New Thread</a>
             </div>
         </div>
     </div>

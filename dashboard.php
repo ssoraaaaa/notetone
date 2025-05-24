@@ -49,33 +49,59 @@ if ($thread_result->num_rows > 0) {
         <li class="li_header"><a class="a_header" href="profile.php">Profile</a></li>
         <li class="li_header"><a class="a_header" href="logout.php">Logout</a></li>
     </ul>
-    <div class="wrapper1">
-        <div class="wrapper-left">
-            <h2>All Notations</h2>
-            <div class="notations-container-dashboard">
-                <?php foreach ($notations as $notation): ?>
-                    <div class="box">
-                        <a href="notation.php?id=<?php echo $notation['notationid']; ?>">
-                            <p class="bolded"><?php echo htmlspecialchars($notation['title']); ?></p>
-                            <p>Song: <?php echo htmlspecialchars($notation['song_title']); ?></p>
-                            <p>Instrument: <?php echo htmlspecialchars($notation['instrument_name']); ?></p>
-                            <p>Added by: <?php echo htmlspecialchars($notation['user_name']); ?></p>
-                        </a>
+    <div class="container">
+        <div class="wrapper" style="width: 80%; max-width: 1200px; margin: 0 auto;">
+            <h2 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin-bottom: 30px; color: #fff; font-size: 2rem;">Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?>!</h2>
+            
+            <div style="display: flex; gap: 30px; margin-bottom: 50px;">
+                <div style="flex: 1; background: #2a2a2a; border: 1px solid #464646; padding: 20px; border-radius: 4px;">
+                    <h3 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin-bottom: 20px; color: #fff; font-size: 1.5rem;">Recent Threads</h3>
+                    <?php if (empty($recent_threads)): ?>
+                        <p style="color: #888; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1rem;">No recent threads found.</p>
+                    <?php else: ?>
+                        <?php foreach ($recent_threads as $thread): ?>
+                            <div style="background: #1a1a1a; padding: 15px; border-radius: 4px; margin-bottom: 15px;">
+                                <h4 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0 0 10px 0; color: #fff; font-size: 1.2rem;"><?php echo htmlspecialchars($thread['title']); ?></h4>
+                                <p style="color: #888; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; font-size: 0.9rem;">
+                                    By <?php echo htmlspecialchars($thread['user_name']); ?> on <?php echo date('F j, Y', strtotime($thread['datecreated'])); ?>
+                                </p>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                    <div style="margin-top: 20px;">
+                        <a href="threads.php" class="btn btn-primary" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-decoration: none; display: inline-block; text-align: center; line-height: 45px; height: 45px; font-size: 1rem;">View All Threads</a>
                     </div>
-                <?php endforeach; ?>
+                </div>
+
+                <div style="flex: 1; background: #2a2a2a; border: 1px solid #464646; padding: 20px; border-radius: 4px;">
+                    <h3 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin-bottom: 20px; color: #fff; font-size: 1.5rem;">Recent Notations</h3>
+                    <?php if (empty($recent_notations)): ?>
+                        <p style="color: #888; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1rem;">No recent notations found.</p>
+                    <?php else: ?>
+                        <?php foreach ($recent_notations as $notation): ?>
+                            <div style="background: #1a1a1a; padding: 15px; border-radius: 4px; margin-bottom: 15px;">
+                                <h4 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0 0 10px 0; color: #fff; font-size: 1.2rem;"><?php echo htmlspecialchars($notation['title']); ?></h4>
+                                <p style="color: #888; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; font-size: 0.9rem;">
+                                    <?php echo htmlspecialchars($notation['song_title'] . ' - ' . $notation['performer']); ?> | 
+                                    <?php echo htmlspecialchars($notation['instrument_name']); ?>
+                                </p>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                    <div style="margin-top: 20px;">
+                        <a href="notations.php" class="btn btn-primary" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-decoration: none; display: inline-block; text-align: center; line-height: 45px; height: 45px; font-size: 1rem;">View All Notations</a>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="wrapper-right">
-            <h2>All Threads</h2>
-            <div class="threads-container-dashboard">
-                <?php foreach ($threads as $thread): ?>
-                    <div class="box">
-                        <a href="thread.php?id=<?php echo $thread['threadid']; ?>">
-                            <p class="bolded"><?php echo htmlspecialchars($thread['title']); ?></p>
-                            <p>Created by: <?php echo htmlspecialchars($thread['user_name']); ?></p>
-                        </a>
+
+            <div style="display: flex; gap: 30px;">
+                <div style="flex: 1; background: #2a2a2a; border: 1px solid #464646; padding: 20px; border-radius: 4px;">
+                    <h3 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin-bottom: 20px; color: #fff; font-size: 1.5rem;">Quick Actions</h3>
+                    <div style="display: flex; gap: 15px;">
+                        <a href="add_thread.php" class="btn btn-primary" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-decoration: none; display: inline-block; text-align: center; line-height: 45px; height: 45px; font-size: 1rem; flex: 1;">Create Thread</a>
+                        <a href="add_notation.php" class="btn btn-primary" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-decoration: none; display: inline-block; text-align: center; line-height: 45px; height: 45px; font-size: 1rem; flex: 1;">Add Notation</a>
                     </div>
-                <?php endforeach; ?>
+                </div>
             </div>
         </div>
     </div>

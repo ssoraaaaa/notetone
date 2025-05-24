@@ -223,6 +223,18 @@ html, body {
   font-family: 'Barlow', sans-serif; font-weight: 400; font-style: normal;
 }
 
+.btn-reply{
+  background: #a82a2a;
+  border: none;
+  outline: none;
+  border-radius: 40px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+/* return here */
+
+
+
+
 .wrapper .btn:hover{
   background: #989898;
 }

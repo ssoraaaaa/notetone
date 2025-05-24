@@ -10,7 +10,7 @@ if (!isset($_SESSION['username'])) {
 // Fetch user's notations
 $username = $_SESSION['username'];
 $userid = $_SESSION['userid'];
-$notation_sql = "SELECT n.*, s.title AS song_title, i.name AS instrument_name 
+$notation_sql = "SELECT n.*, s.title AS song_title, i.name AS instrument_name, s.performer 
                  FROM notations n 
                  LEFT JOIN songs s ON n.songid = s.songid 
                  LEFT JOIN instruments i ON n.instrumentid = i.instrumentid 
@@ -86,51 +86,65 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_instrument'])) {
         <li class="li_header"><a class="a_header" href="logout.php">Logout</a></li>
     </ul>
     <div class="container">
-        <div class="wrapper2">
-            <h2>Your Notations</h2>
-            <button class="btn" onclick="location.href='add_notation.php'">Add Notation</button>
-            <div class="notations-container-notations">
+        <div class="wrapper" style="width: 80%; max-width: 1200px; margin: 0 auto;">
+            <h2 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin-bottom: 30px; color: #fff; font-size: 2rem;">My Notations</h2>
+            
+            <?php if (empty($notations)): ?>
+                <p style="color: #888; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1rem;">No notations found.</p>
+            <?php else: ?>
                 <?php foreach ($notations as $notation): ?>
-                    <div class="box">
-                        <a href="notation.php?id=<?php echo $notation['notationid']; ?>">
-                            <p class="bolded"><?php echo htmlspecialchars($notation['title']); ?></p>
-                            <p>Song: <?php echo htmlspecialchars($notation['song_title']); ?></p>
-                            <p>Instrument: <?php echo htmlspecialchars($notation['instrument_name']); ?></p>
-                        </a>
+                    <div style="background: #2a2a2a; border: 1px solid #464646; border-left: 5px solid #464646; padding: 20px; margin-bottom: 20px; border-radius: 4px;">
+                        <h3 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0 0 10px 0; color: #fff; font-size: 1.5rem;"><?php echo htmlspecialchars($notation['title']); ?></h3>
+                        <p style="color: #888; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0 0 15px 0; font-size: 1rem;">
+                            Song: <?php echo htmlspecialchars($notation['song_title'] . ' - ' . $notation['performer']); ?> | 
+                            Instrument: <?php echo htmlspecialchars($notation['instrument_name']); ?>
+                        </p>
+                        <div style="background: #1a1a1a; padding: 15px; border-radius: 4px; margin-bottom: 15px;">
+                            <pre style="color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; white-space: pre-wrap; font-size: 1rem;"><?php echo htmlspecialchars($notation['content']); ?></pre>
+                        </div>
+                        <div style="color: #888; font-size: 0.9rem; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+                            Created: <?php echo date('F j, Y', strtotime($notation['dateadded'])); ?>
+                        </div>
                     </div>
                 <?php endforeach; ?>
+            <?php endif; ?>
+
+            <div style="margin-top: 30px;">
+                <a href="add_notation.php" class="btn btn-primary" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-decoration: none; display: inline-block; text-align: center; line-height: 45px; height: 45px; font-size: 1rem;">Add New Notation</a>
             </div>
-        </div>
-        <div class="right-container">
-            <div class="wrapper3">
-                <h2>Add a New Song</h2>
-                <?php if ($song_error): ?>
-                    <p class="error"><?php echo $song_error; ?></p>
-                <?php endif; ?>
-                <form method="POST" action="">
-                    <div class="input-box">
-                        <input type="text" name="song_title" placeholder="Song Title">
-                    </div>
-                    <div class="input-box">
-                        <input type="text" name="performer" placeholder="Performer">
-                    </div>
-                    <button class="btn" type="submit" name="add_song">Add Song</button>
-                </form>
-            </div>
-            <div class="wrapper4">
-                <h2>Add a New Instrument</h2>
-                <?php if ($instrument_error): ?>
-                    <p class="error"><?php echo $instrument_error; ?></p>
-                <?php endif; ?>
-                <form method="POST" action="">
-                    <div class="input-box">
-                        <input type="text" name="instrument_name" placeholder="Instrument Name">
-                    </div>
-                    <div class="input-box">
-                        <input type="text" name="instrument_type" placeholder="Instrument Type">
-                    </div>
-                    <button class="btn" type="submit" name="add_instrument">Add Instrument</button>
-                </form>
+
+            <div style="margin-top: 50px; display: flex; gap: 30px;">
+                <div style="flex: 1; background: #2a2a2a; border: 1px solid #464646; padding: 20px; border-radius: 4px;">
+                    <h2 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin-bottom: 20px; color: #fff; font-size: 1.5rem;">Add a New Song</h2>
+                    <?php if ($song_error): ?>
+                        <p style="color: #ff6b6b; margin-bottom: 15px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1rem;"><?php echo $song_error; ?></p>
+                    <?php endif; ?>
+                    <form method="POST" action="">
+                        <div style="margin-bottom: 15px;">
+                            <input type="text" name="song_title" placeholder="Song Title" required style="width: 100%; height: 45px; background: #1a1a1a; color: #fff; border: 1px solid #464646; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 0 10px; font-size: 1rem;">
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <input type="text" name="performer" placeholder="Performer" required style="width: 100%; height: 45px; background: #1a1a1a; color: #fff; border: 1px solid #464646; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 0 10px; font-size: 1rem;">
+                        </div>
+                        <button type="submit" name="add_song" class="btn btn-primary" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1rem;">Add Song</button>
+                    </form>
+                </div>
+
+                <div style="flex: 1; background: #2a2a2a; border: 1px solid #464646; padding: 20px; border-radius: 4px;">
+                    <h2 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin-bottom: 20px; color: #fff; font-size: 1.5rem;">Add a New Instrument</h2>
+                    <?php if ($instrument_error): ?>
+                        <p style="color: #ff6b6b; margin-bottom: 15px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1rem;"><?php echo $instrument_error; ?></p>
+                    <?php endif; ?>
+                    <form method="POST" action="">
+                        <div style="margin-bottom: 15px;">
+                            <input type="text" name="instrument_name" placeholder="Instrument Name" required style="width: 100%; height: 45px; background: #1a1a1a; color: #fff; border: 1px solid #464646; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 0 10px; font-size: 1rem;">
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <input type="text" name="instrument_type" placeholder="Instrument Type" required style="width: 100%; height: 45px; background: #1a1a1a; color: #fff; border: 1px solid #464646; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 0 10px; font-size: 1rem;">
+                        </div>
+                        <button type="submit" name="add_instrument" class="btn btn-primary" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1rem;">Add Instrument</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>

@@ -45,16 +45,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <li class="li_header"><a class="a_header" href="profile.php">Profile</a></li>
         <li class="li_header"><a class="a_header" href="logout.php">Logout</a></li>
     </ul>
-    <div class="wrapper">
-        <h2>Start a New Thread</h2>
-        <form method="POST" action="add_thread.php">
-            <div class="input-box">
-                <input type="text" name="title" placeholder="title">
+    <div class="wrapper" style="width: 80%; max-width: 1200px; margin: 0 auto;">
+        <h2 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">Start a New Thread</h2>
+        <form method="POST" action="">
+            <div class="form-group" style="width: 100%;">
+                <input type="text" name="title" class="form-control" placeholder="Title" required style="background: #2a2a2a; color: #fff; border: 1px solid #464646; margin-bottom: 20px; width: 100%; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; height: 45px;">
             </div>
-            <div class="input-box">
-                <textarea name="content" placeholder="content"></textarea>
+            <div class="form-group" style="width: 100%;">
+                <textarea name="content" class="form-control" placeholder="What's on your mind?" required style="height: 100px; resize: none; width: 100%; background: #2a2a2a; color: #fff; border: 1px solid #464646; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"></textarea>
             </div>
-            <button type="submit" class="btn">Start Thread</button>
+            <button type="submit" name="add_thread" class="btn btn-primary" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin-top: 20px;">Create Thread</button>
         </form>
     </div>
 </body>
