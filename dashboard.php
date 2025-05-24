@@ -44,8 +44,10 @@ if ($thread_result->num_rows > 0) {
     <ul class="header">
         <a href="dashboard.php"><img src="logo-gray.png" class="header_logo" alt="Logo"></a>
         <li class="li_header"><a class="a_header" href="dashboard.php">Dashboard</a></li>
-        <li class="li_header"><a class="a_header" href="threads.php">My Threads</a></li>
-        <li class="li_header"><a class="a_header" href="notations.php">My Notations</a></li>
+        <li class="li_header"><a class="a_header" href="threads.php">Threads</a></li>
+        <li class="li_header"><a class="a_header" href="notations.php">Notations</a></li>
+        <li class="li_header"><a class="a_header" href="mythreads.php">My Threads</a></li>
+        <li class="li_header"><a class="a_header" href="mynotations.php">My Notations</a></li>
         <li class="li_header"><a class="a_header" href="profile.php">Profile</a></li>
         <li class="li_header"><a class="a_header" href="logout.php">Logout</a></li>
     </ul>
@@ -60,12 +62,19 @@ if ($thread_result->num_rows > 0) {
                         <p style="color: #888; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1rem;">No recent threads found.</p>
                     <?php else: ?>
                         <?php foreach ($recent_threads as $thread): ?>
-                            <div style="background: #1a1a1a; padding: 15px; border-radius: 4px; margin-bottom: 15px;">
-                                <h4 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0 0 10px 0; color: #fff; font-size: 1.2rem;"><?php echo htmlspecialchars($thread['title']); ?></h4>
-                                <p style="color: #888; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; font-size: 0.9rem;">
-                                    By <?php echo htmlspecialchars($thread['user_name']); ?> on <?php echo date('F j, Y', strtotime($thread['datecreated'])); ?>
-                                </p>
-                            </div>
+                            <a href="thread.php?id=<?php echo $thread['threadid']; ?>" style="text-decoration: none; color: inherit;">
+                                <div style="background: #1a1a1a; padding: 15px; border-radius: 4px; margin-bottom: 15px;">
+                                    <h4 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0 0 10px 0; color: #fff; font-size: 1.2rem;">
+                                        <?php echo htmlspecialchars($thread['title']); ?>
+                                    </h4>
+                                    <p style="color: #888; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; font-size: 0.9rem;">
+                                        By <?php echo htmlspecialchars($thread['user_name']); ?>
+                                        <?php if (isset($thread['datecreated'])): ?>
+                                            on <?php echo date('F j, Y', strtotime($thread['datecreated'])); ?>
+                                        <?php endif; ?>
+                                    </p>
+                                </div>
+                            </a>
                         <?php endforeach; ?>
                     <?php endif; ?>
                     <div style="margin-top: 20px;">
@@ -79,13 +88,17 @@ if ($thread_result->num_rows > 0) {
                         <p style="color: #888; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1rem;">No recent notations found.</p>
                     <?php else: ?>
                         <?php foreach ($recent_notations as $notation): ?>
-                            <div style="background: #1a1a1a; padding: 15px; border-radius: 4px; margin-bottom: 15px;">
-                                <h4 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0 0 10px 0; color: #fff; font-size: 1.2rem;"><?php echo htmlspecialchars($notation['title']); ?></h4>
-                                <p style="color: #888; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; font-size: 0.9rem;">
-                                    <?php echo htmlspecialchars($notation['song_title'] . ' - ' . $notation['performer']); ?> | 
-                                    <?php echo htmlspecialchars($notation['instrument_name']); ?>
-                                </p>
-                            </div>
+                            <a href="notation.php?id=<?php echo $notation['notationid']; ?>" style="text-decoration: none; color: inherit;">
+                                <div style="background: #1a1a1a; padding: 15px; border-radius: 4px; margin-bottom: 15px;">
+                                    <h4 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0 0 10px 0; color: #fff; font-size: 1.2rem;">
+                                        <?php echo htmlspecialchars($notation['title']); ?>
+                                    </h4>
+                                    <p style="color: #888; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; font-size: 0.9rem;">
+                                        <?php echo htmlspecialchars($notation['song_title'] . ' - ' . $notation['performer']); ?> |
+                                        <?php echo htmlspecialchars($notation['instrument_name']); ?>
+                                    </p>
+                                </div>
+                            </a>
                         <?php endforeach; ?>
                     <?php endif; ?>
                     <div style="margin-top: 20px;">

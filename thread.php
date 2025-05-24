@@ -93,9 +93,14 @@ if ($reply_to_id) {
 function renderComments($comments, $reply_to_id) {
     foreach ($comments as $comment) {
         $is_reply_target = ($reply_to_id == $comment['commentid']);
-        echo '<div class="comment-box" style="margin-left:'.($comment['replytocommentid'] ? '40' : '0').'px; background: #2a2a2a; padding: 15px; margin-bottom: 15px; border-radius: 8px;'.($comment['replytocommentid'] ? ' border-left: 3px solid #464646;' : '').' border: 1px solid #464646;">';
-        echo '<p style="margin: 0 0 10px 0;"><em>' . ($comment['username'] ? htmlspecialchars($comment['username']) : 'deleted user') . ' replied:</em></p>';
-        echo '<p'.($is_reply_target ? ' style="background:#464646;padding:10px;border-radius:4px;margin:0 0 10px 0;"' : ' style="margin:0 0 10px 0;"').'>' . nl2br(htmlspecialchars($comment['content'])) . '</p>';
+        $leftBorder = $is_reply_target ? '#fff' : '#464646';
+        echo '<div class="comment-box" style="margin-left:'.($comment['replytocommentid'] ? '40' : '0').'px; background: #2a2a2a; border: 1px solid #464646; border-left: 5px solid '.$leftBorder.'; padding: 20px; margin-bottom: 20px; border-radius: 4px;">';
+        echo '<div style="color: #888; font-size: 0.9rem; font-family: \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif; margin-bottom: 10px;">';
+        echo '<em>' . ($comment['username'] ? htmlspecialchars($comment['username']) : 'deleted user') . '</em>';
+        echo '</div>';
+        echo '<div style="background: #1a1a1a; padding: 15px; border-radius: 4px; margin-bottom: 15px;">';
+        echo '<p style="color: #fff; font-family: \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif; margin: 0; white-space: pre-wrap; word-break: break-word;">' . nl2br(htmlspecialchars($comment['content'])) . '</p>';
+        echo '</div>';
         echo '<div style="clear: both;">';
         echo '<form method="get" style="display:inline;" class="reply-form" onsubmit="return false;">';
         echo '<input type="hidden" name="id" value="' . htmlspecialchars($_GET['id']) . '">';
@@ -125,8 +130,10 @@ function renderComments($comments, $reply_to_id) {
     <ul class="header">
         <a href="dashboard.php"><img src="logo-gray.png" class="header_logo" alt="Logo"></a>
         <li class="li_header"><a class="a_header" href="dashboard.php">Dashboard</a></li>
-        <li class="li_header"><a class="a_header" href="threads.php">My Threads</a></li>
-        <li class="li_header"><a class="a_header" href="notations.php">My Notations</a></li>
+        <li class="li_header"><a class="a_header" href="threads.php">Threads</a></li>
+        <li class="li_header"><a class="a_header" href="notations.php">Notations</a></li>
+        <li class="li_header"><a class="a_header" href="mythreads.php">My Threads</a></li>
+        <li class="li_header"><a class="a_header" href="mynotations.php">My Notations</a></li>
         <li class="li_header"><a class="a_header" href="profile.php">Profile</a></li>
         <li class="li_header"><a class="a_header" href="logout.php">Logout</a></li>
     </ul>
@@ -135,9 +142,13 @@ function renderComments($comments, $reply_to_id) {
         <?php if (isset($error_message)): ?>
             <p class="error"><?php echo $error_message; ?></p>
         <?php endif; ?>
-        <div class="thread-box">
-            <p style="font-size: 1.2rem; line-height: 1.6;"><?php echo nl2br(htmlspecialchars($thread['content'])); ?></p>
-            <p><strong>Created by:</strong> <?php echo $thread['user_name'] ? htmlspecialchars($thread['user_name']) : '<em>deleted user</em>'; ?></p>
+        <div style="background: #2a2a2a; border: 1px solid #464646; border-left: 5px solid #464646; padding: 20px; margin-bottom: 20px; border-radius: 4px;">
+            <div style="background: #1a1a1a; padding: 15px; border-radius: 4px; margin-bottom: 15px;">
+                <p style="color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; font-size: 1rem;"><?php echo nl2br(htmlspecialchars($thread['content'])); ?></p>
+            </div>
+            <div style="color: #888; font-size: 0.9rem; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+                Created by: <?php echo $thread['user_name'] ? htmlspecialchars($thread['user_name']) : '<em>deleted user</em>'; ?>
+            </div>
         </div>
         <?php if ($thread['createdby'] == $user_id): ?>
         <form method="POST" action="">
@@ -150,13 +161,13 @@ function renderComments($comments, $reply_to_id) {
             <form method="POST" action="" class="comment-form mt-3" id="commentForm">
                 <?php if ($reply_to_id && $reply_to_comment): ?>
                     <input type="hidden" name="replytocommentid" value="<?php echo $reply_to_id; ?>">
-                    <div class="mb-3 d-flex align-items-center gap-2" style="background: #2a2a2a; padding: 10px; border-radius: 8px; margin-bottom: 10px;">
-                        <span class="badge bg-primary">Replying to <?php echo $reply_to_username; ?></span>
-                        <a href="javascript:void(0)" class="btn btn-secondary btn-sm ms-2" onclick="cancelReply()">Cancel</a>
+                    <div class="mb-3 d-flex align-items-center justify-content-between" style="background: #2a2a2a; padding: 10px 15px; border-radius: 8px 8px 0 0; border-bottom: 1px solid #464646; position: relative;">
+                        <span class="badge bg-primary" style="font-style: italic;">Replying to <?php echo $reply_to_username; ?></span>
+                        <button type="button" onclick="cancelReply()" style="background: none; border: none; color: #888; font-size: 1.5rem; padding: 0 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 4px; transition: background-color 0.2s; position: absolute; right: 15px; top: 50%; transform: translateY(-50%);">×</button>
                     </div>
                 <?php endif; ?>
                 <input type="hidden" name="id" value="<?php echo htmlspecialchars($_GET['id']); ?>">
-                <textarea name="comment_content" placeholder="Add a comment..." required class="form-control" style="height: 100px; resize: none; width: 100%; background: #2a2a2a; color: #fff; border: 1px solid #464646; margin-bottom: 20px;"></textarea>
+                <textarea name="comment_content" placeholder="Add a comment..." required class="form-control" style="height: 120px; resize: none; width: calc(100% - 30px); background: #2a2a2a; color: #fff; border: 1px solid #464646; margin-bottom: 20px; font-size: 1.1rem; padding: 15px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; outline: none;"></textarea>
                 <button type="submit" name="add_comment" class="btn btn-primary">Post Reply</button>
             </form>
         </div>

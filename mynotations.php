@@ -7,7 +7,10 @@ if (!isset($_SESSION['username'])) {
     exit;
 }
 
-$notation_sql = "SELECT n.*, s.title AS song_title, i.name AS instrument_name, s.performer, u.username AS user_name FROM notations n LEFT JOIN songs s ON n.songid = s.songid LEFT JOIN instruments i ON n.instrumentid = i.instrumentid LEFT JOIN users u ON n.userid = u.userid ORDER BY n.notationid DESC";
+// Fetch user's notations
+$username = $_SESSION['username'];
+$userid = $_SESSION['userid'];
+$notation_sql = "SELECT n.*, s.title AS song_title, i.name AS instrument_name, s.performer FROM notations n LEFT JOIN songs s ON n.songid = s.songid LEFT JOIN instruments i ON n.instrumentid = i.instrumentid WHERE n.userid = '$userid' ORDER BY n.notationid DESC";
 $notation_result = $conn->query($notation_sql);
 $notations = [];
 if ($notation_result->num_rows > 0) {
@@ -21,7 +24,7 @@ if ($notation_result->num_rows > 0) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notations</title>
+    <title>My Notations</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -37,7 +40,10 @@ if ($notation_result->num_rows > 0) {
     </ul>
     <div class="container">
         <div class="wrapper" style="width: 80%; max-width: 1200px; margin: 0 auto;">
-            <h2 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin-bottom: 30px; color: #fff; font-size: 2rem;">Notations</h2>
+            <h2 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin-bottom: 30px; color: #fff; font-size: 2rem;">My Notations</h2>
+            <div style="margin-bottom: 30px;">
+                <a href="add_notation.php" class="btn btn-primary" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-decoration: none; display: inline-block; text-align: center; line-height: 45px; height: 45px; font-size: 1rem;">Add Notation</a>
+            </div>
             <?php if (empty($notations)): ?>
                 <p style="color: #888; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1rem;">No notations found.</p>
             <?php else: ?>
@@ -50,7 +56,6 @@ if ($notation_result->num_rows > 0) {
                             <p style="color: #888; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0 0 15px 0; font-size: 1rem;">
                                 Song: <?php echo htmlspecialchars($notation['song_title'] . ' - ' . $notation['performer']); ?> |
                                 Instrument: <?php echo htmlspecialchars($notation['instrument_name']); ?>
-                                <br>By: <?php echo $notation['user_name'] ? htmlspecialchars($notation['user_name']) : '<em>deleted user</em>'; ?>
                             </p>
                             <div style="background: #1a1a1a; padding: 15px; border-radius: 4px; margin-bottom: 15px;">
                                 <pre style="color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; white-space: pre-wrap; font-size: 1rem;">

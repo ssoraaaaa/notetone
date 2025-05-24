@@ -7,7 +7,10 @@ if (!isset($_SESSION['username'])) {
     exit;
 }
 
-$thread_sql = "SELECT t.*, u.username AS user_name FROM threads t LEFT JOIN users u ON t.createdby = u.userid ORDER BY t.threadid DESC";
+// Fetch user's threads
+$username = $_SESSION['username'];
+$userid = $_SESSION['userid'];
+$thread_sql = "SELECT t.*, u.username AS user_name FROM threads t LEFT JOIN users u ON t.createdby = u.userid WHERE t.createdby = '$userid' ORDER BY t.threadid DESC";
 $thread_result = $conn->query($thread_sql);
 $threads = [];
 if ($thread_result->num_rows > 0) {
@@ -16,12 +19,13 @@ if ($thread_result->num_rows > 0) {
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Threads</title>
+    <title>My Threads</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -37,7 +41,10 @@ if ($thread_result->num_rows > 0) {
     </ul>
     <div class="container">
         <div class="wrapper" style="width: 80%; max-width: 1200px; margin: 0 auto;">
-            <h2 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin-bottom: 30px; color: #fff; font-size: 2rem;">Threads</h2>
+            <h2 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin-bottom: 30px; color: #fff; font-size: 2rem;">My Threads</h2>
+            <div style="margin-bottom: 30px;">
+                <a href="add_thread.php" class="btn btn-primary" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-decoration: none; display: inline-block; text-align: center; line-height: 45px; height: 45px; font-size: 1rem;">Create New Thread</a>
+            </div>
             <?php if (empty($threads)): ?>
                 <p style="color: #888; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1rem;">No threads found.</p>
             <?php else: ?>
@@ -65,4 +72,4 @@ if ($thread_result->num_rows > 0) {
         </div>
     </div>
 </body>
-</html> 
+</html>

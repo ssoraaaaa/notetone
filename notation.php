@@ -8,7 +8,7 @@ if (!isset($_SESSION['username'])) {
 }
 
 $notation_id = $_GET['id'];
-$user_id = $_SESSION['user_id'];
+$user_id = $_SESSION['userid'];
 
 // Fetch the notation details
 $notation_sql = "SELECT n.*, s.title AS song_title, i.name AS instrument_name, u.username AS user_name 
@@ -48,29 +48,39 @@ $additional_js = [
     'assets/js/notation.js'
 ];
 
-include('includes/header.php');
-?>
+?><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?php echo $page_title; ?></title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body style="background: #181818; color: #fff; min-height: 100vh; margin: 0;">
+<?php include('includes/header.php'); ?>
 
-<div class="wrapper-notation">
-    <h2><?php echo htmlspecialchars($notation['title']); ?></h2>
+<div class="wrapper-notation" style="width: 80%; max-width: 900px; margin: 40px auto; background: #232323; border-radius: 8px; padding: 32px 24px; box-shadow: 0 2px 16px #0002;">
+    <h2 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #fff; margin-bottom: 20px; font-size: 2rem; text-align: center;">
+        <?php echo htmlspecialchars($notation['title']); ?>
+    </h2>
     <?php if (isset($error_message)): ?>
-        <p class="error"><?php echo $error_message; ?></p>
+        <p class="error" style="color: #ff6b6b; text-align: center; margin-bottom: 20px; font-size: 1.1rem;"> <?php echo $error_message; ?> </p>
     <?php endif; ?>
-    <div class="notation-box">
+    <div class="notation-box" style="background: #2a2a2a; border: 1px solid #464646; border-radius: 4px; padding: 18px 20px; margin-bottom: 24px;">
         <p><strong>Song:</strong> <?php echo htmlspecialchars($notation['song_title']); ?></p>
         <p><strong>Instrument:</strong> <?php echo htmlspecialchars($notation['instrument_name']); ?></p>
         <p><strong>Date Added:</strong> <?php echo htmlspecialchars($notation['dateadded']); ?></p>
         <p><strong>Created by:</strong> <?php echo $notation['user_name'] ? htmlspecialchars($notation['user_name']) : '<em>deleted user</em>'; ?></p>
     </div>
-    <div class="notation-box">
-        <div id="osmd-container"></div>
-        <pre id="musicxml-source" style="display:none;"><?php echo htmlspecialchars($notation['content']); ?></pre>
+    <div class="notation-box" style="background: #1a1a1a; border: 1px solid #464646; border-radius: 4px; padding: 18px 20px; margin-bottom: 24px;">
+        <pre style="color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: transparent; border: none; margin: 0; white-space: pre-wrap; font-size: 1rem;">
+<?php echo htmlspecialchars($notation['content']); ?>
+        </pre>
     </div>
     <?php if ($notation['userid'] == $user_id): ?>
     <form method="POST" action="">
-        <button class="btn-delete-notation" type="submit" name="delete">Delete Notation</button>
+        <button class="btn-delete-notation" type="submit" name="delete" style="background: #ff6b6b; color: #fff; border: none; border-radius: 4px; padding: 10px 22px; font-size: 1rem; cursor: pointer;">Delete Notation</button>
     </form>
     <?php endif; ?>
 </div>
-
 <?php include('includes/footer.php'); ?>
