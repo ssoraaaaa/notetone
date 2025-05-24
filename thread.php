@@ -1,6 +1,6 @@
 <?php
 session_start();
-include('db.php');
+include('includes/db.php');
 
 if (!isset($_SESSION['username'])) {
     header('Location: login.php');
@@ -23,6 +23,15 @@ if (!$thread) {
     exit;
 }
 
+// Handle new comment
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_comment'])) {
+    $comment_content = trim($_POST['comment_content']);
+    if ($comment_content !== '') {
+        $insert_comment_sql = "INSERT INTO threadcomments (content, threadid, userid) VALUES ('" . $conn->real_escape_string($comment_content) . "', '$thread_id', '$user_id')";
+        $conn->query($insert_comment_sql);
+    }
+}
+
 // Handle deletion
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
     if ($thread['createdby'] == $user_id) {
@@ -37,6 +46,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
         $error_message = 'You do not have permission to delete this thread.';
     }
 }
+
+// Fetch comments for this thread
+$comments_sql = "SELECT c.*, u.username FROM threadcomments c LEFT JOIN users u ON c.userid = u.userid WHERE c.threadid = '$thread_id' ORDER BY c.commentid ASC";
+$comments_result = $conn->query($comments_sql);
 ?>
 
 <!DOCTYPE html>
@@ -62,7 +75,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
             <p class="error"><?php echo $error_message; ?></p>
         <?php endif; ?>
         <div class="thread-box">
-            <p><strong>Content:</strong> <?php echo nl2br(htmlspecialchars($thread['content'])); ?></p>
+            <p><?php echo nl2br(htmlspecialchars($thread['content'])); ?></p>
             <p><strong>Created by:</strong> <?php echo $thread['user_name'] ? htmlspecialchars($thread['user_name']) : '<em>deleted user</em>'; ?></p>
         </div>
         <?php if ($thread['createdby'] == $user_id): ?>
@@ -70,6 +83,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
             <button class="btn-delete-thread" type="submit" name="delete">Delete Thread</button>
         </form>
         <?php endif; ?>
+        <div class="comments-section">
+            <h3>Replies</h3>
+            <?php if ($comments_result && $comments_result->num_rows > 0): ?>
+                <?php while ($comment = $comments_result->fetch_assoc()): ?>
+                    <div class="comment-box">
+                        <p><?php echo nl2br(htmlspecialchars($comment['content'])); ?></p>
+                        <p><em>by <?php echo $comment['username'] ? htmlspecialchars($comment['username']) : 'deleted user'; ?></em></p>
+                    </div>
+                <?php endwhile; ?>
+            <?php else: ?>
+                <p>No replies yet...</p>
+            <?php endif; ?>
+            <form method="POST" action="" class="comment-form">
+                <textarea name="comment_content" placeholder="Add a comment..." required></textarea>
+                <button type="submit" name="add_comment" class="btn">Post Reply</button>
+            </form>
+        </div>
     </div>
 </body>
 </html>

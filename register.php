@@ -1,5 +1,5 @@
 <?php
-include('db.php');
+include('includes/db.php');
 
 // Initialize error messages array
 $errors = [];

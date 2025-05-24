@@ -7,7 +7,7 @@ if (!isset($_SESSION['username'])) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    include('db.php');
+    include('includes/db.php');
     $title = $_POST['title'];
     $content = $_POST['content'];
     $username = $_SESSION['username'];

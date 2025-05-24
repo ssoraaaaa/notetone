@@ -1,6 +1,6 @@
 <?php
 session_start();
-include('db.php');
+include('includes/db.php');
 
 if (!isset($_SESSION['username'])) {
     header('Location: login.php');
@@ -39,44 +39,38 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
         $error_message = 'You do not have permission to delete this notation.';
     }
 }
+
+// Set page title and additional resources
+$page_title = htmlspecialchars($notation['title']) . ' - NoteTone';
+$additional_css = ['https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.7.6/build/opensheetmusicdisplay.min.css'];
+$additional_js = [
+    'https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.7.6/build/opensheetmusicdisplay.min.js',
+    'assets/js/notation.js'
+];
+
+include('includes/header.php');
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notation Details</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <ul class="header">
-        <a href="dashboard.php"><img src="logo-gray.png" class="header_logo" alt="Logo"></a>
-        <li class="li_header"><a class="a_header" href="dashboard.php">Dashboard</a></li>
-        <li class="li_header"><a class="a_header" href="threads.php">My Threads</a></li>
-        <li class="li_header"><a class="a_header" href="notations.php">My Notations</a></li>
-        <li class="li_header"><a class="a_header" href="profile.php">Profile</a></li>
-        <li class="li_header"><a class="a_header" href="logout.php">Logout</a></li>
-    </ul>
-    <div class="wrapper-notation">
-        <h2><?php echo htmlspecialchars($notation['title']); ?></h2>
-        <?php if (isset($error_message)): ?>
-            <p class="error"><?php echo $error_message; ?></p>
-        <?php endif; ?>
-        <div class="notation-box">
-            <p><strong>Song:</strong> <?php echo htmlspecialchars($notation['song_title']); ?></p>
-            <p><strong>Instrument:</strong> <?php echo htmlspecialchars($notation['instrument_name']); ?></p>
-            <p><strong>Date Added:</strong> <?php echo htmlspecialchars($notation['dateadded']); ?></p>
-            <p><strong>Created by:</strong> <?php echo $notation['user_name'] ? htmlspecialchars($notation['user_name']) : '<em>deleted user</em>'; ?></p>
-        </div>
-        <div class="notation-box">
-            <p><?php echo nl2br(htmlspecialchars($notation['content'])); ?></p>
-        </div>
-        <?php if ($notation['userid'] == $user_id): ?>
-        <form method="POST" action="">
-            <button class="btn-delete-notation" type="submit" name="delete">Delete Notation</button>
-        </form>
-        <?php endif; ?>
+<div class="wrapper-notation">
+    <h2><?php echo htmlspecialchars($notation['title']); ?></h2>
+    <?php if (isset($error_message)): ?>
+        <p class="error"><?php echo $error_message; ?></p>
+    <?php endif; ?>
+    <div class="notation-box">
+        <p><strong>Song:</strong> <?php echo htmlspecialchars($notation['song_title']); ?></p>
+        <p><strong>Instrument:</strong> <?php echo htmlspecialchars($notation['instrument_name']); ?></p>
+        <p><strong>Date Added:</strong> <?php echo htmlspecialchars($notation['dateadded']); ?></p>
+        <p><strong>Created by:</strong> <?php echo $notation['user_name'] ? htmlspecialchars($notation['user_name']) : '<em>deleted user</em>'; ?></p>
     </div>
-</body>
-</html>
+    <div class="notation-box">
+        <div id="osmd-container"></div>
+        <pre id="musicxml-source" style="display:none;"><?php echo htmlspecialchars($notation['content']); ?></pre>
+    </div>
+    <?php if ($notation['userid'] == $user_id): ?>
+    <form method="POST" action="">
+        <button class="btn-delete-notation" type="submit" name="delete">Delete Notation</button>
+    </form>
+    <?php endif; ?>
+</div>
+
+<?php include('includes/footer.php'); ?>
