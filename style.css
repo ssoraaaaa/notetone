@@ -6,15 +6,47 @@
 body {
     margin: 0;
     padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: #1a1a1a;
     color: #fff;
+    min-width: 1200px; /* Set minimum width */
+    overflow-x: auto; /* Allow horizontal scroll if needed */
 }
 
 .wrapper {
-    width: 80%;
-    max-width: 1200px;
+    width: 1200px; /* Fixed width */
     margin: 0 auto;
     padding: 20px;
+    box-sizing: border-box;
+}
+
+.wrapper-thread {
+    width: 1200px; /* Fixed width */
+    margin: 0 auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.wrapper-notation {
+    width: 1200px; /* Fixed width */
+    margin: 0 auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.wrapper-profile {
+    width: 1200px; /* Fixed width */
+    margin: 0 auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* Container styles */
+.container {
+    width: 1200px; /* Fixed width */
+    margin: 0 auto;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
 /* Header styles */
@@ -50,49 +82,127 @@ body {
 }
 
 /* Form styles */
+.form-group {
+    margin-bottom: 20px;
+    width: 100%;
+    max-width: 1200px; /* Fixed width */
+}
+
 .form-control {
     width: 100%;
     padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 4px;
+    border: 1px solid #464646;
+    background: #2a2a2a;
+    color: #fff;
+    font-size: 16px;
     box-sizing: border-box;
 }
 
+/* Button styles */
 .btn {
     padding: 10px 20px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
 }
 
 .btn-primary {
-    background-color: #007bff;
-    color: white;
+    background: #4faaff;
+    color: #fff;
 }
 
 .btn-primary:hover {
-    background-color: #0056b3;
+    background: #3d8fd9;
 }
 
-/* Thread styles */
-.thread-box {
-    background: #2a2a2a;
-    padding: 20px;
-    border-radius: 8px;
+/* Error and success messages */
+.error {
+    color: #ff6b6b;
     margin-bottom: 20px;
-    border: 1px solid #464646;
 }
 
+.success {
+    color: #4caf50;
+    margin-bottom: 20px;
+}
+
+/* Profile specific styles */
+.profile-box {
+    background: #2a2a2a;
+    border: 1px solid #464646;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+.input-box {
+    margin-bottom: 20px;
+}
+
+.btn-change-username,
+.btn-change-password,
+.btn-delete-profile {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.btn-change-username {
+    background: #4faaff;
+    color: #fff;
+}
+
+.btn-change-password {
+    background: #4caf50;
+    color: #fff;
+}
+
+.btn-delete-profile {
+    background: #ff6b6b;
+    color: #fff;
+}
+
+/* Thread and notation specific styles */
 .comment-box {
     background: #2a2a2a;
-    padding: 15px;
-    margin-bottom: 15px;
-    border-radius: 8px;
     border: 1px solid #464646;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 4px;
 }
 
-/* Error message */
-.error {
-    color: #dc3545;
-    margin-bottom: 15px;
+.notation-box {
+    background: #2a2a2a;
+    border: 1px solid #464646;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+/* Prevent text wrapping */
+h1, h2, h3, h4, h5, h6, p, span, a, button, input, textarea {
+    white-space: nowrap;
+}
+
+/* Make sure images don't wrap */
+img {
+    max-width: none;
+}
+
+/* Ensure tables don't wrap */
+table {
+    width: auto;
+    min-width: 1200px;
+}
+
+/* Ensure flex containers don't wrap */
+.flex-container {
+    flex-wrap: nowrap;
+    min-width: 1200px;
 } 

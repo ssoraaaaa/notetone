@@ -1,11 +1,6 @@
 <?php
-session_start();
-include('includes/db.php');
-
-if (!isset($_SESSION['username'])) {
-    header('Location: login.php');
-    exit;
-}
+require_once 'includes/session.php';
+require_once 'includes/db.php';
 
 $notation_sql = "SELECT n.*, s.title AS song_title, i.name AS instrument_name, s.performer, u.username AS user_name FROM notations n LEFT JOIN songs s ON n.songid = s.songid LEFT JOIN instruments i ON n.instrumentid = i.instrumentid LEFT JOIN users u ON n.userid = u.userid ORDER BY n.notationid DESC";
 $notation_result = $conn->query($notation_sql);
@@ -25,19 +20,14 @@ if ($notation_result->num_rows > 0) {
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <ul class="header">
-        <a href="dashboard.php"><img src="logo-gray.png" class="header_logo" alt="Logo"></a>
-        <li class="li_header"><a class="a_header" href="dashboard.php">Dashboard</a></li>
-        <li class="li_header"><a class="a_header" href="threads.php">Threads</a></li>
-        <li class="li_header"><a class="a_header" href="notations.php">Notations</a></li>
-        <li class="li_header"><a class="a_header" href="mythreads.php">My Threads</a></li>
-        <li class="li_header"><a class="a_header" href="mynotations.php">My Notations</a></li>
-        <li class="li_header"><a class="a_header" href="profile.php">Profile</a></li>
-        <li class="li_header"><a class="a_header" href="logout.php">Logout</a></li>
-    </ul>
+    <?php include 'includes/navbar.php'; ?>
     <div class="container">
         <div class="wrapper" style="width: 80%; max-width: 1200px; margin: 0 auto;">
-            <h2 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin-bottom: 30px; color: #fff; font-size: 2rem;">Notations</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <h2 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #fff; font-size: 2rem; margin: 0;">Notations</h2>
+                <?php if (isLoggedIn()): ?>
+                <?php endif; ?>
+            </div>
             <?php if (empty($notations)): ?>
                 <p style="color: #888; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1rem;">No notations found.</p>
             <?php else: ?>

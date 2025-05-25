@@ -1,66 +1,38 @@
 <?php
-session_start();
-include('includes/db.php');
+require_once 'includes/session.php';
+require_once 'includes/db.php';
 
-// Initialize error messages array
-$errors = [];
-
-// Display success message if it exists
-$success_message = '';
-if (isset($_SESSION['success_message'])) {
-    $success_message = $_SESSION['success_message'];
-    unset($_SESSION['success_message']);
+if (isLoggedIn()) {
+    header("Location: dashboard.php");
+    exit();
 }
 
-// Check if form is submitted
+$error = '';
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Sanitize and validate inputs
-    $username = trim($_POST['username']);
+    $username = $_POST['username'];
     $password = $_POST['password'];
 
-    if (empty($username)) {
-        $errors[] = "Username is required";
-    } elseif (!preg_match('/^[a-zA-Z0-9_]+$/', $username)) { // Allow only alphanumeric and underscore
-        $errors[] = "Invalid username format";
-    }
+    if (empty($username) || empty($password)) {
+        $error = "Please fill in all fields";
+    } else {
+        $sql = "SELECT * FROM users WHERE username = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $result = $stmt->get_result();
 
-    if (empty($password)) {
-        $errors[] = "Password is required";
-    }
-
-    // Check credentials in the database if no errors
-    if (empty($errors)) {
-        try {
-            // Use prepared statements for SQL injection prevention
-            $stmt = $conn->prepare("SELECT * FROM users WHERE username = ?");
-            if ($stmt === false) {
-                throw new Exception("Database query failed.");
-            }
-
-            $stmt->bind_param("s", $username);
-            $stmt->execute();
-            $result = $stmt->get_result();
-
-            if ($result->num_rows > 0) {
-                $user = $result->fetch_assoc();
-                if (password_verify($password, $user['password'])) {
-                    session_regenerate_id(true);
-
-                    $_SESSION['username'] = htmlspecialchars($username, ENT_QUOTES, 'UTF-8');
-                    $_SESSION['userid'] = $user['userid'];
-                    echo '<script>window.location.href="dashboard.php";</script>';
-                    exit;
-                } else {
-                    $errors[] = "Incorrect username or password";
-                }
+        if ($result->num_rows == 1) {
+            $user = $result->fetch_assoc();
+            if (password_verify($password, $user['password'])) {
+                $_SESSION['username'] = $username;
+                header("Location: dashboard.php");
+                exit();
             } else {
-                $errors[] = "Incorrect username or password";
+                $error = "Invalid username or password";
             }
-            $stmt->close();
-        } catch (Exception $e) {
-            // Log error for further analysis (ensure this path is secured and monitored)
-            error_log("Database error: " . $e->getMessage());
-            $errors[] = "An unexpected error occurred. Please try again.";
+        } else {
+            $error = "Invalid username or password";
         }
     }
 }
@@ -71,44 +43,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Log in</title>
+    <title>Login - NoteTone</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <ul class="header">
-        <a href="./index.html"><img src="logo-gray.png" class="header_logo"></a>
-        <li class="li_header"><a class="a_header" href="./login.php">Log in</a></li>
-        <li class="li_header"><a class="a_header" href="./register.php">Register</a></li>
-        <li class="li_header"><a class="a_header">About us</a></li>
-    </ul>
+    <?php include 'includes/navbar.php'; ?>
     <div class="wrapper">
-        <h2>Log in</h2>
-        <?php if (!empty($success_message)): ?>
-            <script>alert('<?php echo htmlspecialchars($success_message, ENT_QUOTES); ?>');</script>
+        <h2>Login</h2>
+        <?php if ($error): ?>
+            <div class="error"><?php echo $error; ?></div>
         <?php endif; ?>
-        <form method="POST" saction="login.php">
-            <div class="input-box">
-                <input type="text" name="username" placeholder="username" autofocus>
+        <form method="post" action="">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
             </div>
-            <div class="input-box">
-                <input type="password" name="password" placeholder="password">
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
             </div>
-            <div class="error-messages">
-                <?php
-                if (!empty($errors)) {
-                    echo '<ul class="error">';
-                    foreach ($errors as $error) {
-                        echo '<li>' . htmlspecialchars($error, ENT_QUOTES) . '</li>';
-                    }
-                    echo '</ul>';
-                }
-                ?>
-            </div>
-            <button type="submit" class="btn">Log in</button>
-            <div class="register-link">
-                <p>Don't have an account? <a href="register.php">Register</a></p>
-            </div>
+            <button type="submit">Login</button>
         </form>
+        <p>Don't have an account? <a href="register.php">Register here</a></p>
     </div>
 </body>
 </html>

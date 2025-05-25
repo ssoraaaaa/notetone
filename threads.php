@@ -1,11 +1,6 @@
 <?php
-session_start();
-include('includes/db.php');
-
-if (!isset($_SESSION['username'])) {
-    header('Location: login.php');
-    exit;
-}
+require_once 'includes/session.php';
+require_once 'includes/db.php';
 
 $thread_sql = "SELECT t.*, u.username AS user_name FROM threads t LEFT JOIN users u ON t.createdby = u.userid ORDER BY t.threadid DESC";
 $thread_result = $conn->query($thread_sql);
@@ -25,19 +20,12 @@ if ($thread_result->num_rows > 0) {
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <ul class="header">
-        <a href="dashboard.php"><img src="logo-gray.png" class="header_logo" alt="Logo"></a>
-        <li class="li_header"><a class="a_header" href="dashboard.php">Dashboard</a></li>
-        <li class="li_header"><a class="a_header" href="threads.php">Threads</a></li>
-        <li class="li_header"><a class="a_header" href="notations.php">Notations</a></li>
-        <li class="li_header"><a class="a_header" href="mythreads.php">My Threads</a></li>
-        <li class="li_header"><a class="a_header" href="mynotations.php">My Notations</a></li>
-        <li class="li_header"><a class="a_header" href="profile.php">Profile</a></li>
-        <li class="li_header"><a class="a_header" href="logout.php">Logout</a></li>
-    </ul>
+    <?php include 'includes/navbar.php'; ?>
     <div class="container">
         <div class="wrapper" style="width: 80%; max-width: 1200px; margin: 0 auto;">
-            <h2 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin-bottom: 30px; color: #fff; font-size: 2rem;">Threads</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <h2 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #fff; font-size: 2rem; margin: 0;">Threads</h2>              
+            </div>
             <?php if (empty($threads)): ?>
                 <p style="color: #888; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1rem;">No threads found.</p>
             <?php else: ?>

@@ -1,10 +1,10 @@
 <?php
-session_start();
-include('includes/db.php');
+require_once 'includes/session.php';
+require_once 'includes/db.php';
 
 header('Content-Type: application/json');
 
-if (!isset($_SESSION['username'])) {
+if (!isLoggedIn()) {
     echo json_encode(['success' => false, 'message' => 'Not logged in']);
     exit;
 }

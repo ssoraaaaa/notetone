@@ -1,13 +1,13 @@
 <?php
-session_start();
+require_once 'includes/session.php';
+require_once 'includes/db.php';
 
-if (!isset($_SESSION['username'])) {
-    header('Location: login.php');
-    exit;
+if (!isLoggedIn()) {
+    header("Location: login.php");
+    exit();
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    include('includes/db.php');
     $title = $_POST['title'];
     $content = $_POST['content'];
     $username = $_SESSION['username'];
@@ -33,20 +33,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Thread</title>
+    <title>Add Thread - NoteTone</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <ul class="header">
-        <a href="<?php echo isset($_SESSION['username']) ? 'dashboard.php' : 'index.html'; ?>"><img src="logo-gray.png" class="header_logo" alt="Logo"></a>
-        <li class="li_header"><a class="a_header" href="dashboard.php">Dashboard</a></li>
-        <li class="li_header"><a class="a_header" href="threads.php">Threads</a></li>
-        <li class="li_header"><a class="a_header" href="notations.php">Notations</a></li>
-        <li class="li_header"><a class="a_header" href="mythreads.php">My Threads</a></li>
-        <li class="li_header"><a class="a_header" href="mynotations.php">My Notations</a></li>
-        <li class="li_header"><a class="a_header" href="profile.php">Profile</a></li>
-        <li class="li_header"><a class="a_header" href="logout.php">Logout</a></li>
-    </ul>
+    <?php include 'includes/navbar.php'; ?>
     <div class="wrapper" style="width: 80%; max-width: 1200px; margin: 0 auto;">
         <h2 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">Start a New Thread</h2>
         <form method="POST" action="">

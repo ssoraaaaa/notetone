@@ -1,14 +1,8 @@
 <?php
-session_start();
-include('includes/db.php');
-
-if (!isset($_SESSION['username'])) {
-    header('Location: login.php');
-    exit;
-}
+require_once 'includes/session.php';
+require_once 'includes/db.php';
 
 $notation_id = $_GET['id'];
-$user_id = $_SESSION['userid'];
 
 // Fetch the notation details
 $notation_sql = "SELECT n.*, s.title AS song_title, i.name AS instrument_name, u.username AS user_name 
@@ -27,7 +21,11 @@ if (!$notation) {
 
 // Handle deletion
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
-    if ($notation['userid'] == $user_id) {
+    if (!isLoggedIn()) {
+        header('Location: login.php');
+        exit;
+    }
+    if ($notation['userid'] == $_SESSION['userid']) {
         $delete_sql = "DELETE FROM notations WHERE notationid = '$notation_id'";
         if ($conn->query($delete_sql) === TRUE) {
             header('Location: notations.php');
@@ -57,18 +55,9 @@ $additional_js = [
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <ul class="header">
-        <a href="dashboard.php"><img src="logo-gray.png" class="header_logo" alt="Logo"></a>
-        <li class="li_header"><a class="a_header" href="dashboard.php">Dashboard</a></li>
-        <li class="li_header"><a class="a_header" href="threads.php">Threads</a></li>
-        <li class="li_header"><a class="a_header" href="notations.php">Notations</a></li>
-        <li class="li_header"><a class="a_header" href="mythreads.php">My Threads</a></li>
-        <li class="li_header"><a class="a_header" href="mynotations.php">My Notations</a></li>
-        <li class="li_header"><a class="a_header" href="profile.php">Profile</a></li>
-        <li class="li_header"><a class="a_header" href="logout.php">Logout</a></li>
-    </ul>
+    <?php include 'includes/navbar.php'; ?>
 
-<div class="wrapper-notation" style="width: 80%; max-width: 900px; margin: 40px auto; background: #232323; border-radius: 8px; padding: 32px 24px; box-shadow: 0 2px 16px #0002;">
+<div class="wrapper-notation" style="width: 80%; max-width: 1200px; margin: 40px auto; background: #232323; border-radius: 8px; padding: 32px 24px; box-shadow: 0 2px 16px #0002;">
     <h2 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #fff; margin-bottom: 20px; font-size: 2rem; text-align: center;">
         <?php echo htmlspecialchars($notation['title']); ?>
     </h2>
@@ -85,7 +74,7 @@ $additional_js = [
         <div id="vf-container"></div>
         <div id="vf-tab-container"></div>
     </div>
-    <?php if ($notation['userid'] == $user_id): ?>
+    <?php if (isLoggedIn() && $notation['userid'] == $_SESSION['userid']): ?>
     <form method="POST" action="">
         <button class="btn-delete-notation" type="submit" name="delete" style="background: #ff6b6b; color: #fff; border: none; border-radius: 4px; padding: 10px 22px; font-size: 1rem; cursor: pointer;">Delete Notation</button>
     </form>
@@ -98,44 +87,129 @@ $additional_js = [
     // Get the notation content from PHP
     const notationContent = <?php echo json_encode($notation['content']); ?>;
     const VF = Vex.Flow;
-    const div = document.getElementById('vf-container');
-    const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
-    renderer.resize(500, 180);
-    const context = renderer.getContext();
-    context.setFont('Arial', 10, '').setBackgroundFillStyle('#1a1a1a');
-    const stave = new VF.Stave(10, 40, 400);
-    stave.addClef('treble').addTimeSignature('4/4');
-    stave.setContext(context).draw();
-    try {
-        // Use EasyScore for simple input
-        const factory = new VF.Factory({renderer: {elementId: 'vf-container', width: 500, height: 180}});
-        const score = factory.EasyScore();
-        const system = factory.System();
-        system.addStave({ voices: [score.voice(score.notes(notationContent))] }).addClef('treble').addTimeSignature('4/4');
-        factory.draw();
-    } catch (e) {
-        div.innerHTML = '<span style="color: #ff6b6b">Could not render notation: ' + e.message + '</span>';
+
+    // Function to check if content is tab JSON
+    function isTabNotation(content) {
+        try {
+            const parsed = JSON.parse(content);
+            return Array.isArray(parsed) && parsed.length > 0 && 
+                   (parsed[0].hasOwnProperty('str') || 
+                    (Array.isArray(parsed[0].positions) && parsed[0].positions.length > 0));
+        } catch (e) {
+            return false;
+        }
     }
 
-    const tabNotesData = <?php echo json_encode(json_decode($notation['content'])); ?>;
-    function renderTab(notes) {
-        const VF = Vex.Flow;
-        const div = document.getElementById('vf-tab-container');
+    // Function to render tab notation
+    function renderTabNotation(notes) {
+        const div = document.getElementById('vf-container');
         div.innerHTML = '';
-        if (!Array.isArray(notes) || notes.length === 0) {
-            div.innerHTML = '<div style="color:#888;text-align:center;padding:20px;">No tab notes to display.</div>';
-            return;
-        }
         const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
-        renderer.resize(500, 180);
+        renderer.resize(700, 220);
         const context = renderer.getContext();
-        const tabStave = new VF.TabStave(10, 40, 400);
-        tabStave.addClef('tab').setContext(context).draw();
-        const vfNotes = notes.map(note => new VF.TabNote({positions: [{str: note.str, fret: note.fret}], duration: note.duration}));
-        const voice = new VF.Voice().setStrict(false);
-        voice.addTickables(vfNotes);
-        new VF.Formatter().joinVoices([voice]).format([voice], 400);
-        voice.draw(context, tabStave);
+        context.setFont('Arial', 18, '').setFillStyle('#fff');
+
+        // Group notes into measures (assuming 4/4 time signature)
+        let currentMeasure = [];
+        let currentMeasureBeats = 0;
+        const measures = [];
+        const beats = 4; // Default to 4/4
+
+        notes.forEach(note => {
+            const noteBeats = getDurationInBeats(note.duration);
+            if (currentMeasureBeats + noteBeats > beats) {
+                if (currentMeasure.length > 0) {
+                    measures.push(currentMeasure);
+                }
+                currentMeasure = [note];
+                currentMeasureBeats = noteBeats;
+            } else {
+                currentMeasure.push(note);
+                currentMeasureBeats += noteBeats;
+            }
+        });
+        if (currentMeasure.length > 0) {
+            measures.push(currentMeasure);
+        }
+
+        // Responsive measure width
+        const baseWidth = 60;
+        const widthPerNote = 40;
+        const minWidth = 100;
+        const maxWidth = 260;
+
+        let x = 10;
+        let y = 40;
+        const maxMeasuresPerLine = 4;
+
+        measures.forEach((measure, measureIndex) => {
+            // Responsive width for this measure
+            const staveWidth = Math.max(minWidth, Math.min(maxWidth, baseWidth + measure.length * widthPerNote));
+
+            if (measureIndex > 0 && measureIndex % maxMeasuresPerLine === 0) {
+                x = 10;
+                y += 100;
+            }
+
+            const stave = new VF.TabStave(x, y, staveWidth);
+            if (measureIndex === 0) {
+                stave.addClef('tab');
+            }
+            stave.setContext(context).draw();
+
+            const vfNotes = measure.map(note => {
+                if (Array.isArray(note.positions)) {
+                    return new VF.TabNote({
+                        positions: note.positions,
+                        duration: note.duration
+                    }).setStyle({ fillStyle: '#fff', strokeStyle: '#fff' });
+                } else {
+                    return new VF.TabNote({
+                        positions: [{str: note.str, fret: note.fret}],
+                        duration: note.duration
+                    }).setStyle({ fillStyle: '#fff', strokeStyle: '#fff' });
+                }
+            });
+
+            const voice = new VF.Voice().setStrict(false);
+            voice.addTickables(vfNotes);
+            new VF.Formatter().joinVoices([voice]).format([voice], staveWidth - 20);
+            voice.draw(context, stave);
+
+            x += staveWidth;
+        });
+
+        // Remove rectangles from tab numbers
+        const svg = div.querySelector('svg');
+        if (svg) {
+            const tabNoteGroups = svg.querySelectorAll('g.vf-tabnote');
+            tabNoteGroups.forEach(group => {
+                const rects = group.querySelectorAll('rect');
+                rects.forEach(rect => rect.remove());
+            });
+        }
     }
-    renderTab(tabNotesData);
+
+    // Function to get duration in beats
+    function getDurationInBeats(duration) {
+        const durationMap = {
+            'w': 4,    // whole note
+            'h': 2,    // half note
+            'q': 1,    // quarter note
+            '8': 0.5,  // eighth note
+            '16': 0.25 // sixteenth note
+        };
+        return durationMap[duration] || 1;
+    }
+
+    // Initialize the notation display
+    if (isTabNotation(notationContent)) {
+        renderTabNotation(JSON.parse(notationContent));
+    } else {
+        // Display as plain text
+        const div = document.getElementById('vf-container');
+        div.innerHTML = `<pre style="color: #fff; font-family: monospace; white-space: pre-wrap;">${notationContent}</pre>`;
+    }
 </script>
+</body>
+</html>

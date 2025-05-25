@@ -1,10 +1,10 @@
 <?php
-session_start();
-include('includes/db.php');
+require_once 'includes/session.php';
+require_once 'includes/db.php';
 
-if (!isset($_SESSION['username'])) {
-    header('Location: login.php');
-    exit;
+if (!isLoggedIn()) {
+    header("Location: login.php");
+    exit();
 }
 
 // Fetch user's notations
@@ -24,25 +24,16 @@ if ($notation_result->num_rows > 0) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Notations</title>
+    <title>My Notations - NoteTone</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <ul class="header">
-        <a href="dashboard.php"><img src="logo-gray.png" class="header_logo" alt="Logo"></a>
-        <li class="li_header"><a class="a_header" href="dashboard.php">Dashboard</a></li>
-        <li class="li_header"><a class="a_header" href="threads.php">Threads</a></li>
-        <li class="li_header"><a class="a_header" href="notations.php">Notations</a></li>
-        <li class="li_header"><a class="a_header" href="mythreads.php">My Threads</a></li>
-        <li class="li_header"><a class="a_header" href="mynotations.php">My Notations</a></li>
-        <li class="li_header"><a class="a_header" href="profile.php">Profile</a></li>
-        <li class="li_header"><a class="a_header" href="logout.php">Logout</a></li>
-    </ul>
+    <?php include 'includes/navbar.php'; ?>
     <div class="container">
         <div class="wrapper" style="width: 80%; max-width: 1200px; margin: 0 auto;">
-            <h2 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin-bottom: 30px; color: #fff; font-size: 2rem;">My Notations</h2>
-            <div style="margin-bottom: 30px;">
-                <a href="add_notation.php" class="btn btn-primary" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-decoration: none; display: inline-block; text-align: center; line-height: 45px; height: 45px; font-size: 1rem;">Add Notation</a>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <h2 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #fff; font-size: 2rem; margin: 0;">My Notations</h2>
+                <a href="add_notation.php" class="btn btn-primary" style="text-decoration: none;">Add New Notation</a>
             </div>
             <?php if (empty($notations)): ?>
                 <p style="color: #888; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1rem;">No notations found.</p>

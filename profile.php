@@ -1,10 +1,10 @@
 <?php
-session_start();
-include('includes/db.php');
+require_once 'includes/session.php';
+require_once 'includes/db.php';
 
-if (!isset($_SESSION['username'])) {
-    header('Location: login.php');
-    exit;
+if (!isLoggedIn()) {
+    header("Location: login.php");
+    exit();
 }
 
 $username = $_SESSION['username'];
@@ -87,56 +87,48 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_profile'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile</title>
+    <title>Profile - NoteTone</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <ul class="header">
-        <a href="dashboard.php"><img src="logo-gray.png" class="header_logo" alt="Logo"></a>
-        <li class="li_header"><a class="a_header" href="dashboard.php">Dashboard</a></li>
-        <li class="li_header"><a class="a_header" href="threads.php">Threads</a></li>
-        <li class="li_header"><a class="a_header" href="notations.php">Notations</a></li>
-        <li class="li_header"><a class="a_header" href="mythreads.php">My Threads</a></li>
-        <li class="li_header"><a class="a_header" href="mynotations.php">My Notations</a></li>
-        <li class="li_header"><a class="a_header" href="profile.php">Profile</a></li>
-        <li class="li_header"><a class="a_header" href="logout.php">Logout</a></li>
-    </ul>
-    <div class="wrapper-profile">
-        <h2>Your Profile</h2>
-         <div class="profile-box">
-            <p><strong>Username:</strong> <?php echo htmlspecialchars($username); ?></p>
-            <p><strong>Threads Created:</strong> <?php echo $thread_count; ?></p>
-            <p><strong>Notations Created:</strong> <?php echo $notation_count; ?></p>
-        </div>
+    <?php include 'includes/navbar.php'; ?>
+        <div class="wrapper-profile">
+            <h2>Your Profile</h2>
+             <div class="profile-box">
+                <p><strong>Username:</strong> <?php echo htmlspecialchars($username); ?></p>
+                <p><strong>Threads Created:</strong> <?php echo $thread_count; ?></p>
+                <p><strong>Notations Created:</strong> <?php echo $notation_count; ?></p>
+            </div>
 
-        <?php if (isset($success_message)): ?>
-            <p class="success"><?php echo $success_message; ?></p>
-        <?php endif; ?>
-        <?php if (isset($error_message)): ?>
-            <p class="error"><?php echo $error_message; ?></p>
-        <?php endif; ?>
-       
-        <form method="POST" action="">
-            <div class="input-box">
-                <input type="text" name="new_username" placeholder="New Username">
-            </div>
-            <button class="btn-change-username" type="submit" name="change_username">Change Username</button>
-        </form>
-        <form method="POST" action="">
-            <div class="input-box">
-                <input type="password" name="old_password" placeholder="Old Password">
-            </div>
-            <div class="input-box">
-                <input type="password" name="new_password" placeholder="New Password">
-            </div>
-            <div class="input-box">
-                <input type="password" name="confirm_password" placeholder="Confirm New Password">
-            </div>
-            <button class="btn-change-password" type="submit" name="change_password">Change Password</button>
-        </form>
-        <form method="POST" action="">
-            <button class="btn-delete-profile" type="submit" name="delete_profile">Delete Profile</button>
-        </form>
+            <?php if (isset($success_message)): ?>
+                <p class="success"><?php echo $success_message; ?></p>
+            <?php endif; ?>
+            <?php if (isset($error_message)): ?>
+                <p class="error"><?php echo $error_message; ?></p>
+            <?php endif; ?>
+           
+            <form method="POST" action="">
+                <div class="input-box">
+                    <input type="text" name="new_username" placeholder="New Username">
+                </div>
+                <button class="btn-change-username" type="submit" name="change_username">Change Username</button>
+            </form>
+            <form method="POST" action="">
+                <div class="input-box">
+                    <input type="password" name="old_password" placeholder="Old Password">
+                </div>
+                <div class="input-box">
+                    <input type="password" name="new_password" placeholder="New Password">
+                </div>
+                <div class="input-box">
+                    <input type="password" name="confirm_password" placeholder="Confirm New Password">
+                </div>
+                <button class="btn-change-password" type="submit" name="change_password">Change Password</button>
+            </form>
+            <form method="POST" action="">
+                <button class="btn-delete-profile" type="submit" name="delete_profile">Delete Profile</button>
+            </form>
+        </div>
     </div>
 </body>
 </html>

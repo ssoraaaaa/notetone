@@ -1,21 +1,19 @@
 <?php
-session_start();
-include('includes/db.php');
-
-if (!isset($_SESSION['username'])) {
-    header('Location: login.php');
-    exit;
-}
+require_once 'includes/session.php';
+require_once 'includes/db.php';
 
 $thread_id = $_GET['id'];
-$user_id = $_SESSION['userid'];
 
 // Handle new comment or reply
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_comment'])) {
+    if (!isLoggedIn()) {
+        header('Location: login.php');
+        exit;
+    }
     $comment_content = trim($_POST['comment_content']);
     $reply_to = isset($_POST['replytocommentid']) && $_POST['replytocommentid'] !== '' ? intval($_POST['replytocommentid']) : 'NULL';
     if ($comment_content !== '') {
-        $insert_comment_sql = "INSERT INTO threadcomments (content, threadid, userid, replytocommentid) VALUES ('" . $conn->real_escape_string($comment_content) . "', '$thread_id', '$user_id', " . ($reply_to === 'NULL' ? 'NULL' : $reply_to) . ")";
+        $insert_comment_sql = "INSERT INTO threadcomments (content, threadid, userid, replytocommentid) VALUES ('" . $conn->real_escape_string($comment_content) . "', '$thread_id', '" . $_SESSION['userid'] . "', " . ($reply_to === 'NULL' ? 'NULL' : $reply_to) . ")";
         $conn->query($insert_comment_sql);
     }
 }
@@ -35,7 +33,11 @@ if (!$thread) {
 
 // Handle deletion
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
-    if ($thread['createdby'] == $user_id) {
+    if (!isLoggedIn()) {
+        header('Location: login.php');
+        exit;
+    }
+    if ($thread['createdby'] == $_SESSION['userid']) {
         $delete_sql = "DELETE FROM threads WHERE threadid = '$thread_id'";
         if ($conn->query($delete_sql) === TRUE) {
             header('Location: threads.php');
@@ -57,6 +59,7 @@ if ($comments_result && $comments_result->num_rows > 0) {
         $comments[] = $row;
     }
 }
+
 // Organize comments into a tree
 function buildCommentTree($comments) {
     $tree = [];
@@ -101,13 +104,15 @@ function renderComments($comments, $reply_to_id) {
         echo '<div style="background: #1a1a1a; padding: 15px; border-radius: 4px; margin-bottom: 15px;">';
         echo '<p style="color: #fff; font-family: \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif; margin: 0; white-space: pre-wrap; word-break: break-word;">' . nl2br(htmlspecialchars($comment['content'])) . '</p>';
         echo '</div>';
-        echo '<div style="clear: both;">';
-        echo '<form method="get" style="display:inline;" class="reply-form" onsubmit="return false;">';
-        echo '<input type="hidden" name="id" value="' . htmlspecialchars($_GET['id']) . '">';
-        echo '<input type="hidden" name="reply" value="' . $comment['commentid'] . '">';
-        echo '<button type="submit" class="btn btn-link p-0 reply-btn" data-comment-id="' . $comment['commentid'] . '" style="font-size: 0.85rem; border-radius: 10px; padding: 2px 8px; width: 80px;">Reply</button>';
-        echo '</form>';
-        echo '</div>';
+        if (isLoggedIn()) {
+            echo '<div style="clear: both;">';
+            echo '<form method="get" style="display:inline;" class="reply-form" onsubmit="return false;">';
+            echo '<input type="hidden" name="id" value="' . htmlspecialchars($_GET['id']) . '">';
+            echo '<input type="hidden" name="reply" value="' . $comment['commentid'] . '">';
+            echo '<button type="submit" class="btn btn-link p-0 reply-btn" data-comment-id="' . $comment['commentid'] . '" style="font-size: 0.85rem; border-radius: 10px; padding: 2px 8px; width: 80px;">Reply</button>';
+            echo '</form>';
+            echo '</div>';
+        }
         if (!empty($comment['children'])) {
             echo '<div style="margin-top: 20px;">';
             renderComments($comment['children'], $reply_to_id);
@@ -122,21 +127,12 @@ function renderComments($comments, $reply_to_id) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($thread['title']); ?></title>
+    <title>Thread - NoteTone</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-    <ul class="header">
-        <a href="dashboard.php"><img src="logo-gray.png" class="header_logo" alt="Logo"></a>
-        <li class="li_header"><a class="a_header" href="dashboard.php">Dashboard</a></li>
-        <li class="li_header"><a class="a_header" href="threads.php">Threads</a></li>
-        <li class="li_header"><a class="a_header" href="notations.php">Notations</a></li>
-        <li class="li_header"><a class="a_header" href="mythreads.php">My Threads</a></li>
-        <li class="li_header"><a class="a_header" href="mynotations.php">My Notations</a></li>
-        <li class="li_header"><a class="a_header" href="profile.php">Profile</a></li>
-        <li class="li_header"><a class="a_header" href="logout.php">Logout</a></li>
-    </ul>
+    <?php include 'includes/navbar.php'; ?>
     <div class="wrapper-thread">
         <h2 style="text-align: center;"><?php echo htmlspecialchars($thread['title']); ?></h2>
         <?php if (isset($error_message)): ?>
@@ -150,7 +146,7 @@ function renderComments($comments, $reply_to_id) {
                 Created by: <?php echo $thread['user_name'] ? htmlspecialchars($thread['user_name']) : '<em>deleted user</em>'; ?>
             </div>
         </div>
-        <?php if ($thread['createdby'] == $user_id): ?>
+        <?php if (isLoggedIn() && $thread['createdby'] == $_SESSION['userid']): ?>
         <form method="POST" action="">
             <button class="btn-delete-thread" type="submit" name="delete">Delete Thread</button>
         </form>
@@ -158,6 +154,7 @@ function renderComments($comments, $reply_to_id) {
         <div class="comments-section">
             <h3>Replies</h3>
             <?php renderComments($comment_tree, $reply_to_id); ?>
+            <?php if (isLoggedIn()): ?>
             <form method="POST" action="" class="comment-form mt-3" id="commentForm">
                 <?php if ($reply_to_id && $reply_to_comment): ?>
                     <input type="hidden" name="replytocommentid" value="<?php echo $reply_to_id; ?>">
@@ -170,6 +167,11 @@ function renderComments($comments, $reply_to_id) {
                 <textarea name="comment_content" placeholder="Add a comment..." required class="form-control" style="height: 120px; resize: none; width: calc(100% - 30px); background: #2a2a2a; color: #fff; border: 1px solid #464646; margin-bottom: 20px; font-size: 1.1rem; padding: 15px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; outline: none;"></textarea>
                 <button type="submit" name="add_comment" class="btn btn-primary">Post Reply</button>
             </form>
+            <?php else: ?>
+            <div style="background: #2a2a2a; border: 1px solid #464646; padding: 20px; border-radius: 4px; text-align: center;">
+                <p style="color: #888; margin: 0;">Please <a href="login.php" style="color: #007bff; text-decoration: none;">login</a> to post a reply.</p>
+            </div>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -198,14 +200,13 @@ function renderComments($comments, $reply_to_id) {
                 contentType: false,
                 success: function(response) {
                     if(response.success) {
-                        window.location.reload();
+                        location.reload();
                     } else {
-                        alert('Error posting comment: ' + response.message);
+                        alert(response.message || 'Error posting comment');
                     }
                 },
-                error: function(xhr, status, error) {
-                    console.error('Error:', error);
-                    alert('Error posting comment. Please try again.');
+                error: function() {
+                    alert('Error posting comment');
                 }
             });
         });

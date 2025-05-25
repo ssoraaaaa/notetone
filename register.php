@@ -1,53 +1,49 @@
 <?php
-include('includes/db.php');
+require_once 'includes/session.php';
+require_once 'includes/db.php';
 
-// Initialize error messages array
-$errors = [];
+if (isLoggedIn()) {
+    header("Location: dashboard.php");
+    exit();
+}
 
-// Check if form is submitted
+$error = '';
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST['username'];
     $password = $_POST['password'];
-    $password_repeat = $_POST['password_repeat'];
+    $confirm_password = $_POST['confirm_password'];
 
-    // Validate username: only letters, numbers, hyphens, and underscores; at least 3 characters
-    if (empty($username)) {
-        $errors[] = "Username is required";
-    } elseif (!preg_match('/^[a-zA-Z0-9_-]{3,}$/', $username)) {
-        $errors[] = "Username must be at least 3 characters and contain only letters, numbers, hyphens, or underscores";
-    }
+    if (empty($username) || empty($password) || empty($confirm_password)) {
+        $error = "Please fill in all fields";
+    } elseif ($password !== $confirm_password) {
+        $error = "Passwords do not match";
+    } elseif (strlen($password) < 6) {
+        $error = "Password must be at least 6 characters long";
+    } else {
+        // Check if username already exists
+        $sql = "SELECT * FROM users WHERE username = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $result = $stmt->get_result();
 
-    // Validate password: only letters, numbers, and symbols; at least 8 characters
-    if (empty($password)) {
-        $errors[] = "Password is required";
-    } elseif (!preg_match('/^[\w\W]{8,}$/', $password)) {
-        $errors[] = "Password must be at least 8 characters and contain only letters, numbers, or symbols";
-    }
-
-    // Validate repeated password ???????????????????????????????????????????????????
-    if ($password !== $password_repeat) {
-        $errors[] = "Passwords do not match";
-    }
-
-    // Check if username already exists
-    if (empty($errors)) {
-        $sql = "SELECT * FROM users WHERE username='$username'";
-        $result = $conn->query($sql);
         if ($result->num_rows > 0) {
-            $errors[] = "User already exists";
-        }
-    }
-
-    // If no errors, proceed with registration
-    if (empty($errors)) {
-        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-        $sql = "INSERT INTO users (username, password) VALUES ('$username', '$hashed_password')";
-        
-        if ($conn->query($sql) === TRUE) {
-            echo '<script>window.location.href="login.php";</script>';
-            exit;
+            $error = "Username already exists";
         } else {
-            $errors[] = "Error: " . $conn->error;
+            // Hash password and insert new user
+            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+            $sql = "INSERT INTO users (username, password) VALUES (?, ?)";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("ss", $username, $hashed_password);
+
+            if ($stmt->execute()) {
+                $_SESSION['username'] = $username;
+                header("Location: dashboard.php");
+                exit();
+            } else {
+                $error = "Registration failed. Please try again.";
+            }
         }
     }
 }
@@ -58,48 +54,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
+    <title>Register - NoteTone</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        .error { color: red; }
-    </style>
 </head>
 <body>
-    <ul class="header">
-        <a href="./index.html" ><img src="logo-gray.png" class="header_logo"></a>
-        <li class="li_header"><a class="a_header" href="./login.php">Log in</a></li>
-        <li class="li_header"><a class="a_header" href="./register.php">Register</a></li>
-        <li class="li_header"><a class="a_header">About us</a></li>
-    </ul>
+    <?php include 'includes/navbar.php'; ?>
     <div class="wrapper">
         <h2>Register</h2>
-        <form method="POST" action="register.php">
-            <div class="input-box">
-                <input type="text" name="username" placeholder="username" autofocus>
+        <?php if ($error): ?>
+            <div class="error"><?php echo $error; ?></div>
+        <?php endif; ?>
+        <form method="post" action="">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
             </div>
-            <div class="input-box">
-                <input type="password" name="password" placeholder="password">
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
             </div>
-            <div class="input-box">
-                <input type="password" name="password_repeat" placeholder="repeat password">
+            <div class="form-group">
+                <label for="confirm_password">Confirm Password:</label>
+                <input type="password" id="confirm_password" name="confirm_password" required>
             </div>
-            <div class="error-messages">
-                <?php
-                if (!empty($errors)) {
-                    echo '<ul class="error">';
-                    foreach ($errors as $error) {
-                        echo '<li>' . htmlspecialchars($error, ENT_QUOTES) . '</li>';
-                    }
-                    echo '</ul>';
-                }
-                ?>
-            </div>
-            <button type="submit" class="btn">Register</button>
-            <div class="register-link">
-                <p>Already have an account? <a href="login.php">Login</a></p>
-            </div>
+            <button type="submit">Register</button>
         </form>
+        <p>Already have an account? <a href="login.php">Login here</a></p>
     </div>
-    
 </body>
 </html>
