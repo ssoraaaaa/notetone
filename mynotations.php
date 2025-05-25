@@ -57,11 +57,6 @@ if ($notation_result->num_rows > 0) {
                                 Song: <?php echo htmlspecialchars($notation['song_title'] . ' - ' . $notation['performer']); ?> |
                                 Instrument: <?php echo htmlspecialchars($notation['instrument_name']); ?>
                             </p>
-                            <div style="background: #1a1a1a; padding: 15px; border-radius: 4px; margin-bottom: 15px;">
-                                <pre style="color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; white-space: pre-wrap; font-size: 1rem;">
-                                    <?php echo htmlspecialchars($notation['content']); ?>
-                                </pre>
-                            </div>
                             <div style="color: #888; font-size: 0.9rem; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
                                 Created: <?php echo date('F j, Y', strtotime($notation['dateadded'])); ?>
                             </div>

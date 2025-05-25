@@ -56,8 +56,17 @@ $additional_js = [
     <title><?php echo $page_title; ?></title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body style="background: #181818; color: #fff; min-height: 100vh; margin: 0;">
-<?php include('includes/header.php'); ?>
+<body>
+    <ul class="header">
+        <a href="dashboard.php"><img src="logo-gray.png" class="header_logo" alt="Logo"></a>
+        <li class="li_header"><a class="a_header" href="dashboard.php">Dashboard</a></li>
+        <li class="li_header"><a class="a_header" href="threads.php">Threads</a></li>
+        <li class="li_header"><a class="a_header" href="notations.php">Notations</a></li>
+        <li class="li_header"><a class="a_header" href="mythreads.php">My Threads</a></li>
+        <li class="li_header"><a class="a_header" href="mynotations.php">My Notations</a></li>
+        <li class="li_header"><a class="a_header" href="profile.php">Profile</a></li>
+        <li class="li_header"><a class="a_header" href="logout.php">Logout</a></li>
+    </ul>
 
 <div class="wrapper-notation" style="width: 80%; max-width: 900px; margin: 40px auto; background: #232323; border-radius: 8px; padding: 32px 24px; box-shadow: 0 2px 16px #0002;">
     <h2 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #fff; margin-bottom: 20px; font-size: 2rem; text-align: center;">
@@ -73,9 +82,8 @@ $additional_js = [
         <p><strong>Created by:</strong> <?php echo $notation['user_name'] ? htmlspecialchars($notation['user_name']) : '<em>deleted user</em>'; ?></p>
     </div>
     <div class="notation-box" style="background: #1a1a1a; border: 1px solid #464646; border-radius: 4px; padding: 18px 20px; margin-bottom: 24px;">
-        <pre style="color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: transparent; border: none; margin: 0; white-space: pre-wrap; font-size: 1rem;">
-<?php echo htmlspecialchars($notation['content']); ?>
-        </pre>
+        <div id="vf-container"></div>
+        <div id="vf-tab-container"></div>
     </div>
     <?php if ($notation['userid'] == $user_id): ?>
     <form method="POST" action="">
@@ -84,3 +92,50 @@ $additional_js = [
     <?php endif; ?>
 </div>
 <?php include('includes/footer.php'); ?>
+<script src="https://unpkg.com/vexflow/releases/vexflow-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.2/build/cjs/vexflow.js"></script>
+<script>
+    // Get the notation content from PHP
+    const notationContent = <?php echo json_encode($notation['content']); ?>;
+    const VF = Vex.Flow;
+    const div = document.getElementById('vf-container');
+    const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
+    renderer.resize(500, 180);
+    const context = renderer.getContext();
+    context.setFont('Arial', 10, '').setBackgroundFillStyle('#1a1a1a');
+    const stave = new VF.Stave(10, 40, 400);
+    stave.addClef('treble').addTimeSignature('4/4');
+    stave.setContext(context).draw();
+    try {
+        // Use EasyScore for simple input
+        const factory = new VF.Factory({renderer: {elementId: 'vf-container', width: 500, height: 180}});
+        const score = factory.EasyScore();
+        const system = factory.System();
+        system.addStave({ voices: [score.voice(score.notes(notationContent))] }).addClef('treble').addTimeSignature('4/4');
+        factory.draw();
+    } catch (e) {
+        div.innerHTML = '<span style="color: #ff6b6b">Could not render notation: ' + e.message + '</span>';
+    }
+
+    const tabNotesData = <?php echo json_encode(json_decode($notation['content'])); ?>;
+    function renderTab(notes) {
+        const VF = Vex.Flow;
+        const div = document.getElementById('vf-tab-container');
+        div.innerHTML = '';
+        if (!Array.isArray(notes) || notes.length === 0) {
+            div.innerHTML = '<div style="color:#888;text-align:center;padding:20px;">No tab notes to display.</div>';
+            return;
+        }
+        const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
+        renderer.resize(500, 180);
+        const context = renderer.getContext();
+        const tabStave = new VF.TabStave(10, 40, 400);
+        tabStave.addClef('tab').setContext(context).draw();
+        const vfNotes = notes.map(note => new VF.TabNote({positions: [{str: note.str, fret: note.fret}], duration: note.duration}));
+        const voice = new VF.Voice().setStrict(false);
+        voice.addTickables(vfNotes);
+        new VF.Formatter().joinVoices([voice]).format([voice], 400);
+        voice.draw(context, tabStave);
+    }
+    renderTab(tabNotesData);
+</script>
