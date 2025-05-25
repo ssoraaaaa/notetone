@@ -6,47 +6,15 @@
 body {
     margin: 0;
     padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: #1a1a1a;
     color: #fff;
-    min-width: 1200px; /* Set minimum width */
-    overflow-x: auto; /* Allow horizontal scroll if needed */
 }
 
 .wrapper {
-    width: 1200px; /* Fixed width */
+    width: 80%;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
-    box-sizing: border-box;
-}
-
-.wrapper-thread {
-    width: 1200px; /* Fixed width */
-    margin: 0 auto;
-    padding: 20px;
-    box-sizing: border-box;
-}
-
-.wrapper-notation {
-    width: 1200px; /* Fixed width */
-    margin: 0 auto;
-    padding: 20px;
-    box-sizing: border-box;
-}
-
-.wrapper-profile {
-    width: 1200px; /* Fixed width */
-    margin: 0 auto;
-    padding: 20px;
-    box-sizing: border-box;
-}
-
-/* Container styles */
-.container {
-    width: 1200px; /* Fixed width */
-    margin: 0 auto;
-    padding: 20px;
-    box-sizing: border-box;
 }
 
 /* Header styles */
@@ -82,50 +50,82 @@ body {
 }
 
 /* Form styles */
-.form-group {
-    margin-bottom: 20px;
-    width: 100%;
-    max-width: 1200px; /* Fixed width */
-}
 
-.form-control {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #464646;
-    background: #2a2a2a;
-    color: #fff;
-    font-size: 16px;
-    box-sizing: border-box;
-}
-
-/* Button styles */
-.btn {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s;
-}
 
 .btn-primary {
-    background: #4faaff;
-    color: #fff;
+    background-color: #007bff;
+    color: white;
 }
 
 .btn-primary:hover {
-    background: #3d8fd9;
+    background-color: #0056b3;
 }
 
-/* Error and success messages */
+/* Thread styles */
+.thread-box {
+    background: #2a2a2a;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid #464646;
+}
+
+.comment-box {
+    background: #2a2a2a;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border: 1px solid #464646;
+}
+
+/* Error message */
 .error {
-    color: #ff6b6b;
-    margin-bottom: 20px;
+    color: #dc3545;
+    margin-bottom: 15px;
 }
 
-.success {
-    color: #4caf50;
-    margin-bottom: 20px;
+/* Global styles */
+* {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #1a1a1a;
+    color: #fff;
+    min-width: 1200px; /* Set minimum width */
+    overflow-x: auto; /* Allow horizontal scroll if needed */
+}
+
+.wrapper-thread {
+    width: 1200px; /* Fixed width */
+    margin: 0 auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.wrapper-notation {
+    width: 1200px; /* Fixed width */
+    margin: 0 auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.wrapper-profile {
+    width: 1200px; /* Fixed width */
+    margin: 0 auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* Container styles */
+.container {
+    width: 1200px; /* Fixed width */
+    margin: 0 auto;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
 /* Profile specific styles */
@@ -169,14 +169,6 @@ body {
 }
 
 /* Thread and notation specific styles */
-.comment-box {
-    background: #2a2a2a;
-    border: 1px solid #464646;
-    padding: 20px;
-    margin-bottom: 20px;
-    border-radius: 4px;
-}
-
 .notation-box {
     background: #2a2a2a;
     border: 1px solid #464646;

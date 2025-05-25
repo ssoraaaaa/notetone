@@ -66,20 +66,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <?php endif; ?>
         <form method="post" action="">
             <div class="form-group">
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" required>
+                <input type="text" id="username" name="username" class="form-control" placeholder="Username" required>
             </div>
             <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
+                <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
             </div>
             <div class="form-group">
-                <label for="confirm_password">Confirm Password:</label>
-                <input type="password" id="confirm_password" name="confirm_password" required>
+                <input type="password" id="confirm_password" name="confirm_password" class="form-control" placeholder="Confirm Password" required>
             </div>
-            <button type="submit">Register</button>
+            <button type="submit" class="btn btn-primary">Register</button>
         </form>
-        <p>Already have an account? <a href="login.php">Login here</a></p>
+        <p>Already have an account? <a href="login.php" style="color: #fff;">Login here</a></p>
     </div>
 </body>
 </html>
