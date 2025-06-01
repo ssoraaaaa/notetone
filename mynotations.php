@@ -9,9 +9,40 @@ if (!isLoggedIn()) {
 
 // Fetch user's notations
 $username = $_SESSION['username'];
+if (!isset($_SESSION['userid'])) {
+    // If userid is not set, try to fetch it from the database
+    $sql = "SELECT userid FROM users WHERE username = ?";
+    $stmt = $conn->prepare($sql);
+    if ($stmt) {
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($row = $result->fetch_assoc()) {
+            $_SESSION['userid'] = $row['userid'];
+        } else {
+            die("Error: Could not find user ID");
+        }
+    } else {
+        die("Error preparing statement: " . $conn->error);
+    }
+}
+
 $userid = $_SESSION['userid'];
-$notation_sql = "SELECT n.*, s.title AS song_title, i.name AS instrument_name, s.performer FROM notations n LEFT JOIN songs s ON n.songid = s.songid LEFT JOIN instruments i ON n.instrumentid = i.instrumentid WHERE n.userid = '$userid' ORDER BY n.notationid DESC";
-$notation_result = $conn->query($notation_sql);
+$notation_sql = "SELECT n.*, s.title AS song_title, i.name AS instrument_name, s.performer 
+                 FROM notations n 
+                 LEFT JOIN songs s ON n.songid = s.songid 
+                 LEFT JOIN instruments i ON n.instrumentid = i.instrumentid 
+                 WHERE n.userid = ? 
+                 ORDER BY n.notationid DESC";
+
+$stmt = $conn->prepare($notation_sql);
+if (!$stmt) {
+    die("Error preparing statement: " . $conn->error);
+}
+
+$stmt->bind_param("i", $userid);
+$stmt->execute();
+$notation_result = $stmt->get_result();
 $notations = [];
 if ($notation_result->num_rows > 0) {
     while ($row = $notation_result->fetch_assoc()) {
