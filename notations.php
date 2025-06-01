@@ -23,9 +23,10 @@ if ($notation_result->num_rows > 0) {
     <?php include 'includes/navbar.php'; ?>
     <div class="container">
         <div class="wrapper" style="width: 80%; max-width: 1200px; margin: 0 auto;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                <h2 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #fff; font-size: 2rem; margin: 0;">Notations</h2>
+            <div class="container-header">
+                <h2>Notations</h2>
                 <?php if (isLoggedIn()): ?>
+                    <a href="add_notation.php" class="btn btn-primary" style="text-decoration: none; ">Add New Notation</a>
                 <?php endif; ?>
             </div>
             <?php if (empty($notations)): ?>

@@ -5,7 +5,7 @@ require_once 'includes/db.php';
 $notation_id = $_GET['id'];
 
 // Fetch the notation details
-$notation_sql = "SELECT n.*, s.title AS song_title, i.name AS instrument_name, u.username AS user_name 
+$notation_sql = "SELECT n.*, n.userid, s.title AS song_title, i.name AS instrument_name, u.username AS user_name 
                  FROM notations n 
                  LEFT JOIN songs s ON n.songid = s.songid 
                  LEFT JOIN instruments i ON n.instrumentid = i.instrumentid 
@@ -25,7 +25,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
         header('Location: login.php');
         exit;
     }
-    if ($notation['userid'] == $_SESSION['userid']) {
+    if (isset($notation['userid']) && $notation['userid'] == $_SESSION['userid']) {
         $delete_sql = "DELETE FROM notations WHERE notationid = '$notation_id'";
         if ($conn->query($delete_sql) === TRUE) {
             header('Location: notations.php');
@@ -74,7 +74,7 @@ $additional_js = [
         <div id="vf-container"></div>
         <div id="vf-tab-container"></div>
     </div>
-    <?php if (isLoggedIn() && $notation['userid'] == $_SESSION['userid']): ?>
+    <?php if (isLoggedIn() && isset($notation['userid']) && $notation['userid'] == $_SESSION['userid']): ?>
     <form method="POST" action="">
         <button class="btn-delete-notation" type="submit" name="delete" style="background: #ff6b6b; color: #fff; border: none; border-radius: 4px; padding: 10px 22px; font-size: 1rem; cursor: pointer;">Delete Notation</button>
     </form>

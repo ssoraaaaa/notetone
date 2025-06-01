@@ -23,8 +23,11 @@ if ($thread_result->num_rows > 0) {
     <?php include 'includes/navbar.php'; ?>
     <div class="container">
         <div class="wrapper" style="width: 80%; max-width: 1200px; margin: 0 auto;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                <h2 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #fff; font-size: 2rem; margin: 0;">Threads</h2>              
+            <div class="container-header">
+                <h2>Threads</h2>
+                <?php if (isLoggedIn()): ?>
+                    <a href="add_thread.php" class="btn btn-primary" style="text-decoration: none; ">Add New Thread</a>
+                <?php endif; ?>
             </div>
             <?php if (empty($threads)): ?>
                 <p style="color: #888; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1rem;">No threads found.</p>
