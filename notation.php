@@ -19,6 +19,10 @@ if (!$notation) {
     exit;
 }
 
+// Determine entry source
+$from = isset($_GET['from']) ? $_GET['from'] : '';
+$back_url = isset($_GET['back']) ? $_GET['back'] : ($from === 'mynotations' ? 'mynotations.php' : ($from === 'notations' ? 'notations.php' : (isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : 'notations.php')));
+
 // Handle deletion
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
     if (!isLoggedIn()) {
@@ -28,7 +32,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
     if (isset($notation['userid']) && $notation['userid'] == $_SESSION['userid']) {
         $delete_sql = "DELETE FROM notations WHERE notationid = '$notation_id'";
         if ($conn->query($delete_sql) === TRUE) {
+            if ($from === 'mynotations') {
+                header('Location: mynotations.php');
+            } else {
             header('Location: notations.php');
+            }
             exit;
         } else {
             $error_message = 'Error: ' . $conn->error;
@@ -45,6 +53,16 @@ $additional_js = [
     'https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.7.6/build/opensheetmusicdisplay.min.js',
     'assets/js/notation.js'
 ];
+
+// After $back_url is set, add logic to prevent edit.php as a back target
+if (strpos($back_url, 'edit.php') !== false) {
+    // If user came from mynotations, go there, else fallback to notations.php
+    if (isset($_GET['back']) && strpos($_GET['back'], 'mynotations.php') !== false) {
+        $back_url = 'mynotations.php';
+    } else {
+        $back_url = 'notations.php';
+    }
+}
 
 ?><!DOCTYPE html>
 <html lang="en">
@@ -64,7 +82,7 @@ $additional_js = [
     <?php if (isset($error_message)): ?>
         <p class="error" style="color: #ff6b6b; text-align: center; margin-bottom: 20px; font-size: 1.1rem;"> <?php echo $error_message; ?> </p>
     <?php endif; ?>
-    <div class="notation-box" style="background: #2a2a2a; border: 1px solid #464646; border-radius: 4px; padding: 18px 20px; margin-bottom: 24px;">
+    <div class="tab-description" style="background: #2a2a2a; border: 1px solid #464646; border-radius: 4px; padding: 18px 20px; margin-bottom: 24px;">
         <p><strong>Song:</strong> <?php echo htmlspecialchars($notation['song_title']); ?></p>
         <p><strong>Instrument:</strong> <?php echo htmlspecialchars($notation['instrument_name']); ?></p>
         <p><strong>Date Added:</strong> <?php echo htmlspecialchars($notation['dateadded']); ?></p>
@@ -72,13 +90,14 @@ $additional_js = [
     </div>
     <div class="notation-box" style="background: #1a1a1a; border: 1px solid #464646; border-radius: 4px; padding: 18px 20px; margin-bottom: 24px;">
         <div id="vf-container"></div>
-        <div id="vf-tab-container"></div>
     </div>
-    <?php if (isLoggedIn() && isset($notation['userid']) && $notation['userid'] == $_SESSION['userid']): ?>
-    <form method="POST" action="">
+    <?php if (isLoggedIn() && isset($notation['userid']) && $notation['userid'] == $_SESSION['userid'] && $from === 'mynotations'): ?>
+    <form method="POST" action="" style="display:inline-block; margin-right: 10px;">
         <button class="btn-delete-notation" type="submit" name="delete" style="background: #ff6b6b; color: #fff; border: none; border-radius: 4px; padding: 10px 22px; font-size: 1rem; cursor: pointer;">Delete Notation</button>
     </form>
+    <a href="edit.php?id=<?php echo $notation['notationid']; ?>&from=mynotations&back=<?php echo urlencode($back_url); ?>" class="btn btn-primary" style="text-decoration: none; padding: 10px 22px; font-size: 1rem; border-radius: 4px; background: #4faaff; color: #fff; border: none; margin-left: 10px;">Edit</a>
     <?php endif; ?>
+    <a href="<?php echo htmlspecialchars($back_url); ?>" class="btn btn-primary" style="text-decoration: none; margin-left: 10px;">&larr; Back</a>
 </div>
 <?php include('includes/footer.php'); ?>
 <script src="https://unpkg.com/vexflow/releases/vexflow-min.js"></script>
@@ -104,11 +123,7 @@ $additional_js = [
     function renderTabNotation(notes) {
         const div = document.getElementById('vf-container');
         div.innerHTML = '';
-        const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
-        renderer.resize(700, 220);
-        const context = renderer.getContext();
-        context.setFont('Arial', 18, '').setFillStyle('#fff');
-
+        const containerWidth = div.offsetWidth > 0 ? div.offsetWidth : 700;
         // Group notes into measures (assuming 4/4 time signature)
         let currentMeasure = [];
         let currentMeasureBeats = 0;
@@ -132,51 +147,92 @@ $additional_js = [
             measures.push(currentMeasure);
         }
 
-        // Responsive measure width
+        // Responsive measure width (copied from add_notation.php)
         const baseWidth = 60;
         const widthPerNote = 40;
         const minWidth = 100;
         const maxWidth = 260;
+        const sidePadding = 10;
+        const minSpacingWidth = 120;
+        const extraDigitWidth = 8;
 
-        let x = 10;
-        let y = 40;
-        const maxMeasuresPerLine = 4;
-
-        measures.forEach((measure, measureIndex) => {
-            // Responsive width for this measure
-            const staveWidth = Math.max(minWidth, Math.min(maxWidth, baseWidth + measure.length * widthPerNote));
-
-            if (measureIndex > 0 && measureIndex % maxMeasuresPerLine === 0) {
-                x = 10;
-                y += 100;
-            }
-
-            const stave = new VF.TabStave(x, y, staveWidth);
-            if (measureIndex === 0) {
-                stave.addClef('tab');
-            }
-            stave.setContext(context).draw();
-
-            const vfNotes = measure.map(note => {
-                if (Array.isArray(note.positions)) {
-                    return new VF.TabNote({
-                        positions: note.positions,
-                        duration: note.duration
-                    }).setStyle({ fillStyle: '#fff', strokeStyle: '#fff' });
-                } else {
-                    return new VF.TabNote({
-                        positions: [{str: note.str, fret: note.fret}],
-                        duration: note.duration
-                    }).setStyle({ fillStyle: '#fff', strokeStyle: '#fff' });
-                }
+        // Calculate stave widths
+        const staveWidths = measures.map(measure => {
+            let noteCount = measure.length;
+            let maxFretLen = 1;
+            measure.forEach(note => {
+                let positions = Array.isArray(note.positions) ? note.positions : [{str: note.str, fret: note.fret}];
+                positions.forEach(pos => {
+                    maxFretLen = Math.max(maxFretLen, String(pos.fret).length);
+                });
             });
+            const extraWidth = (maxFretLen - 1) * extraDigitWidth;
+            const contentWidth = baseWidth + noteCount * widthPerNote + sidePadding * 2 + extraWidth;
+            return Math.max(minWidth, Math.min(maxWidth, Math.max(minSpacingWidth, contentWidth)));
+        });
 
-            const voice = new VF.Voice().setStrict(false);
-            voice.addTickables(vfNotes);
-            new VF.Formatter().joinVoices([voice]).format([voice], staveWidth - 20);
-            voice.draw(context, stave);
+        // Calculate how many measures fit per line
+        let lines = [[]];
+        let currentLineWidth = 10; // initial x offset
+        let currentLine = 0;
+        for (let i = 0; i < measures.length; i++) {
+            if (currentLineWidth + staveWidths[i] > containerWidth && lines[currentLine].length > 0) {
+                // Start new line
+                lines.push([]);
+                currentLine++;
+                currentLineWidth = 10 + staveWidths[i];
+                lines[currentLine].push(i);
+            } else {
+                lines[currentLine].push(i);
+                currentLineWidth += staveWidths[i];
+            }
+        }
 
-            x += staveWidth;
+        // Calculate required SVG height
+        const lineHeight = 200;
+        const svgHeight = lines.length * lineHeight + 60;
+
+        // Create renderer with dynamic width/height
+        const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
+        renderer.resize(containerWidth, svgHeight);
+        const context = renderer.getContext();
+        context.setFont('Arial', 18, '').setFillStyle('#fff');
+
+        // Draw all measures
+        let y = 40;
+        lines.forEach(line => {
+            let x = 10;
+            line.forEach(idx => {
+                const measure = measures[idx];
+                const staveWidth = staveWidths[idx];
+                const stave = new VF.TabStave(x, y, staveWidth);
+                if (idx === 0) {
+                    stave.addClef('tab');
+                }
+                stave.setContext(context).draw();
+                const vfNotes = measure.map(note => {
+                    let positions = Array.isArray(note.positions) ? note.positions : [{str: note.str, fret: note.fret}];
+                    // Invert string numbers for VexFlow: 1 (high e) should be bottom, 6 (low E) should be top
+                    positions = positions.map(pos => ({
+                        str: 7 - pos.str, // invert string number
+                        fret: pos.fret
+                    }));
+                    let vfNote = new VF.TabNote({
+                        positions: positions,
+                        duration: note.duration.replace('.', '')
+                    }).setStyle({ fillStyle: '#fff', strokeStyle: '#fff' });
+                    if (note.duration.endsWith('.')) {
+                        vfNote.addDotToAll();
+                    }
+                    return vfNote;
+                });
+                const voice = new VF.Voice().setStrict(false);
+                voice.addTickables(vfNotes);
+                new VF.Formatter().joinVoices([voice]).format([voice], staveWidth - 20);
+                voice.draw(context, stave);
+                x += staveWidth;
+            });
+            y += lineHeight;
         });
 
         // Remove rectangles from tab numbers

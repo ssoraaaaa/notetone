@@ -25,9 +25,6 @@ if ($thread_result->num_rows > 0) {
         <div class="wrapper" style="width: 80%; max-width: 1200px; margin: 0 auto;">
             <div class="container-header">
                 <h2>Threads</h2>
-                <?php if (isLoggedIn()): ?>
-                    <a href="add_thread.php" class="btn btn-primary" style="text-decoration: none; ">Add New Thread</a>
-                <?php endif; ?>
             </div>
             <?php if (empty($threads)): ?>
                 <p style="color: #888; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1rem;">No threads found.</p>

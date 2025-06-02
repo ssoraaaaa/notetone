@@ -50,7 +50,7 @@ $stmt->execute();
 $thread_result = $stmt->get_result();
 
 // Debug query results
-echo "Number of threads found: " . $thread_result->num_rows . "<br>";
+// echo "Number of threads found: " . $thread_result->num_rows . "<br>";
 
 $threads = [];
 if ($thread_result->num_rows > 0) {

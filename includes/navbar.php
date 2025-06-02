@@ -3,7 +3,7 @@ require_once 'includes/session.php';
 ?>
 <link rel="stylesheet" href="includes/navbar.css">
 <nav class="navbar">
-    <a href="dashboard.php" class="navbar-logo-container">
+    <a href="index.php" class="navbar-logo-container">
         <img src="assets/images/logo-gray.png" class="navbar-logo" alt="Logo">
     </a>
     <ul class="navbar-items">

@@ -103,7 +103,7 @@ if ($thread_result->num_rows > 0) {
                         <h3 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin-bottom: 20px; color: #fff; font-size: 1.5rem;">Quick Actions</h3>
                         <div style="display: flex; gap: 15px;">
                             <a href="add_thread.php" class="btn btn-primary" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-decoration: none; display: inline-block; text-align: center; line-height: 45px; height: 45px; font-size: 1rem; flex: 1;">Create Thread</a>
-                            <a href="add_notation.php" class="btn btn-primary" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-decoration: none; display: inline-block; text-align: center; line-height: 45px; height: 45px; font-size: 1rem; flex: 1;">Add Notation</a>
+                            <a href="edit.php?from=dashboard" class="btn btn-primary" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-decoration: none; display: inline-block; text-align: center; line-height: 45px; height: 45px; font-size: 1rem; flex: 1;">Create Notation</a>
                         </div>
                     </div>
                 </div>

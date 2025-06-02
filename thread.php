@@ -134,6 +134,9 @@ function renderComments($comments, $reply_to_id) {
 <body>
     <?php include 'includes/navbar.php'; ?>
     <div class="wrapper-thread">
+        <div style="margin-bottom: 20px;">
+            <a href="<?php echo isset($_SERVER['HTTP_REFERER']) ? htmlspecialchars($_SERVER['HTTP_REFERER']) : 'threads.php'; ?>" class="btn btn-primary" style="text-decoration: none;">&larr; Back</a>
+        </div>
         <h2 style="text-align: center;"><?php echo htmlspecialchars($thread['title']); ?></h2>
         <?php if (isset($error_message)): ?>
             <p class="error"><?php echo $error_message; ?></p>

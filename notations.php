@@ -25,15 +25,12 @@ if ($notation_result->num_rows > 0) {
         <div class="wrapper" style="width: 80%; max-width: 1200px; margin: 0 auto;">
             <div class="container-header">
                 <h2>Notations</h2>
-                <?php if (isLoggedIn()): ?>
-                    <a href="add_notation.php" class="btn btn-primary" style="text-decoration: none; ">Add New Notation</a>
-                <?php endif; ?>
             </div>
             <?php if (empty($notations)): ?>
                 <p style="color: #888; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1rem;">No notations found.</p>
             <?php else: ?>
                 <?php foreach ($notations as $notation): ?>
-                    <a href="notation.php?id=<?php echo $notation['notationid']; ?>" style="text-decoration: none; color: inherit;">
+                    <a href="notation.php?id=<?php echo $notation['notationid']; ?>&from=notations" style="text-decoration: none; color: inherit;">
                         <div style="background: #2a2a2a; border: 1px solid #464646; border-left: 5px solid #464646; padding: 20px; margin-bottom: 20px; border-radius: 4px; transition: box-shadow 0.2s;">
                             <h3 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0 0 10px 0; color: #fff; font-size: 1.5rem;">
                                 <?php echo htmlspecialchars($notation['title']); ?>
