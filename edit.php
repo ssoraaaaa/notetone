@@ -210,7 +210,7 @@ if ($edit_mode && $notation) {
                     </div>
                     <div id="tab-note-list" style="margin-bottom: 10px; color: #ccc; font-size: 0.95rem;"></div>
                     <input type="hidden" name="content" id="tab-json-content">
-                    <div id="vf-preview" style="margin-top: 20px; margin-bottom: 20px; background: #181818; border-radius: 4px; padding: 20px; max-width: 100%; /* overflow-x: auto; overflow-y: visible; white-space: nowrap; */"></div>
+                    <div id="vf-preview" style="margin-top: 20px; margin-bottom: 20px; background: #181818; border-radius: 4px; padding: 20px; max-width: 100%;"></div>
                 </div>
             </div>
             <div id="text-editor" style="display: <?php echo $prefill_mode === 'text' ? '' : 'none'; ?>;">
@@ -250,6 +250,8 @@ if ($edit_mode && $notation) {
         const messageDiv = document.getElementById('notation-message');
 
         let tabNotes = [];
+        let selectedNoteIdx = null; // Track selected note index for deletion
+        let tabCursorIdx = tabNotes.length; // Cursor defaults to end
         // Prefill logic
         if (editMode) {
             // Set all fields
@@ -335,109 +337,196 @@ if ($edit_mode && $notation) {
             }
         });
         addChordBtn.addEventListener('click', function() {
-            // Get the current chord from Vue component
             const chord = window.fretboardApp.getCurrentChord();
             if (chord && chord.length > 0) {
-                tabNotes.push({
+                tabNotes.splice(tabCursorIdx, 0, {
                     positions: chord.map(n => ({str: n.str, fret: n.fret}))
                 });
+                tabCursorIdx++;
                 updateTabNoteList();
                 renderVexflowTab();
                 window.fretboardApp.clearChord();
             }
         });
         addTactBtn.addEventListener('click', function() {
-            tabNotes.push({tact: true});
+            tabNotes.splice(tabCursorIdx, 0, {tact: true});
+            tabCursorIdx++;
             updateTabNoteList();
             renderVexflowTab();
         });
         clearChordBtn.addEventListener('click', function() {
             window.fretboardApp.clearChord();
         });
+        function splitNotesIntoLines(notes, maxNotesPerLine = 16) {
+            let lines = [];
+            let currentLine = [];
+            let noteCount = 0;
+            for (let i = 0; i < notes.length; i++) {
+                currentLine.push(notes[i]);
+                noteCount++;
+                if (notes[i].tact && noteCount >= maxNotesPerLine) {
+                    lines.push(currentLine);
+                    currentLine = [];
+                    noteCount = 0;
+                }
+            }
+            if (currentLine.length > 0) lines.push(currentLine);
+            return lines;
+        }
         function renderVexflowTab() {
             previewDiv.innerHTML = '';
             const VF = Vex.Flow;
-            const fixedStaveWidth = 700;
-            const minSpacing = 40; // px
-            const minTactNotes = 5; // minimal notes per tact
-            // Split tabNotes into lines based on tact lines and minTactNotes
-            let lines = [];
-            let currentLine = [];
-            let notesSinceTact = 0;
-            for (let i = 0; i < tabNotes.length; i++) {
-                const note = tabNotes[i];
-                currentLine.push(note);
-                if (note.tact) {
-                    if (notesSinceTact >= minTactNotes) {
-                        lines.push(currentLine);
-                        currentLine = [];
-                        notesSinceTact = 0;
-                    } else if (currentLine.length === 1) {
-                        // tact at start, ignore
-                        currentLine = [];
-                    }
-                } else {
-                    notesSinceTact++;
-                }
-            }
-            if (currentLine.length > 0) {
-                lines.push(currentLine);
-            }
-            // Always end with a double bar line
-            if (!lines[lines.length-1] || !lines[lines.length-1][lines[lines.length-1].length-1] || !lines[lines.length-1][lines[lines.length-1].length-1].tact) {
-                lines[lines.length-1].push({tact: 'double'});
-            }
-            // Render each line
+            const lines = splitNotesIntoLines(tabNotes, 16); // You can adjust max notes per line
+            const fixedStaveWidth = 1100;
+            const lineHeight = 200;
+            const svgHeight = lines.length * lineHeight + 60;
             const renderer = new VF.Renderer(previewDiv, VF.Renderer.Backends.SVG);
-            const lineHeight = 100;
-            renderer.resize(fixedStaveWidth, lines.length * lineHeight + 60);
+            renderer.resize(fixedStaveWidth, svgHeight);
             const context = renderer.getContext();
             context.setFont('Arial', 18, '').setFillStyle('#fff');
             let y = 40;
-            lines.forEach(line => {
+            let noteIdx = 0; // Track index in tabNotes
+            let noteIndices = [];
+            tabNotes.forEach((note, idx) => {
+                if (!note.tact) noteIndices.push(idx);
+            });
+            // For cursor overlay
+            let cursorSpots = [];
+            let runningIdx = 0;
+            for (let l = 0; l < lines.length; l++) {
+                let lineNotes = lines[l];
                 const stave = new VF.TabStave(10, y, fixedStaveWidth);
-                stave.addClef('tab');
+                if (l === 0) {
+                    stave.addClef('tab');
+                }
                 stave.setContext(context).draw();
                 let notes = [];
-                line.forEach(note => {
-                    if (note.tact === 'double') {
-                        notes.push(new VF.BarNote(VF.Barline.type.END));
-                    } else if (note.tact) {
+                lineNotes.forEach((note) => {
+                    if (note.tact) {
                         notes.push(new VF.BarNote());
                     } else {
                         let positions = Array.isArray(note.positions) ? note.positions : [{ str: 7 - note.str, fret: note.fret }];
-                        notes.push(new VF.TabNote({ positions: positions, duration: 'q' }).setStyle({ fillStyle: '#fff', strokeStyle: '#fff' }));
+                        let tabNote = new VF.TabNote({ positions: positions, duration: 'q' }).setStyle({ fillStyle: '#fff', strokeStyle: '#fff' });
+                        tabNote.noteIdx = noteIdx;
+                        if (selectedNoteIdx === noteIdx) {
+                            tabNote.setStyle({ fillStyle: '#ff6b6b', strokeStyle: '#ff6b6b' });
+                        }
+                        notes.push(tabNote);
                     }
+                    noteIdx++;
                 });
                 if (notes.length > 0) {
                     const voice = new VF.Voice().setStrict(false);
                     voice.addTickables(notes);
-                    const formatter = new VF.Formatter();
-                    formatter.joinVoices([voice]);
-                    formatter.formatToStave([voice], stave, { softmaxFactor: 100, minTicksPerSpace: 1 });
-                    // Manually ensure minimal spacing between notes
-                    let prevX = null;
-                    notes.forEach((note, i) => {
-                        const tickContext = note.getTickContext();
-                        if (tickContext) {
-                            const x = tickContext.getX();
-                            if (prevX !== null && x - prevX < minSpacing) {
-                                tickContext.setX(prevX + minSpacing);
-                            }
-                            prevX = tickContext.getX();
-                        }
-                    });
+                    new VF.Formatter().joinVoices([voice]).format([voice], fixedStaveWidth - 60);
                     voice.draw(context, stave);
+                    // Cursor at the very beginning
+                    let prevX = stave.getNoteStartX();
+                    cursorSpots.push({ idx: runningIdx, x: prevX, y: y, h: lineHeight });
+                    // Cursor after each chord or barline
+                    let tickables = voice.getTickables();
+                    for (let i = 0; i < tickables.length; i++) {
+                        let bb = tickables[i].getBoundingBox();
+                        let x = (bb && bb.getX() !== undefined && bb.getW() !== undefined) ? (bb.getX() + bb.getW() + 10) : (prevX + 50);
+                        cursorSpots.push({ idx: runningIdx + i + 1, x: x, y: y, h: lineHeight });
+                        prevX = x;
+                    }
+                    runningIdx += notes.length;
+                } else {
+                    // If no notes, put a cursor at the start
+                    cursorSpots.push({ idx: runningIdx, x: stave.getNoteStartX(), y: y, h: lineHeight });
                 }
                 y += lineHeight;
-            });
-            // Remove rectangles from tab numbers
+            }
+            // After rendering, overlay cursor and clickable areas
             const svg = previewDiv.querySelector('svg');
             if (svg) {
+                // Draw cursor line at selected position
+                let spot = cursorSpots.find(s => s.idx === tabCursorIdx);
+                if (spot) {
+                    const ns = 'http://www.w3.org/2000/svg';
+                    const line = document.createElementNS(ns, 'line');
+                    line.setAttribute('x1', spot.x);
+                    line.setAttribute('x2', spot.x);
+                    line.setAttribute('y1', spot.y);
+                    line.setAttribute('y2', spot.y + spot.h - 20);
+                    line.setAttribute('stroke', '#4faaff');
+                    line.setAttribute('stroke-width', '3');
+                    line.setAttribute('class', 'tab-cursor');
+                    svg.appendChild(line);
+                }
+                // Overlay transparent rects for cursor movement
+                cursorSpots.forEach((spot, i) => {
+                    const ns = 'http://www.w3.org/2000/svg';
+                    const rect = document.createElementNS(ns, 'rect');
+                    rect.setAttribute('x', spot.x - 10);
+                    rect.setAttribute('y', spot.y);
+                    rect.setAttribute('width', 20);
+                    rect.setAttribute('height', spot.h - 20);
+                    rect.setAttribute('fill', 'transparent');
+                    rect.style.cursor = 'pointer';
+                    rect.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        tabCursorIdx = spot.idx;
+                        selectedNoteIdx = null;
+                        renderVexflowTab();
+                    });
+                    svg.appendChild(rect);
+                });
+                // ... (existing note click/X logic follows here)
+                // Remove all rectangles (white backgrounds) in this group
                 const tabNoteGroups = svg.querySelectorAll('g.vf-tabnote');
-                tabNoteGroups.forEach(group => {
+                tabNoteGroups.forEach((group, i) => {
                     const rects = group.querySelectorAll('rect');
                     rects.forEach(rect => rect.remove());
+                });
+                tabNoteGroups.forEach((group, i) => {
+                    const noteIdx = noteIndices[i];
+                    if (noteIdx !== undefined) {
+                        const texts = group.querySelectorAll('text');
+                        texts.forEach(text => {
+                            text.style.cursor = 'pointer';
+                            text.setAttribute('data-note-idx', noteIdx);
+                            text.addEventListener('click', function(e) {
+                                e.stopPropagation();
+                                selectedNoteIdx = noteIdx;
+                                renderVexflowTab();
+                            });
+                        });
+                        if (selectedNoteIdx === noteIdx) {
+                            let topText = null;
+                            let minY = Infinity;
+                            texts.forEach(t => {
+                                const y = parseFloat(t.getAttribute('y'));
+                                if (y < minY) {
+                                    minY = y;
+                                    topText = t;
+                                }
+                            });
+                            if (topText) {
+                                const bbox = topText.getBBox();
+                                const ns = 'http://www.w3.org/2000/svg';
+                                const xBtn = document.createElementNS(ns, 'text');
+                                xBtn.textContent = '×';
+                                xBtn.setAttribute('x', bbox.x + bbox.width / 2);
+                                xBtn.setAttribute('y', bbox.y - 8);
+                                xBtn.setAttribute('fill', '#ff6b6b');
+                                xBtn.setAttribute('font-size', bbox.height * 0.9);
+                                xBtn.setAttribute('font-family', 'Arial, sans-serif');
+                                xBtn.setAttribute('text-anchor', 'middle');
+                                xBtn.style.cursor = 'pointer';
+                                xBtn.addEventListener('click', function(e) {
+                                    e.stopPropagation();
+                                    tabNotes.splice(noteIdx, 1);
+                                    selectedNoteIdx = null;
+                                    if (tabCursorIdx > noteIdx) tabCursorIdx--;
+                                    updateTabNoteList();
+                                    renderVexflowTab();
+                                });
+                                group.appendChild(xBtn);
+                            }
+                        }
+                    }
                 });
             }
         }

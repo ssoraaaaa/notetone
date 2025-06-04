@@ -119,122 +119,60 @@ if (strpos($back_url, 'edit.php') !== false) {
         }
     }
 
-    // Function to render tab notation
-    function renderTabNotation(notes) {
+    // Split notes into lines at tact lines, with a max notes per line
+    function splitNotesIntoLines(notes, maxNotesPerLine = 16) {
+        let lines = [];
+        let currentLine = [];
+        let noteCount = 0;
+        for (let i = 0; i < notes.length; i++) {
+            currentLine.push(notes[i]);
+            noteCount++;
+            if (notes[i].tact && noteCount >= maxNotesPerLine) {
+                lines.push(currentLine);
+                currentLine = [];
+                noteCount = 0;
+            }
+        }
+        if (currentLine.length > 0) lines.push(currentLine);
+        return lines;
+    }
+
+    // Function to render wrapped tab notation
+    function renderVexflowTabWrapped(notes) {
         const div = document.getElementById('vf-container');
         div.innerHTML = '';
-        const containerWidth = div.offsetWidth > 0 ? div.offsetWidth : 700;
-        // Group notes into measures (assuming 4/4 time signature)
-        let currentMeasure = [];
-        let currentMeasureBeats = 0;
-        const measures = [];
-        const beats = 4; // Default to 4/4
-
-        notes.forEach(note => {
-            const noteBeats = getDurationInBeats(note.duration);
-            if (currentMeasureBeats + noteBeats > beats) {
-                if (currentMeasure.length > 0) {
-                    measures.push(currentMeasure);
-                }
-                currentMeasure = [note];
-                currentMeasureBeats = noteBeats;
-            } else {
-                currentMeasure.push(note);
-                currentMeasureBeats += noteBeats;
-            }
-        });
-        if (currentMeasure.length > 0) {
-            measures.push(currentMeasure);
-        }
-
-        // Responsive measure width (copied from add_notation.php)
-        const baseWidth = 60;
-        const widthPerNote = 40;
-        const minWidth = 100;
-        const maxWidth = 260;
-        const sidePadding = 10;
-        const minSpacingWidth = 120;
-        const extraDigitWidth = 8;
-
-        // Calculate stave widths
-        const staveWidths = measures.map(measure => {
-            let noteCount = measure.length;
-            let maxFretLen = 1;
-            measure.forEach(note => {
-                let positions = Array.isArray(note.positions) ? note.positions : [{str: note.str, fret: note.fret}];
-                positions.forEach(pos => {
-                    maxFretLen = Math.max(maxFretLen, String(pos.fret).length);
-                });
-            });
-            const extraWidth = (maxFretLen - 1) * extraDigitWidth;
-            const contentWidth = baseWidth + noteCount * widthPerNote + sidePadding * 2 + extraWidth;
-            return Math.max(minWidth, Math.min(maxWidth, Math.max(minSpacingWidth, contentWidth)));
-        });
-
-        // Calculate how many measures fit per line
-        let lines = [[]];
-        let currentLineWidth = 10; // initial x offset
-        let currentLine = 0;
-        for (let i = 0; i < measures.length; i++) {
-            if (currentLineWidth + staveWidths[i] > containerWidth && lines[currentLine].length > 0) {
-                // Start new line
-                lines.push([]);
-                currentLine++;
-                currentLineWidth = 10 + staveWidths[i];
-                lines[currentLine].push(i);
-            } else {
-                lines[currentLine].push(i);
-                currentLineWidth += staveWidths[i];
-            }
-        }
-
-        // Calculate required SVG height
+        const lines = splitNotesIntoLines(notes, 16); // You can adjust max notes per line
+        const fixedStaveWidth = 1100;
         const lineHeight = 200;
         const svgHeight = lines.length * lineHeight + 60;
-
-        // Create renderer with dynamic width/height
         const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
-        renderer.resize(containerWidth, svgHeight);
+        renderer.resize(fixedStaveWidth, svgHeight);
         const context = renderer.getContext();
         context.setFont('Arial', 18, '').setFillStyle('#fff');
-
-        // Draw all measures
         let y = 40;
-        lines.forEach(line => {
-            let x = 10;
-            line.forEach(idx => {
-                const measure = measures[idx];
-                const staveWidth = staveWidths[idx];
-                const stave = new VF.TabStave(x, y, staveWidth);
-                if (idx === 0) {
-                    stave.addClef('tab');
+        lines.forEach((lineNotes, idx) => {
+            const stave = new VF.TabStave(10, y, fixedStaveWidth);
+            if (idx === 0) {
+                stave.addClef('tab');
+            }
+            stave.setContext(context).draw();
+            let vfNotes = [];
+            lineNotes.forEach(note => {
+                if (note.tact) {
+                    vfNotes.push(new VF.BarNote());
+                } else {
+                    let positions = Array.isArray(note.positions) ? note.positions : [{ str: 7 - note.str, fret: note.fret }];
+                    vfNotes.push(new VF.TabNote({ positions: positions, duration: 'q' }).setStyle({ fillStyle: '#fff', strokeStyle: '#fff' }));
                 }
-                stave.setContext(context).draw();
-                const vfNotes = measure.map(note => {
-                    let positions = Array.isArray(note.positions) ? note.positions : [{str: note.str, fret: note.fret}];
-                    // Invert string numbers for VexFlow: 1 (high e) should be bottom, 6 (low E) should be top
-                    positions = positions.map(pos => ({
-                        str: 7 - pos.str, // invert string number
-                        fret: pos.fret
-                    }));
-                    let vfNote = new VF.TabNote({
-                        positions: positions,
-                        duration: note.duration.replace('.', '')
-                    }).setStyle({ fillStyle: '#fff', strokeStyle: '#fff' });
-                    if (note.duration.endsWith('.')) {
-                        vfNote.addDotToAll();
-                    }
-                    return vfNote;
-                });
+            });
+            if (vfNotes.length > 0) {
                 const voice = new VF.Voice().setStrict(false);
                 voice.addTickables(vfNotes);
-                new VF.Formatter().joinVoices([voice]).format([voice], staveWidth - 20);
+                new VF.Formatter().joinVoices([voice]).format([voice], fixedStaveWidth - 60);
                 voice.draw(context, stave);
-                x += staveWidth;
-            });
+            }
             y += lineHeight;
         });
-
         // Remove rectangles from tab numbers
         const svg = div.querySelector('svg');
         if (svg) {
@@ -246,21 +184,9 @@ if (strpos($back_url, 'edit.php') !== false) {
         }
     }
 
-    // Function to get duration in beats
-    function getDurationInBeats(duration) {
-        const durationMap = {
-            'w': 4,    // whole note
-            'h': 2,    // half note
-            'q': 1,    // quarter note
-            '8': 0.5,  // eighth note
-            '16': 0.25 // sixteenth note
-        };
-        return durationMap[duration] || 1;
-    }
-
     // Initialize the notation display
     if (isTabNotation(notationContent)) {
-        renderTabNotation(JSON.parse(notationContent));
+        renderVexflowTabWrapped(JSON.parse(notationContent));
     } else {
         // Display as plain text
         const div = document.getElementById('vf-container');
