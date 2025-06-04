@@ -38,6 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </head>
 <body>
     <?php include 'includes/navbar.php'; ?>
+    <div class="navbar-spacer"></div>
     <div class="wrapper" style="width: 80%; max-width: 1200px; margin: 0 auto;">
         <h2 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">Start a New Thread</h2>
         <form method="POST" action="">

@@ -13,8 +13,8 @@ body {
 }
 
 /* Layout */
-.wrapper, .wrapper-thread, .wrapper-notation, .wrapper-profile {
-    width: 80%;
+.wrapper, .wrapper-thread, .wrapper-profile {
+    width: 100%;
     max-width: 1300px;
     margin: 0 auto;
     padding: 20px;
@@ -23,7 +23,7 @@ body {
 
 .container {
     width: 100%;
-    max-width: 1200px;
+    max-width: 1800px;
     margin: 0 auto;
     padding: 20px;
     box-sizing: border-box;
@@ -57,18 +57,23 @@ body {
     padding: 20px;
     margin-bottom: 20px;
     border-radius: 4px;
+    
 }
 
-.notation-box {
-    background: #1a1a1a;
-    border: 1px solid #464646;
-    padding: 20px;
-    margin-bottom: 20px;
-    border-radius: 4px;
-    min-height: 40px;
-    height: auto;
-    overflow-y: visible;
-    overflow-x: auto;
+.wrapper-notation {
+    width: 1300px;
+    min-width: 1300px;
+    max-width: 1300px;
+    overflow-x: none;
+    padding: 0;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+.notation-box, #vf-container, {
+    width: 100%;
+    overflow-x: none;
+    margin: 0 auto;
 }
 
 .input-box {
@@ -95,6 +100,12 @@ body {
     background: #4faaff;
     color: #fff;
 }
+
+.btn-change-username:hover {
+    background: #3a8fd1;
+    color: #e0e0e0;
+}
+
 
 .btn-change-password {
     background: #b2f7b4;
@@ -169,7 +180,7 @@ body {
 }
 
 /* Prevent text wrapping */
-h1, h2, h3, h4, h5, h6, p, span, a, button, input, textarea {
+h1, h2, h3, h4, h5, h6, p, span, a, button, input {
     white-space: nowrap;
 }
 
@@ -196,4 +207,11 @@ table {
     width: 100%;
     height: auto;
     display: block;
+}
+
+textarea {
+    white-space: pre-wrap !important;
+    word-break: break-word;
+    overflow-y: hidden;
+    min-height: 120px;
 } 

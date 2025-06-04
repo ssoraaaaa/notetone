@@ -2,7 +2,7 @@
 require_once 'includes/session.php';
 require_once 'includes/db.php';
 
-$notation_sql = "SELECT n.*, s.title AS song_title, i.name AS instrument_name, s.performer, u.username AS user_name FROM notations n LEFT JOIN songs s ON n.songid = s.songid LEFT JOIN instruments i ON n.instrumentid = i.instrumentid LEFT JOIN users u ON n.userid = u.userid ORDER BY n.notationid DESC";
+$notation_sql = "SELECT n.*, s.title AS song_title, i.name AS instrument_name, s.performer, u.username AS user_name, u.moderatorstatus AS user_moderator FROM notations n LEFT JOIN songs s ON n.songid = s.songid LEFT JOIN instruments i ON n.instrumentid = i.instrumentid LEFT JOIN users u ON n.userid = u.userid ORDER BY n.notationid DESC";
 $notation_result = $conn->query($notation_sql);
 $notations = [];
 if ($notation_result->num_rows > 0) {
@@ -38,7 +38,11 @@ if ($notation_result->num_rows > 0) {
                             <p style="color: #888; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0 0 15px 0; font-size: 1rem;">
                                 Song: <?php echo htmlspecialchars($notation['song_title'] . ' - ' . $notation['performer']); ?> |
                                 Instrument: <?php echo htmlspecialchars($notation['instrument_name']); ?>
-                                <br>By: <?php echo $notation['user_name'] ? htmlspecialchars($notation['user_name']) : '<em>deleted user</em>'; ?>
+                                <br>By: <?php 
+                                    $is_admin = isset($notation['user_moderator']) && $notation['user_moderator'] == 1;
+                                    $admin_symbol = $is_admin ? ' <span title="Admin" style="all: unset; color:#ffcc00 !important; display:inline-block;">&#9812;</span>' : '';
+                                    echo $notation['user_name'] ? '<span>' . htmlspecialchars($notation['user_name']) . '</span>' . $admin_symbol : '<em>deleted user</em>'; 
+                                ?>
                             </p>
                             <div style="color: #888; font-size: 0.9rem; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
                                 Created: <?php echo date('F j, Y', strtotime($notation['dateadded'])); ?>

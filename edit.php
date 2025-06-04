@@ -52,6 +52,10 @@ $is_ajax = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $title = $_POST['title'];
     $content = $_POST['content'];
+    // Normalize line endings to \n
+    $content = str_replace(["\r\n", "\r"], "\n", $content);
+    // Replace literal '\n' with real newlines
+    $content = str_replace('\\n', "\n", $content);
     $songid = $_POST['songid'];
     $instrumentid = $_POST['instrumentid'];
     $userid = $_SESSION['userid'];
@@ -115,6 +119,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
+// Handle delete notation
+if (
+    $_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_notation']) && $edit_mode && $notation
+) {
+    $delete_sql = "DELETE FROM notations WHERE notationid = ? AND userid = ?";
+    $stmt = $conn->prepare($delete_sql);
+    $stmt->bind_param("ii", $notation_id, $_SESSION['userid']);
+    if ($stmt->execute()) {
+        header('Location: mynotations.php');
+        exit;
+    } else {
+        $error_message = 'Error deleting notation: ' . $conn->error;
+    }
+}
+
 $page_title = $edit_mode ? 'Edit Notation - NoteTone' : 'Create Notation - NoteTone';
 $button_text = $edit_mode ? 'Save Changes' : 'Create Notation';
 $header_text = $edit_mode ? 'Edit Notation' : 'Create Notation';
@@ -132,7 +151,7 @@ $prefill_js = json_encode([
     'instrumentid' => $prefill['instrumentid'],
     'content' => $prefill['content'],
 ]);
-$prefill_mode = 'text';
+$prefill_mode = $edit_mode ? 'text' : 'tab';
 if ($edit_mode && $notation) {
     // Try to detect if content is tab JSON
     $c = $notation['content'];
@@ -144,18 +163,29 @@ if ($edit_mode && $notation) {
         $is_tab = false;
     }
     $prefill_mode = $is_tab ? 'tab' : 'text';
+} else {
+    $prefill_mode = 'text'; // Show text editor by default for new notation
 }
 
 // Set the back link for the form
 if ($edit_mode && $notation) {
     $from = isset($_GET['from']) ? $_GET['from'] : '';
-    $back = isset($_GET['back']) ? $_GET['back'] : '';
     // Always set backLink to the interactable notation page
     $backLink = 'notation.php?id=' . $notation_id . '&from=mynotations&back=mynotations.php';
 } else {
     $from = isset($_GET['from']) ? $_GET['from'] : '';
     $backLink = ($from === 'dashboard') ? 'dashboard.php' : 'mynotations.php';
 }
+
+// Use heredoc for real newlines in the tab preset
+$tab_preset = <<<EOT
+e---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+B---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+G---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+D---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+A---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+E---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+EOT;
 ?>
 
 <!DOCTYPE html>
@@ -169,7 +199,8 @@ if ($edit_mode && $notation) {
 </head>
 <body>
     <?php include 'includes/navbar.php'; ?>
-    <div class="wrapper" style="width: 100%; max-width: 1200px; margin: 0 auto; overflow-x: auto;">
+    <div class="navbar-spacer"></div>
+    <div class="wrapper" style="width: 100%; max-width: 1300px; margin: 0 auto; overflow-x: auto;">
         <h2 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><?php echo $header_text; ?></h2>
         <form id="notation-form" method="POST" action="">
             <?php if ($back_url): ?>
@@ -215,16 +246,32 @@ if ($edit_mode && $notation) {
             </div>
             <div id="text-editor" style="display: <?php echo $prefill_mode === 'text' ? '' : 'none'; ?>;">
                 <div class="form-group" style="width: 100%;">
-                    <textarea name="content" id="text-content" style="width: 100%; box-sizing: border-box; height: 300px; background: #2a2a2a; color: #fff; border: 1px solid #464646; padding: 10px; font-family: monospace; margin-bottom: 20px; resize: none; overflow-x: hidden; white-space: pre-line;" placeholder="Enter your notation here..."><?php echo $prefill_mode === 'text' ? htmlspecialchars($prefill['content']) : ''; ?></textarea>
+                    <textarea name="content" id="text-content" style="width: 100%; box-sizing: border-box; background: #2a2a2a; color: #fff; border: 1px solid #464646; padding: 10px; font-family: monospace; margin-bottom: 20px; resize: none; overflow-x: hidden; white-space: pre-line; min-height: 120px;" placeholder="Enter your notation here...">
+<?php 
+    if ($prefill_mode === 'text') {
+        if ($edit_mode) {
+            echo htmlspecialchars(str_replace('\\n', "\n", $prefill['content']));
+        } else {
+            echo htmlspecialchars($tab_preset);
+        }
+    }
+?>
+</textarea>
                 </div>
             </div>
-            <div style="display: flex; gap: 20px; margin-top: 20px;">
+            <div style="display: flex; gap: 10px; margin-top: 20px; align-items: center;">
                 <button type="submit" class="btn btn-primary"><?php echo $button_text; ?></button>
                 <a href="<?php echo $backLink; ?>" class="btn btn-primary" style="text-decoration: none;">&larr; Back</a>
+                <?php if ($edit_mode): ?>
+                    <form method="POST" action="" onsubmit="return confirm('Are you sure you want to delete this notation? This cannot be undone.');" style="display:inline; margin:0; padding:0;">
+                        <button type="submit" name="delete_notation" class="btn btn-delete-notation" style="background: #ff6b6b; color: #fff; border: none; border-radius: 4px; padding: 10px 22px; font-size: 1rem; cursor: pointer;">Delete Notation</button>
+                    </form>
+                <?php endif; ?>
             </div>
         </form>
         <div id="notation-message" style="margin-top: 15px;"></div>
     </div>
+    <?php include('includes/footer.php'); ?>
     <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.2/build/cjs/vexflow.js"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -283,7 +330,7 @@ if ($edit_mode && $notation) {
                 textModeBtn.style.color = '#fff';
                 tabModeBtn.style.background = '';
                 tabModeBtn.style.color = '';
-                textContent.value = prefill.content;
+                textContent.value = prefill.content.replace(/\\n/g, "\n");
                 tabJsonContent.name = '';
                 textContent.name = 'content';
             }
@@ -301,6 +348,7 @@ if ($edit_mode && $notation) {
                 textModeBtn.style.color = '';
                 tabJsonContent.name = 'content';
                 textContent.name = '';
+                renderVexflowTab();
             });
             textModeBtn.addEventListener('click', function() {
                 tabEditor.style.display = 'none';
@@ -312,9 +360,14 @@ if ($edit_mode && $notation) {
                 tabJsonContent.name = '';
                 textContent.name = 'content';
             });
+            // Initial render for tab mode if it's the default
+            if (prefillMode === 'tab') {
+                updateTabNoteList();
+                renderVexflowTab();
+            }
         }
 
-        // --- Tab editor logic (same as before) ---
+        // Tab editor logic
         function updateTabNoteList() {
             tabNoteList.innerHTML = tabNotes.length === 0 ? '<em>No notes yet.</em>' :
                 tabNotes.map((note, idx) => {
@@ -357,180 +410,214 @@ if ($edit_mode && $notation) {
         clearChordBtn.addEventListener('click', function() {
             window.fretboardApp.clearChord();
         });
-        function splitNotesIntoLines(notes, maxNotesPerLine = 16) {
-            let lines = [];
-            let currentLine = [];
-            let noteCount = 0;
-            for (let i = 0; i < notes.length; i++) {
-                currentLine.push(notes[i]);
-                noteCount++;
-                if (notes[i].tact && noteCount >= maxNotesPerLine) {
-                    lines.push(currentLine);
-                    currentLine = [];
-                    noteCount = 0;
-                }
-            }
-            if (currentLine.length > 0) lines.push(currentLine);
-            return lines;
-        }
         function renderVexflowTab() {
             previewDiv.innerHTML = '';
             const VF = Vex.Flow;
-            const lines = splitNotesIntoLines(tabNotes, 16); // You can adjust max notes per line
+            
             const fixedStaveWidth = 1100;
             const lineHeight = 200;
-            const svgHeight = lines.length * lineHeight + 60;
+            const staveStartX = 10;
+            const staveContentStartX = 80; // After TAB clef
+            const staveContentEndX = fixedStaveWidth - 30; // Before end barline
+            const elementSpacing = 10; // 10px between each element
+            const noteWidth = 40;
+            const barlineWidth = 15;
+            
+            // Calculate element positions manually
+            let elements = [];
+            let currentX = staveContentStartX + elementSpacing; // Start 10px after clef
+            let currentLine = 0;
+            
+            // Add initial cursor at the beginning
+            elements.push({
+                type: 'cursor',
+                x: currentX,
+                line: currentLine,
+                idx: 0
+            });
+            currentX += elementSpacing; // Move past cursor area
+            
+            // Process each note/chord/barline with exact positioning
+            for (let i = 0; i < tabNotes.length; i++) {
+                const note = tabNotes[i];
+                const elementWidth = note.tact ? barlineWidth : noteWidth;
+                
+                // Check if we need to wrap to next line
+                if (currentX + elementWidth + elementSpacing > staveContentEndX) {
+                    currentLine++;
+                    currentX = staveContentStartX + elementSpacing;
+                    
+                    // Add cursor at beginning of new line
+                    elements.push({
+                        type: 'cursor',
+                        x: currentX,
+                        line: currentLine,
+                        idx: i
+                    });
+                    currentX += elementSpacing;
+                }
+                
+                // Add the note/chord/barline at exact position
+                elements.push({
+                    type: note.tact ? 'barline' : 'note',
+                    x: currentX,
+                    line: currentLine,
+                    noteIdx: i,
+                    data: note
+                });
+                currentX += elementWidth + elementSpacing;
+                
+                // Add cursor after this element
+                elements.push({
+                    type: 'cursor',
+                    x: currentX,
+                    line: currentLine,
+                    idx: i + 1
+                });
+                currentX += elementSpacing;
+            }
+            
+            // Render the SVG
+            const svgHeight = Math.max(currentLine + 1, 1) * lineHeight + 60;
             const renderer = new VF.Renderer(previewDiv, VF.Renderer.Backends.SVG);
             renderer.resize(fixedStaveWidth, svgHeight);
             const context = renderer.getContext();
             context.setFont('Arial', 18, '').setFillStyle('#fff');
-            let y = 40;
-            let noteIdx = 0; // Track index in tabNotes
-            let noteIndices = [];
-            tabNotes.forEach((note, idx) => {
-                if (!note.tact) noteIndices.push(idx);
-            });
-            // For cursor overlay
-            let cursorSpots = [];
-            let runningIdx = 0;
-            for (let l = 0; l < lines.length; l++) {
-                let lineNotes = lines[l];
-                const stave = new VF.TabStave(10, y, fixedStaveWidth);
+            
+            // Render each line
+            for (let l = 0; l <= currentLine; l++) {
+                const y = 40 + (l * lineHeight);
+                const stave = new VF.TabStave(staveStartX, y, fixedStaveWidth);
+                
                 if (l === 0) {
                     stave.addClef('tab');
                 }
+                stave.setEndBarType(VF.Barline.type.SINGLE);
                 stave.setContext(context).draw();
-                let notes = [];
-                lineNotes.forEach((note) => {
-                    if (note.tact) {
-                        notes.push(new VF.BarNote());
-                    } else {
-                        let positions = Array.isArray(note.positions) ? note.positions : [{ str: 7 - note.str, fret: note.fret }];
-                        let tabNote = new VF.TabNote({ positions: positions, duration: 'q' }).setStyle({ fillStyle: '#fff', strokeStyle: '#fff' });
-                        tabNote.noteIdx = noteIdx;
-                        if (selectedNoteIdx === noteIdx) {
-                            tabNote.setStyle({ fillStyle: '#ff6b6b', strokeStyle: '#ff6b6b' });
-                        }
-                        notes.push(tabNote);
-                    }
-                    noteIdx++;
-                });
-                if (notes.length > 0) {
-                    const voice = new VF.Voice().setStrict(false);
-                    voice.addTickables(notes);
-                    new VF.Formatter().joinVoices([voice]).format([voice], fixedStaveWidth - 60);
-                    voice.draw(context, stave);
-                    // Cursor at the very beginning
-                    let prevX = stave.getNoteStartX();
-                    cursorSpots.push({ idx: runningIdx, x: prevX, y: y, h: lineHeight });
-                    // Cursor after each chord or barline
-                    let tickables = voice.getTickables();
-                    for (let i = 0; i < tickables.length; i++) {
-                        let bb = tickables[i].getBoundingBox();
-                        let x = (bb && bb.getX() !== undefined && bb.getW() !== undefined) ? (bb.getX() + bb.getW() + 10) : (prevX + 50);
-                        cursorSpots.push({ idx: runningIdx + i + 1, x: x, y: y, h: lineHeight });
-                        prevX = x;
-                    }
-                    runningIdx += notes.length;
-                } else {
-                    // If no notes, put a cursor at the start
-                    cursorSpots.push({ idx: runningIdx, x: stave.getNoteStartX(), y: y, h: lineHeight });
-                }
-                y += lineHeight;
             }
-            // After rendering, overlay cursor and clickable areas
+            
+            // Get SVG element for manual positioning
             const svg = previewDiv.querySelector('svg');
             if (svg) {
-                // Draw cursor line at selected position
-                let spot = cursorSpots.find(s => s.idx === tabCursorIdx);
-                if (spot) {
-                    const ns = 'http://www.w3.org/2000/svg';
-                    const line = document.createElementNS(ns, 'line');
-                    line.setAttribute('x1', spot.x);
-                    line.setAttribute('x2', spot.x);
-                    line.setAttribute('y1', spot.y);
-                    line.setAttribute('y2', spot.y + spot.h - 20);
-                    line.setAttribute('stroke', '#4faaff');
-                    line.setAttribute('stroke-width', '3');
-                    line.setAttribute('class', 'tab-cursor');
-                    svg.appendChild(line);
-                }
-                // Overlay transparent rects for cursor movement
-                cursorSpots.forEach((spot, i) => {
-                    const ns = 'http://www.w3.org/2000/svg';
-                    const rect = document.createElementNS(ns, 'rect');
-                    rect.setAttribute('x', spot.x - 10);
-                    rect.setAttribute('y', spot.y);
-                    rect.setAttribute('width', 20);
-                    rect.setAttribute('height', spot.h - 20);
-                    rect.setAttribute('fill', 'transparent');
-                    rect.style.cursor = 'pointer';
-                    rect.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        tabCursorIdx = spot.idx;
-                        selectedNoteIdx = null;
-                        renderVexflowTab();
-                    });
-                    svg.appendChild(rect);
-                });
-                // ... (existing note click/X logic follows here)
-                // Remove all rectangles (white backgrounds) in this group
-                const tabNoteGroups = svg.querySelectorAll('g.vf-tabnote');
-                tabNoteGroups.forEach((group, i) => {
-                    const rects = group.querySelectorAll('rect');
-                    rects.forEach(rect => rect.remove());
-                });
-                tabNoteGroups.forEach((group, i) => {
-                    const noteIdx = noteIndices[i];
-                    if (noteIdx !== undefined) {
-                        const texts = group.querySelectorAll('text');
-                        texts.forEach(text => {
-                            text.style.cursor = 'pointer';
-                            text.setAttribute('data-note-idx', noteIdx);
-                            text.addEventListener('click', function(e) {
-                                e.stopPropagation();
-                                selectedNoteIdx = noteIdx;
-                                renderVexflowTab();
-                            });
-                        });
-                        if (selectedNoteIdx === noteIdx) {
-                            let topText = null;
-                            let minY = Infinity;
-                            texts.forEach(t => {
-                                const y = parseFloat(t.getAttribute('y'));
-                                if (y < minY) {
-                                    minY = y;
-                                    topText = t;
-                                }
-                            });
-                            if (topText) {
-                                const bbox = topText.getBBox();
+                // Manually render each note/chord/barline at calculated positions
+                elements.forEach(el => {
+                    if (el.type === 'note') {
+                        const y = 40 + (el.line * lineHeight);
+                        const staffStartY = y + 34; // Position within staff lines
+                        
+                        if (Array.isArray(el.data.positions)) {
+                            // Render chord
+                            el.data.positions.forEach(pos => {
+                                const stringY = staffStartY + ((6 - pos.str) * 13); // Increased spacing for more vertical space between chord notes
                                 const ns = 'http://www.w3.org/2000/svg';
-                                const xBtn = document.createElementNS(ns, 'text');
-                                xBtn.textContent = '×';
-                                xBtn.setAttribute('x', bbox.x + bbox.width / 2);
-                                xBtn.setAttribute('y', bbox.y - 8);
-                                xBtn.setAttribute('fill', '#ff6b6b');
-                                xBtn.setAttribute('font-size', bbox.height * 0.9);
-                                xBtn.setAttribute('font-family', 'Arial, sans-serif');
-                                xBtn.setAttribute('text-anchor', 'middle');
-                                xBtn.style.cursor = 'pointer';
-                                xBtn.addEventListener('click', function(e) {
+                                const text = document.createElementNS(ns, 'text');
+                                text.textContent = pos.fret;
+                                text.setAttribute('x', el.x + 10);
+                                text.setAttribute('y', stringY + 23);
+                                text.setAttribute('fill', selectedNoteIdx === el.noteIdx ? '#ff6b6b' : '#fff');
+                                text.setAttribute('font-size', '14');
+                                text.setAttribute('font-family', 'Arial, sans-serif');
+                                text.setAttribute('text-anchor', 'middle');
+                                text.style.cursor = 'pointer';
+                                text.addEventListener('click', function(e) {
                                     e.stopPropagation();
-                                    tabNotes.splice(noteIdx, 1);
-                                    selectedNoteIdx = null;
-                                    if (tabCursorIdx > noteIdx) tabCursorIdx--;
-                                    updateTabNoteList();
+                                    selectedNoteIdx = el.noteIdx;
                                     renderVexflowTab();
                                 });
-                                group.appendChild(xBtn);
-                            }
+                                svg.appendChild(text);
+                            });
+                        } else {
+                            // Render single note
+                            const stringY = staffStartY + ((6 - el.data.str) * 13); // Increased spacing to match chord spacing
+                            const ns = 'http://www.w3.org/2000/svg';
+                            const text = document.createElementNS(ns, 'text');
+                            text.textContent = el.data.fret;
+                            text.setAttribute('x', el.x);
+                            text.setAttribute('y', stringY);
+                            text.setAttribute('fill', selectedNoteIdx === el.noteIdx ? '#ff6b6b' : '#fff');
+                            text.setAttribute('font-size', '14');
+                            text.setAttribute('font-family', 'Arial, sans-serif');
+                            text.setAttribute('text-anchor', 'middle');
+                            text.style.cursor = 'pointer';
+                            text.addEventListener('click', function(e) {
+                                e.stopPropagation();
+                                selectedNoteIdx = el.noteIdx;
+                                renderVexflowTab();
+                            });
+                            svg.appendChild(text);
                         }
+                        
+                        // Add delete button if selected
+                        if (selectedNoteIdx === el.noteIdx) {
+                            const ns = 'http://www.w3.org/2000/svg';
+                            const xBtn = document.createElementNS(ns, 'text');
+                            xBtn.textContent = '×';
+                            xBtn.setAttribute('x', el.x + 5);
+                            xBtn.setAttribute('y', y + 60);
+                            xBtn.setAttribute('fill', '#ff6b6b');
+                            xBtn.setAttribute('font-size', '12');
+                            xBtn.setAttribute('font-family', 'Arial, sans-serif');
+                            xBtn.setAttribute('text-anchor', 'middle');
+                            xBtn.style.cursor = 'pointer';
+                            xBtn.addEventListener('click', function(e) {
+                                e.stopPropagation();
+                                tabNotes.splice(el.noteIdx, 1);
+                                selectedNoteIdx = null;
+                                if (tabCursorIdx > el.noteIdx) tabCursorIdx--;
+                                updateTabNoteList();
+                                renderVexflowTab();
+                            });
+                            svg.appendChild(xBtn);
+                        }
+                    } else if (el.type === 'barline') {
+                        // Render barline
+                        const y = 40 + (el.line * lineHeight);
+                        const ns = 'http://www.w3.org/2000/svg';
+                        const line = document.createElementNS(ns, 'line');
+                        line.setAttribute('x1', el.x + 10);
+                        line.setAttribute('x2', el.x + 10);
+                        line.setAttribute('y1', y + 52);
+                        line.setAttribute('y2', y + 117); // 50px span for 6 strings with 10px spacing
+                        line.setAttribute('stroke', '#fff');
+                        line.setAttribute('stroke-width', '2');
+                        svg.appendChild(line);
+                    } else if (el.type === 'cursor') {
+                        const y = 40 + (el.line * lineHeight);
+                        
+                        // Draw cursor line if this is the active cursor
+                        if (el.idx === tabCursorIdx) {
+                            const ns = 'http://www.w3.org/2000/svg';
+                            const line = document.createElementNS(ns, 'line');
+                            line.setAttribute('x1', el.x);
+                            line.setAttribute('x2', el.x+1);
+                            line.setAttribute('y1', y + 52); // Start at first string
+                            line.setAttribute('y2', y + 117); // End at last string (50px span)
+                            line.setAttribute('stroke', '#4faaff');
+                            line.setAttribute('stroke-width', '2');
+                            svg.appendChild(line);
+                        }
+                        
+                        // Add clickable area for cursor positioning
+                        const ns = 'http://www.w3.org/2000/svg';
+                        const rect = document.createElementNS(ns, 'rect');
+                        rect.setAttribute('x', el.x - 7.5);
+                        rect.setAttribute('y', y + 45);
+                        rect.setAttribute('width', 15);
+                        rect.setAttribute('height', 77); // Cover the tab staff area
+                        rect.setAttribute('fill', 'transparent');
+                        rect.style.cursor = 'pointer';
+                        rect.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            tabCursorIdx = el.idx;
+                            selectedNoteIdx = null;
+                            renderVexflowTab();
+                        });
+                        svg.appendChild(rect);
                     }
                 });
             }
         }
-        // --- Form submission logic (AJAX) ---
+        // Form submission logic (AJAX)
         document.getElementById('notation-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             const form = e.target;
@@ -587,7 +674,7 @@ if ($edit_mode && $notation) {
 
     const app = createApp({
       setup() {
-        // 6 strings (1 = high e, 6 = low E), 0-12 frets
+        // 6 strings (1 = Low E, 6 = High e), 0-22 frets
         const NUM_STRINGS = 6;
         const NUM_FRETS = 22;
         // Chord being built: array of {str, fret}

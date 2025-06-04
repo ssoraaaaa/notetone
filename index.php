@@ -11,6 +11,7 @@ require_once 'includes/session.php';
 </head>
 <body>
     <?php include 'includes/navbar.php'; ?>
+    <div class="navbar-spacer"></div>
     <div class="wrapper">
         <h1>Welcome to NoteTone</h1>
         <p>Your platform for musical notation and discussion.</p>

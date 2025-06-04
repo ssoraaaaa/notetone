@@ -2,7 +2,7 @@
 require_once 'includes/session.php';
 require_once 'includes/db.php';
 
-$thread_sql = "SELECT t.*, u.username AS user_name FROM threads t LEFT JOIN users u ON t.createdby = u.userid ORDER BY t.threadid DESC";
+$thread_sql = "SELECT t.*, u.username AS user_name, u.moderatorstatus AS user_moderator FROM threads t LEFT JOIN users u ON t.createdby = u.userid ORDER BY t.threadid DESC";
 $thread_result = $conn->query($thread_sql);
 $threads = [];
 if ($thread_result->num_rows > 0) {
@@ -21,6 +21,7 @@ if ($thread_result->num_rows > 0) {
 </head>
 <body>
     <?php include 'includes/navbar.php'; ?>
+    <div class="navbar-spacer"></div>
     <div class="container">
         <div class="wrapper" style="width: 80%; max-width: 1200px; margin: 0 auto;">
             <div class="container-header">
@@ -41,7 +42,11 @@ if ($thread_result->num_rows > 0) {
                                 </p>
                             </div>
                             <div style="color: #888; font-size: 0.9rem; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
-                                Created by: <?php echo $thread['user_name'] ? htmlspecialchars($thread['user_name']) : '<em>deleted user</em>'; ?>
+                                Created by: <?php 
+                                    $is_admin = isset($thread['user_moderator']) && $thread['user_moderator'] == 1;
+                                    $admin_symbol = $is_admin ? ' <span title="Admin" style="color:#ffcc00 !important; display:inline-block;">&#9812;</span>' : '';
+                                    echo $thread['user_name'] ? '<span>' . htmlspecialchars($thread['user_name']) . '</span>' . $admin_symbol : '<em>deleted user</em>'; 
+                                ?>
                                 <?php if (isset($thread['datecreated'])): ?>
                                     <br>Created: <?php echo date('F j, Y', strtotime($thread['datecreated'])); ?>
                                 <?php endif; ?>

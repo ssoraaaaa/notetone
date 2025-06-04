@@ -10,12 +10,18 @@ if (isLoggedIn()) {
 $error = '';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = $_POST['username'];
+    $username = trim($_POST['username']);
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
 
     if (empty($username) || empty($password) || empty($confirm_password)) {
         $error = "Please fill in all fields";
+    } elseif (strlen($username) < 3) {
+        $error = "Username must be at least 3 characters long";
+    } elseif (strlen($username) > 30) {
+        $error = "Username must be no more than 30 characters long";
+    } elseif (!preg_match('/^[a-zA-Z0-9_]+$/', $username)) {
+        $error = "Username can only contain letters, numbers, and underscores";
     } elseif ($password !== $confirm_password) {
         $error = "Passwords do not match";
     } elseif (strlen($password) < 6) {
@@ -59,6 +65,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </head>
 <body>
     <?php include 'includes/navbar.php'; ?>
+    <div class="navbar-spacer"></div>
     <div class="wrapper">
         <h2>Register</h2>
         <?php if ($error): ?>

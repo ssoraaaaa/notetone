@@ -5,8 +5,7 @@ require_once 'includes/db.php';
 $notation_id = $_GET['id'];
 
 // Fetch the notation details
-$notation_sql = "SELECT n.*, n.userid, s.title AS song_title, i.name AS instrument_name, u.username AS user_name 
-                 FROM notations n 
+$notation_sql = "SELECT n.*, n.userid, s.title AS song_title, i.name AS instrument_name, u.username AS user_name, u.moderatorstatus AS user_moderator FROM notations n 
                  LEFT JOIN songs s ON n.songid = s.songid 
                  LEFT JOIN instruments i ON n.instrumentid = i.instrumentid 
                  LEFT JOIN users u ON n.userid = u.userid 
@@ -74,6 +73,7 @@ if (strpos($back_url, 'edit.php') !== false) {
 </head>
 <body>
     <?php include 'includes/navbar.php'; ?>
+    <div class="navbar-spacer"></div>
 
 <div class="wrapper-notation" style="width: 80%; max-width: 1200px; margin: 40px auto; background: #232323; border-radius: 8px; padding: 32px 24px; box-shadow: 0 2px 16px #0002;">
     <h2 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #fff; margin-bottom: 20px; font-size: 2rem; text-align: center;">
@@ -86,10 +86,36 @@ if (strpos($back_url, 'edit.php') !== false) {
         <p><strong>Song:</strong> <?php echo htmlspecialchars($notation['song_title']); ?></p>
         <p><strong>Instrument:</strong> <?php echo htmlspecialchars($notation['instrument_name']); ?></p>
         <p><strong>Date Added:</strong> <?php echo htmlspecialchars($notation['dateadded']); ?></p>
-        <p><strong>Created by:</strong> <?php echo $notation['user_name'] ? htmlspecialchars($notation['user_name']) : '<em>deleted user</em>'; ?></p>
+        <p><strong>Created by:</strong> <?php 
+            $is_admin = isset($notation['user_moderator']) && $notation['user_moderator'] == 1;
+            $admin_symbol = $is_admin ? ' <span title="Admin" style="color:#ffcc00;">&#9812;</span>' : '';
+            echo $notation['user_name'] ? htmlspecialchars($notation['user_name']) . $admin_symbol : '<em>deleted user</em>'; 
+        ?></p>
     </div>
-    <div class="notation-box" style="background: #1a1a1a; border: 1px solid #464646; border-radius: 4px; padding: 18px 20px; margin-bottom: 24px;">
-        <div id="vf-container"></div>
+    
+
+    <!-- PDF -->
+    <div id="pdf-diary-content">
+        <div class="notation-box" style="background: #1a1a1a; border: 1px solid #464646; border-radius: 4px; padding: 18px 20px; margin-bottom: 24px;">
+            <?php
+            // Show plain text notation in <pre> if not tab JSON
+            $is_tab = false;
+            try {
+                $parsed = json_decode($notation['content'], true);
+                $is_tab = is_array($parsed);
+            } catch (Exception $e) {
+                $is_tab = false;
+            }
+            if ($is_tab) {
+                echo '<div id="vf-container"></div>';
+            } else {
+                $content = $notation['content'];
+                // Convert literal '\n' to real newlines for display
+                $content = str_replace('\\n', "\n", $content);
+                echo '<pre style="color: #fff; font-family: monospace; white-space: pre-wrap; background: none; border: none; margin: 0; padding: 0;">' . htmlspecialchars($content) . '</pre>';
+            }
+            ?>
+        </div>
     </div>
     <?php if (isLoggedIn() && isset($notation['userid']) && $notation['userid'] == $_SESSION['userid'] && $from === 'mynotations'): ?>
     <form method="POST" action="" style="display:inline-block; margin-right: 10px;">
@@ -98,10 +124,17 @@ if (strpos($back_url, 'edit.php') !== false) {
     <a href="edit.php?id=<?php echo $notation['notationid']; ?>&from=mynotations&back=<?php echo urlencode($back_url); ?>" class="btn btn-primary" style="text-decoration: none; padding: 10px 22px; font-size: 1rem; border-radius: 4px; background: #4faaff; color: #fff; border: none; margin-left: 10px;">Edit</a>
     <?php endif; ?>
     <a href="<?php echo htmlspecialchars($back_url); ?>" class="btn btn-primary" style="text-decoration: none; margin-left: 10px;">&larr; Back</a>
+
+    <div style="text-align: right; margin-bottom: 15px; margin-top: 15px;">
+        <button onclick="generatePDF()" style="background: #4faaff; color: #fff; border: none; border-radius: 4px; padding: 10px 22px; font-size: 1rem; cursor: pointer;">Download as PDF</button>
+    </div>
 </div>
 <?php include('includes/footer.php'); ?>
 <script src="https://unpkg.com/vexflow/releases/vexflow-min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.2/build/cjs/vexflow.js"></script>
+<!-- PDF SCRIPT -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
     // Get the notation content from PHP
     const notationContent = <?php echo json_encode($notation['content']); ?>;
@@ -187,11 +220,154 @@ if (strpos($back_url, 'edit.php') !== false) {
     // Initialize the notation display
     if (isTabNotation(notationContent)) {
         renderVexflowTabWrapped(JSON.parse(notationContent));
-    } else {
-        // Display as plain text
-        const div = document.getElementById('vf-container');
-        div.innerHTML = `<pre style="color: #fff; font-family: monospace; white-space: pre-wrap;">${notationContent}</pre>`;
     }
+    // else: do nothing, PHP already rendered the plain text
 </script>
+<script>
+async function generatePDF() {
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+        alert("jsPDF not loaded");
+        return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const diaryElement = document.getElementById("pdf-diary-content");
+    const nickname = "<?= $_SESSION['username'] ?? 'User' ?>";
+    const notationTitle = "<?php echo addslashes($notation['title']); ?>";
+
+    const now = new Date();
+    const date = String(now.getDate()).padStart(2, '0') + '.' + String(now.getMonth() + 1).padStart(2, '0') + '.' + now.getFullYear();
+
+    if (!diaryElement) {
+        alert("Notation content not found");
+        return;
+    }
+
+    // Elements to temporarily hide
+    const downloadButton = diaryElement.querySelector("button");
+    const shadows = diaryElement.querySelectorAll(".shadow");
+
+    // Hide button and remove shadows before rendering
+    if (downloadButton) downloadButton.style.display = "none";
+    shadows.forEach(el => el.classList.remove("shadow"));
+
+    // Temporarily change colors for PDF (black on white)
+    const notationBox = diaryElement.querySelector(".notation-box");
+    const svg = diaryElement.querySelector("svg");
+    const pre = notationBox ? notationBox.querySelector("pre") : null;
+    const originalNotationBg = notationBox ? notationBox.style.background : null;
+    const originalPreColor = pre ? pre.style.color : null;
+    const originalPreBg = pre ? pre.style.background : null;
+    const originalElements = [];
+    
+    if (notationBox) {
+        notationBox.style.background = "white";
+        notationBox.style.border = "1px solid #000";
+    }
+    if (pre) {
+        pre.style.color = "black";
+        pre.style.background = "white";
+    }
+    
+    if (svg) {
+        // Change all white text and strokes to black
+        const whiteElements = svg.querySelectorAll('[fill="#fff"], [stroke="#fff"], [fill="white"], [stroke="white"]');
+        whiteElements.forEach(el => {
+            originalElements.push({
+                element: el,
+                originalFill: el.getAttribute('fill'),
+                originalStroke: el.getAttribute('stroke')
+            });
+            if (el.getAttribute('fill') === '#fff' || el.getAttribute('fill') === 'white') {
+                el.setAttribute('fill', 'black');
+            }
+            if (el.getAttribute('stroke') === '#fff' || el.getAttribute('stroke') === 'white') {
+                el.setAttribute('stroke', 'black');
+            }
+        });
+        
+        // Change tab staff lines to black
+        const lines = svg.querySelectorAll('line');
+        lines.forEach(line => {
+            const stroke = line.getAttribute('stroke');
+            if (stroke === '#fff' || stroke === 'white') {
+                originalElements.push({
+                    element: line,
+                    originalStroke: stroke
+                });
+                line.setAttribute('stroke', 'black');
+            }
+        });
+    }
+
+    // Wait for rendering without these elements
+    const canvas = await html2canvas(diaryElement, { scale: 2, backgroundColor: 'white' });
+
+    // Restore original colors
+    if (notationBox && originalNotationBg) {
+        notationBox.style.background = originalNotationBg;
+        notationBox.style.border = "1px solid #464646";
+    }
+    if (pre) {
+        pre.style.color = originalPreColor;
+        pre.style.background = originalPreBg;
+    }
+    
+    originalElements.forEach(item => {
+        if (item.originalFill) {
+            item.element.setAttribute('fill', item.originalFill);
+        }
+        if (item.originalStroke) {
+            item.element.setAttribute('stroke', item.originalStroke);
+        }
+    });
+
+    // Restore button and shadows
+    if (downloadButton) downloadButton.style.display = "inline-block";
+    shadows.forEach(el => el.classList.add("shadow"));
+
+    // Generate PDF
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    
+    // Try to load logo (optional)
+    try {
+        const img = new Image();
+        img.src = 'assets/images/logo-white.png';
+        await img.decode();
+
+        const logoWidth = 35;
+        const aspectRatio = img.height / img.width;
+        const logoHeight = logoWidth * aspectRatio;
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        // Center the logo horizontally
+        const logoX = (pageWidth - logoWidth) / 2;
+        pdf.addImage(img, 'PNG', logoX, 10, logoWidth, logoHeight);
+    } catch (e) {
+        console.log('Logo not loaded, continuing without it');
+    }
+
+    const imgData = canvas.toDataURL('image/png');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const imgWidth = pageWidth - 20;
+    const imgHeight = imgWidth * (canvas.height / canvas.width);
+
+    // Title
+    pdf.setFontSize(16);
+    pdf.setFont("helvetica", "bold");
+    pdf.text(notationTitle, 105, 30, { align: "center" });
+
+    // Date
+    pdf.setFontSize(10);
+    pdf.setFont("helvetica", "normal");
+    pdf.text(date, 105, 36, { align: "center" });
+    pdf.text("Freshly made for " + nickname, 105, 42, { align: "center" });
+
+    // Content
+    pdf.addImage(imgData, 'PNG', 10, 45, imgWidth, imgHeight);
+
+    pdf.save('notation_' + notationTitle.replace(/[^a-z0-9]/gi, '_') + '.pdf');
+}
+</script>
+
 </body>
 </html>
