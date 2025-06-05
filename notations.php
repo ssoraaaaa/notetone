@@ -2,14 +2,35 @@
 require_once 'includes/session.php';
 require_once 'includes/db.php';
 
-$notation_sql = "SELECT n.*, s.title AS song_title, i.name AS instrument_name, s.performer, u.username AS user_name, u.moderatorstatus AS user_moderator FROM notations n LEFT JOIN songs s ON n.songid = s.songid LEFT JOIN instruments i ON n.instrumentid = i.instrumentid LEFT JOIN users u ON n.userid = u.userid ORDER BY n.notationid DESC";
+// First try a simple query to get notations
+$simple_sql = "SELECT * FROM notations";
+$simple_result = $conn->query($simple_sql);
+echo "<!-- Simple query count: " . ($simple_result ? $simple_result->num_rows : 0) . " -->";
+
+// Then try the full query
+$notation_sql = "SELECT n.*, s.title AS song_title, i.name AS instrument_name, s.performer, u.username AS user_name, u.moderatorstatus AS user_moderator
+                 FROM notations n 
+                 LEFT JOIN songs s ON n.songid = s.songid 
+                 LEFT JOIN instruments i ON n.instrumentid = i.instrumentid 
+                 LEFT JOIN users u ON n.userid = u.userid 
+                 ORDER BY n.notationid DESC";
+
 $notation_result = $conn->query($notation_sql);
+
+// Debug information
+if (!$notation_result) {
+    echo "Query Error: " . $conn->error;
+}
+
 $notations = [];
-if ($notation_result->num_rows > 0) {
+if ($notation_result && $notation_result->num_rows > 0) {
     while ($row = $notation_result->fetch_assoc()) {
         $notations[] = $row;
     }
 }
+
+// Debug count
+echo "<!-- Number of notations found: " . count($notations) . " -->";
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -36,9 +57,15 @@ if ($notation_result->num_rows > 0) {
                             <h3 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0 0 10px 0; color: #fff; font-size: 1.5rem;">
                                 <?php echo htmlspecialchars($notation['title']); ?>
                             </h3>
+
+
                             <p style="color: #888; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0 0 15px 0; font-size: 1rem;">
-                                Song: <?php echo htmlspecialchars($notation['song_title'] . ' - ' . $notation['performer']); ?> |
-                                Instrument: <?php echo htmlspecialchars($notation['instrument_name']); ?>
+                                <?php echo htmlspecialchars($notation['song_title'] . ' - ' . $notation['performer']); ?>
+                            </p>
+                            <p style="color: #888; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0 0 15px 0; font-size: 1rem;">
+                            for <?php echo htmlspecialchars($notation['instrument_name']); ?>
+                            </p>
+                            <p style="color: #888; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0 0 15px 0; font-size: 1rem;">
                                 <br>By: <?php 
                                     $is_admin = isset($notation['user_moderator']) && $notation['user_moderator'] == 1;
                                     $admin_symbol = $is_admin ? ' <span title="Admin" style="all: unset; color:#ffcc00 !important; display:inline-block;">&#9812;</span>' : '';

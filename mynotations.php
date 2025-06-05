@@ -28,7 +28,7 @@ if (!isset($_SESSION['userid'])) {
 }
 
 $userid = $_SESSION['userid'];
-$notation_sql = "SELECT n.*, s.title AS song_title, i.name AS instrument_name, s.performer 
+$notation_sql = "SELECT n.*, s.title AS song_title, i.name AS instrument_name, s.performer
                  FROM notations n 
                  LEFT JOIN songs s ON n.songid = s.songid 
                  LEFT JOIN instruments i ON n.instrumentid = i.instrumentid 
@@ -78,8 +78,10 @@ if ($notation_result->num_rows > 0) {
                                     <?php echo htmlspecialchars($notation['title']); ?>
                                 </h3>
                                 <p style="color: #888; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0 0 15px 0; font-size: 1rem;">
-                                    Song: <?php echo htmlspecialchars($notation['song_title'] . ' - ' . $notation['performer']); ?> |
-                                    Instrument: <?php echo htmlspecialchars($notation['instrument_name']); ?>
+                                    <?php echo htmlspecialchars($notation['song_title'] . ' - ' . $notation['performer']); ?>
+                                </p>
+                                <p style="color: #888; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0 0 15px 0; font-size: 1rem;">
+                                    for <?php echo htmlspecialchars($notation['instrument_name']); ?>
                                 </p>
                                 <div style="color: #888; font-size: 0.9rem; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
                                     Created: <?php echo date('F j, Y', strtotime($notation['dateadded'])); ?>

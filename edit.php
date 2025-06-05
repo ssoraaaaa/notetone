@@ -7,6 +7,16 @@ if (!isLoggedIn()) {
     exit();
 }
 
+// Fetch songs
+$song_sql = "SELECT * FROM songs WHERE status = 'approved'";
+$song_result = $conn->query($song_sql);
+$songs = [];
+if ($song_result->num_rows > 0) {
+    while ($row = $song_result->fetch_assoc()) {
+        $songs[] = $row;
+    }
+} 
+
 // Determine if we are editing or adding
 $edit_mode = false;
 $notation = null;
@@ -27,7 +37,7 @@ if ($notation_id) {
 }
 
 // Fetch songs
-$song_sql = "SELECT * FROM songs";
+$song_sql = "SELECT * FROM songs WHERE status = 'approved'";
 $song_result = $conn->query($song_sql);
 $songs = [];
 if ($song_result->num_rows > 0) {
@@ -236,10 +246,10 @@ EOT;
                         <div style="display: flex; gap: 10px;">
                             <button type="button" id="add-chord" class="btn btn-primary">Add Chord</button>
                             <button type="button" id="add-tact" class="btn btn-primary">Add Bar Line</button>
-                            <button type="button" id="clear-chord" class="btn">Clear Chord</button>
+                            <button type="button" id="clear-chord" class="btn btn-primary">Clear Chord</button>
                         </div>
                     </div>
-                    <!-- <div id="tab-note-list" style="margin-bottom: 10px; color: #ccc; font-size: 0.95rem;"></div> -->
+                    <div id="tab-note-list" style="display: none;"></div>
                     <input type="hidden" name="content" id="tab-json-content">
                     <div id="vf-preview" style="margin-top: 20px; margin-bottom: 20px; background: #181818; border-radius: 4px; padding: 20px; max-width: 100%;"></div>
                 </div>
@@ -385,41 +395,49 @@ EOT;
                 }).join('<br>');
             tabJsonContent.value = JSON.stringify(tabNotes);
         }
-        tabNoteList.addEventListener('click', function(e) {
-            if (e.target.classList.contains('remove-tab-note')) {
-                const idx = parseInt(e.target.getAttribute('data-idx'));
-                tabNotes.splice(idx, 1);
-                updateTabNoteList();
-                renderVexflowTab();
-            }
-        });
-        addChordBtn.addEventListener('click', function() {
-            const chord = window.fretboardApp.getCurrentChord();
-            if (chord && chord.length > 0) {
-                tabNotes.splice(tabCursorIdx, 0, {
-                    positions: chord.map(n => ({str: n.str, fret: n.fret}))
-                });
+        if (tabNoteList) {
+            tabNoteList.addEventListener('click', function(e) {
+                if (e.target.classList.contains('remove-tab-note')) {
+                    const idx = parseInt(e.target.getAttribute('data-idx'));
+                    tabNotes.splice(idx, 1);
+                    updateTabNoteList();
+                    renderVexflowTab();
+                }
+            });
+        }
+        if (addChordBtn) {
+            addChordBtn.addEventListener('click', function() {
+                const chord = window.fretboardApp.getCurrentChord();
+                if (chord && chord.length > 0) {
+                    tabNotes.splice(tabCursorIdx, 0, {
+                        positions: chord.map(n => ({str: n.str, fret: n.fret}))
+                    });
+                    tabCursorIdx++;
+                    updateTabNoteList();
+                    renderVexflowTab();
+                    window.fretboardApp.clearChord();
+                }
+            });
+        }
+        if (addTactBtn) {
+            addTactBtn.addEventListener('click', function() {
+                tabNotes.splice(tabCursorIdx, 0, {tact: true});
                 tabCursorIdx++;
                 updateTabNoteList();
                 renderVexflowTab();
+            });
+        }
+        if (clearChordBtn) {
+            clearChordBtn.addEventListener('click', function() {
                 window.fretboardApp.clearChord();
-            }
-        });
-        addTactBtn.addEventListener('click', function() {
-            tabNotes.splice(tabCursorIdx, 0, {tact: true});
-            tabCursorIdx++;
-            updateTabNoteList();
-            renderVexflowTab();
-        });
-        clearChordBtn.addEventListener('click', function() {
-            window.fretboardApp.clearChord();
-        });
+            });
+        }
         function renderVexflowTab() {
             previewDiv.innerHTML = '';
             const VF = Vex.Flow;
             
             const fixedStaveWidth = 1200;
-            const lineHeight = 200;
+            const lineHeight = 150;
             const staveStartX = 10;
             const staveContentStartX = 80; // After TAB clef
             const staveContentEndX = fixedStaveWidth - 30; // Before end barline
@@ -555,11 +573,21 @@ EOT;
                         if (selectedNoteIdx === el.noteIdx) {
                             const ns = 'http://www.w3.org/2000/svg';
                             const xBtn = document.createElementNS(ns, 'text');
-                            xBtn.textContent = '×';
-                            xBtn.setAttribute('x', el.x + 5);
-                            xBtn.setAttribute('y', y + 60);
+                            xBtn.textContent = 'x';
+                            xBtn.setAttribute('x', el.x + 10);
+                            let xBtnY;
+                            if (Array.isArray(el.data.positions)) {
+                                // For chords, find the bottom note (highest string number)
+                                const maxString = Math.max(...el.data.positions.map(p => p.str));
+                                const staffStartY = 40 + (el.line * lineHeight) + 12;
+                                xBtnY = staffStartY + ((6 - maxString) * 13) + 23;
+                            } else {
+                                // For single notes, use the note's y
+                                xBtnY = y + 70;
+                            }
+                            xBtn.setAttribute('y', xBtnY);
                             xBtn.setAttribute('fill', '#ff6b6b');
-                            xBtn.setAttribute('font-size', '12');
+                            xBtn.setAttribute('font-size', '14');
                             xBtn.setAttribute('font-family', 'Arial, sans-serif');
                             xBtn.setAttribute('text-anchor', 'middle');
                             xBtn.style.cursor = 'pointer';

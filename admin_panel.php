@@ -40,6 +40,7 @@ if (!$is_admin) {
             <a href="#users">Users</a>
             <a href="#audio">Audio</a>
             <a href="#songs">Songs</a>
+            <a href="#song-approval">Song Request Approval</a>
             <a href="#threads">Threads</a>
             <a href="#comments">Thread Comments</a>
             <a href="#categories">Notation Categories</a>
@@ -101,6 +102,62 @@ if (!$is_admin) {
             <ul>
                 <li>Manage song records or data</li>
             </ul>
+        </div>
+        <div id="song-approval" class="admin-section">
+            <h2>Approve or Decline Song Requests</h2>
+            <?php
+            // Fetch pending songs
+            $pending_songs = [];
+            $pending_result = $conn->query("SELECT * FROM songs WHERE status = 'pending'");
+            if ($pending_result && $pending_result->num_rows > 0) {
+                while ($row = $pending_result->fetch_assoc()) {
+                    $pending_songs[] = $row;
+                }
+            }
+            // Handle approval/decline
+            if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['song_action'], $_POST['songid'])) {
+                $songid = intval($_POST['songid']);
+                $action = $_POST['song_action'] === 'approve' ? 'approved' : 'rejected';
+                $conn->query("UPDATE songs SET status='$action' WHERE songid=$songid");
+                echo '<div style="color: #4caf50;">Song #' . $songid . ' has been ' . $action . '.</div>';
+                // Refresh the list
+                $pending_songs = [];
+                $pending_result = $conn->query("SELECT * FROM songs WHERE status = 'pending'");
+                if ($pending_result && $pending_result->num_rows > 0) {
+                    while ($row = $pending_result->fetch_assoc()) {
+                        $pending_songs[] = $row;
+                    }
+                }
+            }
+            ?>
+            <?php if (empty($pending_songs)): ?>
+                <p style="color: #888;">No pending song requests.</p>
+            <?php else: ?>
+                <table style="width:100%; background:#232323; color:#fff; border-collapse:collapse;">
+                    <tr style="background:#181818;">
+                        <th style="padding:8px; border:1px solid #444;">ID</th>
+                        <th style="padding:8px; border:1px solid #444;">Title</th>
+                        <th style="padding:8px; border:1px solid #444;">Performer</th>
+                        <th style="padding:8px; border:1px solid #444;">Requested By (UserID)</th>
+                        <th style="padding:8px; border:1px solid #444;">Actions</th>
+                    </tr>
+                    <?php foreach ($pending_songs as $song): ?>
+                    <tr>
+                        <td style="padding:8px; border:1px solid #444;">#<?php echo $song['songid']; ?></td>
+                        <td style="padding:8px; border:1px solid #444;"><?php echo htmlspecialchars($song['title']); ?></td>
+                        <td style="padding:8px; border:1px solid #444;"><?php echo htmlspecialchars($song['performer']); ?></td>
+                        <td style="padding:8px; border:1px solid #444;"><?php echo $song['userid']; ?></td>
+                        <td style="padding:8px; border:1px solid #444;">
+                            <form method="POST" action="#song-approval" style="display:inline;">
+                                <input type="hidden" name="songid" value="<?php echo $song['songid']; ?>">
+                                <button type="submit" name="song_action" value="approve" style="background:#4caf50; color:#fff; border:none; border-radius:4px; padding:6px 14px; margin-right:6px; cursor:pointer;">Approve</button>
+                                <button type="submit" name="song_action" value="decline" style="background:#ff6b6b; color:#fff; border:none; border-radius:4px; padding:6px 14px; cursor:pointer;">Decline</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </table>
+            <?php endif; ?>
         </div>
         <div id="threads" class="admin-section">
             <h2>Threads</h2>

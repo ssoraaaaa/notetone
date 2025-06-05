@@ -195,6 +195,45 @@ CREATE TABLE `video_comment` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
+-- Table structure for table `genres`
+--
+
+CREATE TABLE `genres` (
+  `genreid` int(11) NOT NULL,
+  `name` varchar(50) NOT NULL,
+  `description` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Table structure for table `song_genres`
+--
+
+CREATE TABLE `song_genres` (
+  `songid` int(11) NOT NULL,
+  `genreid` int(11) NOT NULL,
+  PRIMARY KEY (`songid`, `genreid`),
+  KEY `genreid` (`genreid`),
+  CONSTRAINT `song_genres_ibfk_1` FOREIGN KEY (`songid`) REFERENCES `songs` (`songid`) ON DELETE CASCADE,
+  CONSTRAINT `song_genres_ibfk_2` FOREIGN KEY (`genreid`) REFERENCES `genres` (`genreid`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `genres`
+--
+
+INSERT INTO `genres` (`genreid`, `name`, `description`) VALUES
+(1, 'Rock', 'Rock music and its subgenres'),
+(2, 'Pop', 'Popular music'),
+(3, 'Jazz', 'Jazz music and its variations'),
+(4, 'Classical', 'Classical music'),
+(5, 'Electronic', 'Electronic and dance music'),
+(6, 'Hip Hop', 'Hip hop and rap music'),
+(7, 'Metal', 'Heavy metal and its subgenres'),
+(8, 'Folk', 'Folk music'),
+(9, 'Blues', 'Blues music'),
+(10, 'Country', 'Country music');
+
+--
 -- Indexes for dumped tables
 --
 
@@ -253,6 +292,12 @@ ALTER TABLE `video_comment`
   ADD KEY `replies_to` (`replies_to`);
 
 --
+-- Indexes for table `genres`
+--
+ALTER TABLE `genres`
+  ADD PRIMARY KEY (`genreid`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -303,6 +348,12 @@ ALTER TABLE `video`
 --
 ALTER TABLE `video_comment`
   MODIFY `video_comment_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `genres`
+--
+ALTER TABLE `genres`
+  MODIFY `genreid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- Constraints for dumped tables

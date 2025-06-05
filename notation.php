@@ -5,7 +5,8 @@ require_once 'includes/db.php';
 $notation_id = $_GET['id'];
 
 // Fetch the notation details
-$notation_sql = "SELECT n.*, n.userid, s.title AS song_title, i.name AS instrument_name, u.username AS user_name, u.moderatorstatus AS user_moderator FROM notations n 
+$notation_sql = "SELECT n.*, n.userid, s.title AS song_title, i.name AS instrument_name, u.username AS user_name, u.moderatorstatus AS user_moderator
+                 FROM notations n 
                  LEFT JOIN songs s ON n.songid = s.songid 
                  LEFT JOIN instruments i ON n.instrumentid = i.instrumentid 
                  LEFT JOIN users u ON n.userid = u.userid 
@@ -85,6 +86,9 @@ if (strpos($back_url, 'edit.php') !== false) {
     <div class="tab-description" style="background: #2a2a2a; border: 1px solid #464646; border-radius: 4px; padding: 18px 20px; margin-bottom: 24px;">
         <p><strong>Song:</strong> <?php echo htmlspecialchars($notation['song_title']); ?></p>
         <p><strong>Instrument:</strong> <?php echo htmlspecialchars($notation['instrument_name']); ?></p>
+        <?php if (!empty($notation['genres'])): ?>
+            <p><strong>Genres:</strong> <?php echo htmlspecialchars($notation['genres']); ?></p>
+        <?php endif; ?>
         <p><strong>Date Added:</strong> <?php echo htmlspecialchars($notation['dateadded']); ?></p>
         <p><strong>Created by:</strong> <?php 
             $is_admin = isset($notation['user_moderator']) && $notation['user_moderator'] == 1;
@@ -178,7 +182,7 @@ if (strpos($back_url, 'edit.php') !== false) {
         div.innerHTML = '';
         const lines = splitNotesIntoLines(notes, 16); // You can adjust max notes per line
         const fixedStaveWidth = 1200;
-        const lineHeight = 200;
+        const lineHeight = 150;
         const svgHeight = lines.length * lineHeight + 60;
         const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
         renderer.resize(fixedStaveWidth, svgHeight);

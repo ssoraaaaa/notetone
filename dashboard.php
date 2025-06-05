@@ -8,7 +8,7 @@ if (!isLoggedIn()) {
 }
 
 // Fetch all notations
-$notation_sql = "SELECT n.*, s.title AS song_title, i.name AS instrument_name, IFNULL(u.username, 'deleted user') AS user_name, u.moderatorstatus AS user_moderator FROM notations n LEFT JOIN songs s ON n.songid = s.songid LEFT JOIN instruments i ON n.instrumentid = i.instrumentid LEFT JOIN users u ON n.userid = u.userid";
+$notation_sql = "SELECT n.*, s.title AS song_title, i.name AS instrument_name, IFNULL(u.username, 'deleted user') AS user_name, u.moderatorstatus AS user_moderator FROM notations n LEFT JOIN songs s ON n.songid = s.songid AND s.status = 'approved' LEFT JOIN instruments i ON n.instrumentid = i.instrumentid LEFT JOIN users u ON n.userid = u.userid";
 $notation_result = $conn->query($notation_sql);
 $notations = [];
 if ($notation_result->num_rows > 0) {
@@ -105,6 +105,7 @@ if ($thread_result->num_rows > 0) {
                         <div style="display: flex; gap: 15px;">
                             <a href="add_thread.php?from=dashboard" class="btn btn-primary" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-decoration: none; display: inline-block; text-align: center; line-height: 45px; height: 45px; font-size: 1rem; flex: 1;">Create Thread</a>
                             <a href="edit.php?from=dashboard" class="btn btn-primary" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-decoration: none; display: inline-block; text-align: center; line-height: 45px; height: 45px; font-size: 1rem; flex: 1;">Create Notation</a>
+                            <a href="add_song.php" class="btn btn-primary" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-decoration: none; display: inline-block; text-align: center; line-height: 45px; height: 45px; font-size: 1rem; flex: 1;">Add Song</a>
                         </div>
                     </div>
                 </div>
