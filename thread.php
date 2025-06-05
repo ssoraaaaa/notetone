@@ -1,30 +1,37 @@
 <?php
-session_start();
-include('includes/db.php');
-
-if (!isset($_SESSION['username'])) {
-    header('Location: login.php');
-    exit;
-}
+require_once 'includes/session.php';
+require_once 'includes/db.php';
 
 $thread_id = $_GET['id'];
-$user_id = $_SESSION['userid'];
+
+// Determine the original referrer (not thread.php itself)
+$original_referrer = '';
+if (isset($_POST['original_referrer'])) {
+    $original_referrer = $_POST['original_referrer'];
+} elseif (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'thread.php') === false) {
+    $original_referrer = $_SERVER['HTTP_REFERER'];
+}
 
 // Handle new comment or reply
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_comment'])) {
+    if (!isLoggedIn()) {
+        header('Location: login.php');
+        exit;
+    }
     $comment_content = trim($_POST['comment_content']);
     $reply_to = isset($_POST['replytocommentid']) && $_POST['replytocommentid'] !== '' ? intval($_POST['replytocommentid']) : 'NULL';
     if ($comment_content !== '') {
-        $insert_comment_sql = "INSERT INTO threadcomments (content, threadid, userid, replytocommentid) VALUES ('" . $conn->real_escape_string($comment_content) . "', '$thread_id', '$user_id', " . ($reply_to === 'NULL' ? 'NULL' : $reply_to) . ")";
+        $insert_comment_sql = "INSERT INTO threadcomments (content, threadid, userid, replytocommentid) VALUES ('" . $conn->real_escape_string($comment_content) . "', '$thread_id', '" . $_SESSION['userid'] . "', " . ($reply_to === 'NULL' ? 'NULL' : $reply_to) . ")";
         $conn->query($insert_comment_sql);
+    }
+    // After posting, keep the original referrer
+    if (!empty($original_referrer)) {
+        $_SESSION['thread_original_referrer'] = $original_referrer;
     }
 }
 
 // Fetch the thread details
-$thread_sql = "SELECT t.*, u.username AS user_name 
-               FROM threads t 
-               LEFT JOIN users u ON t.createdby = u.userid 
-               WHERE t.threadid = '$thread_id'";
+$thread_sql = "SELECT t.*, u.username AS user_name, u.moderatorstatus AS user_moderator FROM threads t LEFT JOIN users u ON t.createdby = u.userid WHERE t.threadid = '$thread_id'";
 $thread_result = $conn->query($thread_sql);
 $thread = $thread_result->fetch_assoc();
 
@@ -35,10 +42,14 @@ if (!$thread) {
 
 // Handle deletion
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
-    if ($thread['createdby'] == $user_id) {
+    if (!isLoggedIn()) {
+        header('Location: login.php');
+        exit;
+    }
+    if ($thread['createdby'] == $_SESSION['userid']) {
         $delete_sql = "DELETE FROM threads WHERE threadid = '$thread_id'";
         if ($conn->query($delete_sql) === TRUE) {
-            header('Location: threads.php');
+            header('Location: mythreads.php');
             exit;
         } else {
             $error_message = 'Error: ' . $conn->error;
@@ -49,7 +60,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
 }
 
 // Fetch all comments for this thread
-$comments_sql = "SELECT c.*, u.username FROM threadcomments c LEFT JOIN users u ON c.userid = u.userid WHERE c.threadid = '$thread_id' ORDER BY c.commentid ASC";
+$comments_sql = "SELECT c.*, u.username, u.moderatorstatus FROM threadcomments c LEFT JOIN users u ON c.userid = u.userid WHERE c.threadid = '$thread_id' ORDER BY c.commentid ASC";
 $comments_result = $conn->query($comments_sql);
 $comments = [];
 if ($comments_result && $comments_result->num_rows > 0) {
@@ -57,6 +68,7 @@ if ($comments_result && $comments_result->num_rows > 0) {
         $comments[] = $row;
     }
 }
+
 // Organize comments into a tree
 function buildCommentTree($comments) {
     $tree = [];
@@ -90,24 +102,57 @@ if ($reply_to_id) {
     }
 }
 
+// Handle comment deletion
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_comment'])) {
+    if (!isLoggedIn()) {
+        header('Location: login.php');
+        exit;
+    }
+    $comment_id = intval($_POST['comment_id']);
+    // Check if the comment belongs to the user
+    $check_sql = "SELECT userid FROM threadcomments WHERE commentid = $comment_id";
+    $check_result = $conn->query($check_sql);
+    if ($check_result && $row = $check_result->fetch_assoc()) {
+        if ($row['userid'] == $_SESSION['userid']) {
+            $delete_sql = "DELETE FROM threadcomments WHERE commentid = $comment_id";
+            $conn->query($delete_sql);
+        } else {
+            $error_message = 'You do not have permission to delete this comment.';
+        }
+    }
+}
+
 function renderComments($comments, $reply_to_id) {
     foreach ($comments as $comment) {
         $is_reply_target = ($reply_to_id == $comment['commentid']);
         $leftBorder = $is_reply_target ? '#fff' : '#464646';
-        echo '<div class="comment-box" style="margin-left:'.($comment['replytocommentid'] ? '40' : '0').'px; background: #2a2a2a; border: 1px solid #464646; border-left: 5px solid '.$leftBorder.'; padding: 20px; margin-bottom: 20px; border-radius: 4px;">';
+        echo '<div class="comment-box" id="comment-' . $comment['commentid'] . '" style="margin-left:'.($comment['replytocommentid'] ? '40' : '0').'px; background: #2a2a2a; border: 1px solid #464646; border-left: 5px solid '.$leftBorder.'; padding: 20px; margin-bottom: 20px; border-radius: 4px;">';
         echo '<div style="color: #888; font-size: 0.9rem; font-family: \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif; margin-bottom: 10px;">';
-        echo '<em>' . ($comment['username'] ? htmlspecialchars($comment['username']) : 'deleted user') . '</em>';
+        // Username in comments (non-italic)
+        $is_admin = isset($comment['moderatorstatus']) && $comment['moderatorstatus'] == 1;
+        $admin_symbol = $is_admin ? ' <span title="Admin" style="color:#ffcc00;">&#9812;</span>' : '';
+        echo '<span>' . ($comment['username'] ? htmlspecialchars($comment['username']) . $admin_symbol : 'deleted user') . '</span>';
         echo '</div>';
         echo '<div style="background: #1a1a1a; padding: 15px; border-radius: 4px; margin-bottom: 15px;">';
         echo '<p style="color: #fff; font-family: \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif; margin: 0; white-space: pre-wrap; word-break: break-word;">' . nl2br(htmlspecialchars($comment['content'])) . '</p>';
         echo '</div>';
-        echo '<div style="clear: both;">';
-        echo '<form method="get" style="display:inline;" class="reply-form" onsubmit="return false;">';
-        echo '<input type="hidden" name="id" value="' . htmlspecialchars($_GET['id']) . '">';
-        echo '<input type="hidden" name="reply" value="' . $comment['commentid'] . '">';
-        echo '<button type="submit" class="btn btn-link p-0 reply-btn" data-comment-id="' . $comment['commentid'] . '" style="font-size: 0.85rem; border-radius: 10px; padding: 2px 8px; width: 80px;">Reply</button>';
-        echo '</form>';
-        echo '</div>';
+        if (isLoggedIn()) {
+            echo '<div style="clear: both; display: flex; gap: 10px;">';
+            echo '<form method="get" style="display:inline;" class="reply-form" onsubmit="return false;">';
+            echo '<input type="hidden" name="id" value="' . htmlspecialchars($_GET['id']) . '">';
+            echo '<input type="hidden" name="reply" value="' . $comment['commentid'] . '">';
+            echo '<button type="submit" class="btn btn-link p-0 reply-btn" data-comment-id="' . $comment['commentid'] . '" style="font-size: 0.85rem; border-radius: 10px; padding: 2px 8px; width: 80px;">Reply</button>';
+            echo '</form>';
+            // Show delete button if user is the author
+            if (isset($_SESSION['userid']) && $comment['userid'] == $_SESSION['userid']) {
+                echo '<form method="post" style="display:inline;" id="delete-comment-form-' . $comment['commentid'] . '">';
+                echo '<input type="hidden" name="comment_id" value="' . $comment['commentid'] . '">';
+                echo '<input type="hidden" name="delete_comment" value="1">';
+                echo '<button type="button" class="btn-delete-thread delete-comment-btn" style="font-size: 0.85rem; border-radius: 10px; padding: 2px 8px; margin-left: 8px; background: #ff6b6b; color: #fff;">Delete</button>';
+                echo '</form>';
+            }
+            echo '</div>';
+        }
         if (!empty($comment['children'])) {
             echo '<div style="margin-top: 20px;">';
             renderComments($comment['children'], $reply_to_id);
@@ -122,22 +167,28 @@ function renderComments($comments, $reply_to_id) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($thread['title']); ?></title>
+    <title>Thread - NoteTone</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-    <ul class="header">
-        <a href="dashboard.php"><img src="logo-gray.png" class="header_logo" alt="Logo"></a>
-        <li class="li_header"><a class="a_header" href="dashboard.php">Dashboard</a></li>
-        <li class="li_header"><a class="a_header" href="threads.php">Threads</a></li>
-        <li class="li_header"><a class="a_header" href="notations.php">Notations</a></li>
-        <li class="li_header"><a class="a_header" href="mythreads.php">My Threads</a></li>
-        <li class="li_header"><a class="a_header" href="mynotations.php">My Notations</a></li>
-        <li class="li_header"><a class="a_header" href="profile.php">Profile</a></li>
-        <li class="li_header"><a class="a_header" href="logout.php">Logout</a></li>
-    </ul>
+    <?php include 'includes/navbar.php'; ?>
+    <div class="navbar-spacer"></div>
     <div class="wrapper-thread">
+        <?php 
+            // Prefer the session referrer if set
+            $back_url = 'threads.php';
+            if (!empty($original_referrer)) {
+                $back_url = htmlspecialchars($original_referrer);
+            } elseif (isset($_SESSION['thread_original_referrer'])) {
+                $back_url = htmlspecialchars($_SESSION['thread_original_referrer']);
+            } elseif (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'thread.php') === false) {
+                $back_url = htmlspecialchars($_SERVER['HTTP_REFERER']);
+            }
+        ?>
+        <div style="margin-bottom: 20px;">
+            <a href="<?php echo $back_url; ?>" class="btn btn-primary" style="text-decoration: none;">&larr; Back</a>
+        </div>
         <h2 style="text-align: center;"><?php echo htmlspecialchars($thread['title']); ?></h2>
         <?php if (isset($error_message)): ?>
             <p class="error"><?php echo $error_message; ?></p>
@@ -147,31 +198,60 @@ function renderComments($comments, $reply_to_id) {
                 <p style="color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; font-size: 1rem;"><?php echo nl2br(htmlspecialchars($thread['content'])); ?></p>
             </div>
             <div style="color: #888; font-size: 0.9rem; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
-                Created by: <?php echo $thread['user_name'] ? htmlspecialchars($thread['user_name']) : '<em>deleted user</em>'; ?>
+                Created by: <?php 
+                    $is_admin = isset($thread['user_moderator']) && $thread['user_moderator'] == 1;
+                    $admin_symbol = $is_admin ? ' <span title="Admin" style="color:#ffcc00;">&#9812;</span>' : '';
+                    echo $thread['user_name'] ? htmlspecialchars($thread['user_name']) . $admin_symbol : '<em>deleted user</em>'; 
+                ?>
             </div>
         </div>
-        <?php if ($thread['createdby'] == $user_id): ?>
-        <form method="POST" action="">
-            <button class="btn-delete-thread" type="submit" name="delete">Delete Thread</button>
-        </form>
-        <?php endif; ?>
+        
         <div class="comments-section">
             <h3>Replies</h3>
             <?php renderComments($comment_tree, $reply_to_id); ?>
+            <?php if (isLoggedIn()): ?>
             <form method="POST" action="" class="comment-form mt-3" id="commentForm">
                 <?php if ($reply_to_id && $reply_to_comment): ?>
                     <input type="hidden" name="replytocommentid" value="<?php echo $reply_to_id; ?>">
                     <div class="mb-3 d-flex align-items-center justify-content-between" style="background: #2a2a2a; padding: 10px 15px; border-radius: 8px 8px 0 0; border-bottom: 1px solid #464646; position: relative;">
-                        <span class="badge bg-primary" style="font-style: italic;">Replying to <?php echo $reply_to_username; ?></span>
+                        <span class="badge bg-primary" style="font-style: italic; color: #fff;">Replying to <?php 
+                            $reply_is_admin = false;
+                            foreach ($comments as $c) {
+                                if ($c['commentid'] == $reply_to_id) {
+                                    $reply_is_admin = isset($c['moderatorstatus']) && $c['moderatorstatus'] == 1;
+                                    break;
+                                }
+                            }
+                            echo $reply_to_username;
+                            if ($reply_is_admin) echo ' <span title="Admin" style="color:#ffcc00;">&#9812;</span>';
+                        ?></span>
                         <button type="button" onclick="cancelReply()" style="background: none; border: none; color: #888; font-size: 1.5rem; padding: 0 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 4px; transition: background-color 0.2s; position: absolute; right: 15px; top: 50%; transform: translateY(-50%);">×</button>
                     </div>
                 <?php endif; ?>
                 <input type="hidden" name="id" value="<?php echo htmlspecialchars($_GET['id']); ?>">
-                <textarea name="comment_content" placeholder="Add a comment..." required class="form-control" style="height: 120px; resize: none; width: calc(100% - 30px); background: #2a2a2a; color: #fff; border: 1px solid #464646; margin-bottom: 20px; font-size: 1.1rem; padding: 15px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; outline: none;"></textarea>
-                <button type="submit" name="add_comment" class="btn btn-primary">Post Reply</button>
+                <input type="hidden" name="original_referrer" value="<?php echo htmlspecialchars($original_referrer); ?>">
+                <textarea name="comment_content" placeholder="Add a comment..." required class="form-control" style="resize: none; width: calc(100%); background: #2a2a2a; color: #fff; border: 1px solid #464646; margin-bottom: 20px; font-size: 1.1rem; padding: 15px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; outline: none;"></textarea>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <button type="submit" name="add_comment" class="btn btn-primary">Post Reply</button>
+                </div>
             </form>
+            <?php if (isset($_SESSION['userid']) && $thread['createdby'] == $_SESSION['userid']): ?>
+                <div style="display: flex; justify-content: flex-end; margin-top: -45px; margin-bottom: 20px;">
+                    <button type="button" id="delete-thread-btn" class="btn btn-primary" style="background: #ff6b6b; border: none;">Delete Thread</button>
+                    <form id="delete-thread-form" method="POST" action="" style="display:none;">
+                        <input type="hidden" name="delete" value="1">
+                    </form>
+                    <?php include 'components/thread/delete_modal.php'; ?>
+                </div>
+            <?php endif; ?>
+            <?php else: ?>
+            <div style="background: #2a2a2a; border: 1px solid #464646; padding: 20px; border-radius: 4px; text-align: center;">
+                <p style="color: #888; margin: 0;">Please <a href="login.php" style="color: #007bff; text-decoration: none;">login</a> to post a reply.</p>
+            </div>
+            <?php endif; ?>
         </div>
     </div>
+    <?php include 'components/thread/delete_comment_modal.php'; ?>
 
     <script>
     $(document).ready(function() {
@@ -198,14 +278,13 @@ function renderComments($comments, $reply_to_id) {
                 contentType: false,
                 success: function(response) {
                     if(response.success) {
-                        window.location.reload();
+                        location.reload();
                     } else {
-                        alert('Error posting comment: ' + response.message);
+                        alert(response.message || 'Error posting comment');
                     }
                 },
-                error: function(xhr, status, error) {
-                    console.error('Error:', error);
-                    alert('Error posting comment. Please try again.');
+                error: function() {
+                    alert('Error posting comment');
                 }
             });
         });
@@ -217,6 +296,15 @@ function renderComments($comments, $reply_to_id) {
         window.history.pushState({}, '', currentUrl);
         location.reload();
     }
+
+    document.addEventListener('input', function(e) {
+        if (e.target.tagName.toLowerCase() === 'textarea') {
+            e.target.style.height = 'auto';
+            e.target.style.height = e.target.scrollHeight + 'px';
+            // Forcibly trigger reflow
+            e.target.style.overflowY = 'hidden';
+        }
+    });
     </script>
 </body>
 </html>

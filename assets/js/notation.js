@@ -16,12 +16,5 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Handle notation deletion
-    const deleteButton = document.querySelector('.btn-delete-notation');
-    if (deleteButton) {
-        deleteButton.addEventListener('click', function(e) {
-            if (!confirm('Are you sure you want to delete this notation?')) {
-                e.preventDefault();
-            }
-        });
-    }
+    // (Removed default confirm logic; handled by custom modal in notation.php)
 }); 

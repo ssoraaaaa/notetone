@@ -1,10 +1,10 @@
 <?php
-session_start();
-include('includes/db.php');
+require_once 'includes/session.php';
+require_once 'includes/db.php';
 
-if (!isset($_SESSION['username'])) {
-    header('Location: login.php');
-    exit;
+if (!isLoggedIn()) {
+    header("Location: login.php");
+    exit();
 }
 
 $username = $_SESSION['username'];
@@ -19,20 +19,52 @@ $notation_count_sql = "SELECT COUNT(*) as notation_count FROM notations WHERE us
 $notation_count_result = $conn->query($notation_count_sql);
 $notation_count = $notation_count_result->fetch_assoc()['notation_count'];
 
+// Fetch moderatorstatus for the logged-in user
+$user_sql = "SELECT moderatorstatus FROM users WHERE userid = '$user_id'";
+$user_result = $conn->query($user_sql);
+$user_row = $user_result->fetch_assoc();
+$is_admin = isset($user_row['moderatorstatus']) && $user_row['moderatorstatus'] == 1;
+$admin_symbol = $is_admin ? ' <span title="Admin" style="color:#ffcc00;">&#9812;</span>' : '';
+
 // Handle change username
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['change_username'])) {
-    $new_username = $_POST['new_username'];
-    if (!empty($new_username)) {
-        $change_sql = "UPDATE users SET username = '$new_username' WHERE userid = '$user_id'";
-        if ($conn->query($change_sql) === TRUE) {
-            $_SESSION['username'] = $new_username;
-            $username = $new_username;
-            $success_message = 'Username successfully changed.';
-        } else {
-            $error_message = 'Error: ' . $conn->error;
-        }
+    $new_username = trim($_POST['new_username']);
+    
+    // Validation - same as registration plus additional rules
+    if (empty($new_username)) {
+        $error_message = 'Username cannot be empty.';
+    } elseif (strlen($new_username) < 3) {
+        $error_message = 'Username must be at least 3 characters long.';
+    } elseif (strlen($new_username) > 30) {
+        $error_message = 'Username must be no more than 30 characters long.';
+    } elseif (!preg_match('/^[a-zA-Z0-9_]+$/', $new_username)) {
+        $error_message = 'Username can only contain letters, numbers, and underscores.';
+    } elseif ($new_username === $username) {
+        $error_message = 'This is already your current username.';
     } else {
-        $error_message = 'New username cannot be empty.';
+        // Check if username already exists (excluding current user)
+        $check_sql = "SELECT userid FROM users WHERE username = ? AND userid != ?";
+        $check_stmt = $conn->prepare($check_sql);
+        $check_stmt->bind_param("si", $new_username, $user_id);
+        $check_stmt->execute();
+        $check_result = $check_stmt->get_result();
+        
+        if ($check_result->num_rows > 0) {
+            $error_message = 'Username already exists. Please choose a different username.';
+        } else {
+            // Update username using prepared statement
+            $change_sql = "UPDATE users SET username = ? WHERE userid = ?";
+            $change_stmt = $conn->prepare($change_sql);
+            $change_stmt->bind_param("si", $new_username, $user_id);
+            
+            if ($change_stmt->execute()) {
+                $_SESSION['username'] = $new_username;
+                $username = $new_username;
+                $success_message = 'Username successfully changed.';
+            } else {
+                $error_message = 'Error updating username. Please try again.';
+            }
+        }
     }
 }
 
@@ -87,56 +119,57 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_profile'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile</title>
+    <title>Profile - NoteTone</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <ul class="header">
-        <a href="dashboard.php"><img src="logo-gray.png" class="header_logo" alt="Logo"></a>
-        <li class="li_header"><a class="a_header" href="dashboard.php">Dashboard</a></li>
-        <li class="li_header"><a class="a_header" href="threads.php">Threads</a></li>
-        <li class="li_header"><a class="a_header" href="notations.php">Notations</a></li>
-        <li class="li_header"><a class="a_header" href="mythreads.php">My Threads</a></li>
-        <li class="li_header"><a class="a_header" href="mynotations.php">My Notations</a></li>
-        <li class="li_header"><a class="a_header" href="profile.php">Profile</a></li>
-        <li class="li_header"><a class="a_header" href="logout.php">Logout</a></li>
-    </ul>
-    <div class="wrapper-profile">
-        <h2>Your Profile</h2>
-         <div class="profile-box">
-            <p><strong>Username:</strong> <?php echo htmlspecialchars($username); ?></p>
-            <p><strong>Threads Created:</strong> <?php echo $thread_count; ?></p>
-            <p><strong>Notations Created:</strong> <?php echo $notation_count; ?></p>
-        </div>
+    <?php include 'includes/navbar.php'; ?>
+    <div class="navbar-spacer"></div>
+        <div class="wrapper-profile">
+            <h1>Your Profile</h1>
+             <div class="profile-box">
+            <p><strong>Username:</strong> <?php echo htmlspecialchars($username) . $admin_symbol; ?></p>
+                <p><strong>Threads Created:</strong> <?php echo $thread_count; ?></p>
+                <p><strong>Notations Created:</strong> <?php echo $notation_count; ?></p>
+            <?php if ($is_admin): ?>
+            <p><a href="admin_panel.php" class="btn btn-primary" style="margin-top:10px; display:inline-block;">Admin Panel</a></p>
+            <?php endif; ?>
+            </div>
 
-        <?php if (isset($success_message)): ?>
-            <p class="success"><?php echo $success_message; ?></p>
-        <?php endif; ?>
-        <?php if (isset($error_message)): ?>
-            <p class="error"><?php echo $error_message; ?></p>
-        <?php endif; ?>
-       
-        <form method="POST" action="">
-            <div class="input-box">
-                <input type="text" name="new_username" placeholder="New Username">
-            </div>
-            <button class="btn-change-username" type="submit" name="change_username">Change Username</button>
-        </form>
-        <form method="POST" action="">
-            <div class="input-box">
-                <input type="password" name="old_password" placeholder="Old Password">
-            </div>
-            <div class="input-box">
-                <input type="password" name="new_password" placeholder="New Password">
-            </div>
-            <div class="input-box">
-                <input type="password" name="confirm_password" placeholder="Confirm New Password">
-            </div>
-            <button class="btn-change-password" type="submit" name="change_password">Change Password</button>
-        </form>
-        <form method="POST" action="">
-            <button class="btn-delete-profile" type="submit" name="delete_profile">Delete Profile</button>
-        </form>
+            <?php if (isset($success_message)): ?>
+                <p class="success"><?php echo $success_message; ?></p>
+            <?php endif; ?>
+            <?php if (isset($error_message)): ?>
+                <p class="error"><?php echo $error_message; ?></p>
+            <?php endif; ?>
+           
+            <form method="POST" action="" class="profile-form">
+                <div class="input-box">
+                    <input type="text" name="new_username" placeholder="New Username" class="profile-input">
+                </div>
+                <div class="input-box">
+                    <button class="btn btn-primary profile-btn" type="submit" name="change_username">Change Username</button>
+                </div>
+            </form>
+            <form method="POST" action="" class="profile-form">
+                <div class="input-box">
+                    <input type="password" name="old_password" placeholder="Old Password" class="profile-input">
+                </div>
+                <div class="input-box">
+                    <input type="password" name="new_password" placeholder="New Password" class="profile-input">
+                </div>
+                <div class="input-box">
+                    <input type="password" name="confirm_password" placeholder="Confirm New Password" class="profile-input">
+                </div>
+                <div class="input-box">
+                    <button class="btn btn-primary profile-btn" type="submit" name="change_password">Change Password</button>
+                </div>
+            </form>
+            <form method="POST" action="" class="profile-form">
+                <div class="input-box">
+                    <button class="btn-delete-profile profile-btn" type="submit" name="delete_profile">Delete Profile</button>
+                </div>
+            </form>
     </div>
 </body>
 </html>

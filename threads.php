@@ -1,13 +1,8 @@
 <?php
-session_start();
-include('includes/db.php');
+require_once 'includes/session.php';
+require_once 'includes/db.php';
 
-if (!isset($_SESSION['username'])) {
-    header('Location: login.php');
-    exit;
-}
-
-$thread_sql = "SELECT t.*, u.username AS user_name FROM threads t LEFT JOIN users u ON t.createdby = u.userid ORDER BY t.threadid DESC";
+$thread_sql = "SELECT t.*, u.username AS user_name, u.moderatorstatus AS user_moderator FROM threads t LEFT JOIN users u ON t.createdby = u.userid ORDER BY t.threadid DESC";
 $thread_result = $conn->query($thread_sql);
 $threads = [];
 if ($thread_result->num_rows > 0) {
@@ -25,19 +20,13 @@ if ($thread_result->num_rows > 0) {
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <ul class="header">
-        <a href="dashboard.php"><img src="logo-gray.png" class="header_logo" alt="Logo"></a>
-        <li class="li_header"><a class="a_header" href="dashboard.php">Dashboard</a></li>
-        <li class="li_header"><a class="a_header" href="threads.php">Threads</a></li>
-        <li class="li_header"><a class="a_header" href="notations.php">Notations</a></li>
-        <li class="li_header"><a class="a_header" href="mythreads.php">My Threads</a></li>
-        <li class="li_header"><a class="a_header" href="mynotations.php">My Notations</a></li>
-        <li class="li_header"><a class="a_header" href="profile.php">Profile</a></li>
-        <li class="li_header"><a class="a_header" href="logout.php">Logout</a></li>
-    </ul>
+    <?php include 'includes/navbar.php'; ?>
+    <div class="navbar-spacer"></div>
     <div class="container">
         <div class="wrapper" style="width: 80%; max-width: 1200px; margin: 0 auto;">
-            <h2 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin-bottom: 30px; color: #fff; font-size: 2rem;">Threads</h2>
+            <div class="container-header">
+                <h2>Threads</h2>
+            </div>
             <?php if (empty($threads)): ?>
                 <p style="color: #888; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1rem;">No threads found.</p>
             <?php else: ?>
@@ -53,7 +42,11 @@ if ($thread_result->num_rows > 0) {
                                 </p>
                             </div>
                             <div style="color: #888; font-size: 0.9rem; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
-                                Created by: <?php echo $thread['user_name'] ? htmlspecialchars($thread['user_name']) : '<em>deleted user</em>'; ?>
+                                Created by: <?php 
+                                    $is_admin = isset($thread['user_moderator']) && $thread['user_moderator'] == 1;
+                                    $admin_symbol = $is_admin ? ' <span title="Admin" style="color:#ffcc00 !important; display:inline-block;">&#9812;</span>' : '';
+                                    echo $thread['user_name'] ? '<span>' . htmlspecialchars($thread['user_name']) . '</span>' . $admin_symbol : '<em>deleted user</em>'; 
+                                ?>
                                 <?php if (isset($thread['datecreated'])): ?>
                                     <br>Created: <?php echo date('F j, Y', strtotime($thread['datecreated'])); ?>
                                 <?php endif; ?>
