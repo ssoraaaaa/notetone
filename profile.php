@@ -10,6 +10,10 @@ if (!isLoggedIn()) {
 $username = $_SESSION['username'];
 $user_id = $_SESSION['userid'];
 
+// Debug session
+error_log("Profile page - Session contents: " . print_r($_SESSION, true));
+error_log("Profile page - User ID: " . $user_id);
+
 // Fetch the count of threads and notations
 $thread_count_sql = "SELECT COUNT(*) as thread_count FROM threads WHERE createdby = '$user_id'";
 $thread_count_result = $conn->query($thread_count_sql);
@@ -137,7 +141,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_profile'])) {
             </div>
 
             <?php if (isset($success_message)): ?>
-                <p class="success"><?php echo $success_message; ?></p>
+                <p class="success" style="color:#7CFC98;"><?php echo $success_message; ?></p>
             <?php endif; ?>
             <?php if (isset($error_message)): ?>
                 <p class="error"><?php echo $error_message; ?></p>
@@ -167,9 +171,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_profile'])) {
             </form>
             <form method="POST" action="" class="profile-form">
                 <div class="input-box">
-                    <button class="btn-delete-profile profile-btn" type="submit" name="delete_profile">Delete Profile</button>
+                    <button type="button" id="delete-profile-btn" class="btn-delete-profile profile-btn">Delete Profile</button>
                 </div>
             </form>
+            <?php include 'components/profile/delete_account_modal.php'; ?>
     </div>
 </body>
 </html>

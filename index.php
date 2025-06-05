@@ -11,6 +11,7 @@ require_once 'includes/session.php';
 </head>
 <body>
     <?php include 'includes/navbar.php'; ?>
+    <?php include 'components/account/success_modal.php'; ?>
     <div class="navbar-spacer"></div>
     <div class="wrapper">
         <h1>Welcome to NoteTone</h1>
