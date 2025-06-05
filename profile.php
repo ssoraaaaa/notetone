@@ -125,45 +125,51 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_profile'])) {
 <body>
     <?php include 'includes/navbar.php'; ?>
     <div class="navbar-spacer"></div>
-    <div class="wrapper-profile">
-        <h2>Your Profile</h2>
-         <div class="profile-box">
+        <div class="wrapper-profile">
+            <h1>Your Profile</h1>
+             <div class="profile-box">
             <p><strong>Username:</strong> <?php echo htmlspecialchars($username) . $admin_symbol; ?></p>
-            <p><strong>Threads Created:</strong> <?php echo $thread_count; ?></p>
-            <p><strong>Notations Created:</strong> <?php echo $notation_count; ?></p>
+                <p><strong>Threads Created:</strong> <?php echo $thread_count; ?></p>
+                <p><strong>Notations Created:</strong> <?php echo $notation_count; ?></p>
             <?php if ($is_admin): ?>
             <p><a href="admin_panel.php" class="btn btn-primary" style="margin-top:10px; display:inline-block;">Admin Panel</a></p>
             <?php endif; ?>
-        </div>
+            </div>
 
-        <?php if (isset($success_message)): ?>
-            <p class="success"><?php echo $success_message; ?></p>
-        <?php endif; ?>
-        <?php if (isset($error_message)): ?>
-            <p class="error"><?php echo $error_message; ?></p>
-        <?php endif; ?>
-       
-        <form method="POST" action="">
-            <div class="input-box">
-                <input type="text" name="new_username" placeholder="New Username">
-            </div>
-            <button class="btn btn-primary" type="submit" name="change_username">Change Username</button>
-        </form>
-        <form method="POST" action="">
-            <div class="input-box">
-                <input type="password" name="old_password" placeholder="Old Password">
-            </div>
-            <div class="input-box">
-                <input type="password" name="new_password" placeholder="New Password">
-            </div>
-            <div class="input-box">
-                <input type="password" name="confirm_password" placeholder="Confirm New Password">
-            </div>
-            <button class="btn btn-primary" type="submit" name="change_password">Change Password</button>
-        </form>
-        <form method="POST" action="">
-            <button class="btn-delete-profile" type="submit" name="delete_profile">Delete Profile</button>
-        </form>
+            <?php if (isset($success_message)): ?>
+                <p class="success"><?php echo $success_message; ?></p>
+            <?php endif; ?>
+            <?php if (isset($error_message)): ?>
+                <p class="error"><?php echo $error_message; ?></p>
+            <?php endif; ?>
+           
+            <form method="POST" action="" class="profile-form">
+                <div class="input-box">
+                    <input type="text" name="new_username" placeholder="New Username" class="profile-input">
+                </div>
+                <div class="input-box">
+                    <button class="btn btn-primary profile-btn" type="submit" name="change_username">Change Username</button>
+                </div>
+            </form>
+            <form method="POST" action="" class="profile-form">
+                <div class="input-box">
+                    <input type="password" name="old_password" placeholder="Old Password" class="profile-input">
+                </div>
+                <div class="input-box">
+                    <input type="password" name="new_password" placeholder="New Password" class="profile-input">
+                </div>
+                <div class="input-box">
+                    <input type="password" name="confirm_password" placeholder="Confirm New Password" class="profile-input">
+                </div>
+                <div class="input-box">
+                    <button class="btn btn-primary profile-btn" type="submit" name="change_password">Change Password</button>
+                </div>
+            </form>
+            <form method="POST" action="" class="profile-form">
+                <div class="input-box">
+                    <button class="btn-delete-profile profile-btn" type="submit" name="delete_profile">Delete Profile</button>
+                </div>
+            </form>
     </div>
 </body>
 </html>

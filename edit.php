@@ -235,18 +235,18 @@ EOT;
                         <div id="fretboard-app"></div>
                         <div style="display: flex; gap: 10px;">
                             <button type="button" id="add-chord" class="btn btn-primary">Add Chord</button>
-                            <button type="button" id="add-tact" class="btn btn-primary">Add Tact Line</button>
+                            <button type="button" id="add-tact" class="btn btn-primary">Add Bar Line</button>
                             <button type="button" id="clear-chord" class="btn">Clear Chord</button>
                         </div>
                     </div>
-                    <div id="tab-note-list" style="margin-bottom: 10px; color: #ccc; font-size: 0.95rem;"></div>
+                    <!-- <div id="tab-note-list" style="margin-bottom: 10px; color: #ccc; font-size: 0.95rem;"></div> -->
                     <input type="hidden" name="content" id="tab-json-content">
                     <div id="vf-preview" style="margin-top: 20px; margin-bottom: 20px; background: #181818; border-radius: 4px; padding: 20px; max-width: 100%;"></div>
                 </div>
             </div>
             <div id="text-editor" style="display: <?php echo $prefill_mode === 'text' ? '' : 'none'; ?>;">
                 <div class="form-group" style="width: 100%;">
-                    <textarea name="content" id="text-content" style="width: 100%; box-sizing: border-box; background: #2a2a2a; color: #fff; border: 1px solid #464646; padding: 10px; font-family: monospace; margin-bottom: 20px; resize: none; overflow-x: hidden; white-space: pre-line; min-height: 120px;" placeholder="Enter your notation here...">
+                    <textarea name="content" id="text-content" style="width: 100%; box-sizing: border-box; background: #2a2a2a; color: #fff; border: 1px solid #464646; padding: 10px 0px 10px 10px; font-family: monospace; margin-bottom: 20px; resize: none; overflow-x: hidden; white-space: pre-line; min-height: 120px;" placeholder="Enter your notation here...">
 <?php 
     if ($prefill_mode === 'text') {
         if ($edit_mode) {
@@ -734,7 +734,7 @@ EOT;
     //  FRETBOARD OUTPUT TEMPLATE
       template: `   
         <div>
-          <div style="display: grid; grid-template-columns: repeat(22, 32px); grid-template-rows: repeat(6, 32px); gap: 2px; margin-bottom: 10px; background: #232323; border-radius: 4px; border: 1px solid #464646; padding: 8px 0 8px 8px;">
+          <div style="display: grid; grid-template-columns: repeat(22, 32px); grid-template-rows: repeat(6, 32px); gap: 2px; margin-bottom: 10px; background: #232323; border-radius: 4px; border: 1px solid #464646; padding: 8px 8px 8px 8px;">
             <template v-for="string in [...Array(NUM_STRINGS).keys()].map(i => NUM_STRINGS - i)">
               <template v-for="fret in Array.from({length: NUM_FRETS}, (_, i) => i)">
                 <div
@@ -755,9 +755,6 @@ EOT;
                 >{{ fret === 0 ? '0' : fret }}</div>
               </template>
             </template>
-          </div>
-          <div style="margin-bottom: 10px; color: #ccc; font-size: 0.95rem;">
-            Current Chord: <span>{{ chordText() }}</span>
           </div>
         </div>
       `

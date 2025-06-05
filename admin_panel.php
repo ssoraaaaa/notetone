@@ -35,7 +35,7 @@ if (!$is_admin) {
 <div class="navbar-spacer"></div>
 <div class="container">
     <div class="wrapper" style="max-width: 1500px; margin: 0 auto;">
-        <yle="color:#e7dba9;">Admin Panel</h1>
+    <h1><yle="color:#e7dba9;">Admin Panel</h1>
         <div class="admin-nav">
             <a href="#users">Users</a>
             <a href="#audio">Audio</a>
@@ -46,20 +46,25 @@ if (!$is_admin) {
             <a href="#settings">System Settings</a>
         </div>
         <div id="users" class="admin-section">
-            <h2>Users</h2>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                <h2 style="margin: 0;">Users</h2>
+                <button id="toggle-users-btn" style="background: #232323; color: #e7dba9; border: 1px solid #464646; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; transition: background 0.3s;" title="Collapse/Expand Users">
+                    <span id="toggle-users-arrow" style="display: inline-block; transition: transform 0.3s;">&#9660;</span>
+                </button>
+            </div>
+            <div id="users-content">
+            <div id="users-table-container">
             <table style="width:100%; border-collapse:collapse; background:#232323; color:#e7dba9;">
                 <thead>
                     <tr style="background:#181818;">
                         <th style="padding:8px; border-bottom:1px solid #444;">Username</th>
-                        <th style="padding:8px; border-bottom:1px solid #444;">Email</th>
                         <th style="padding:8px; border-bottom:1px solid #444;">Admin</th>
-                        <th style="padding:8px; border-bottom:1px solid #444;">Registered</th>
                         <th style="padding:8px; border-bottom:1px solid #444;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                 <?php
-                $users_result = $conn->query("SELECT userid, username, email, moderatorstatus, datecreated FROM users ORDER BY datecreated DESC");
+                $users_result = $conn->query("SELECT userid, username, moderatorstatus FROM users ORDER BY userid DESC");
                 if (!$users_result) {
                     echo '<tr><td colspan="5" style="color:#c0392b;">SQL Error: ' . htmlspecialchars($conn->error) . '</td></tr>';
                 } else {
@@ -67,23 +72,23 @@ if (!$is_admin) {
                 ?>
                     <tr>
                         <td style="padding:8px; border-bottom:1px solid #333;"> <?php echo htmlspecialchars($user['username']); ?> </td>
-                        <td style="padding:8px; border-bottom:1px solid #333;"> <?php echo htmlspecialchars($user['email']); ?> </td>
                         <td style="padding:8px; border-bottom:1px solid #333; text-align:center;">
                             <?php echo $user['moderatorstatus'] ? '<span style="color:#ffcc00;">&#9812; Admin</span>' : 'User'; ?>
                         </td>
-                        <td style="padding:8px; border-bottom:1px solid #333;"> <?php echo date('Y-m-d', strtotime($user['datecreated'])); ?> </td>
-                        <td style="padding:8px; border-bottom:1px solid #333;">
+                        <td style="padding:8px; border-bottom:1px solid #333; text-align:center;">
                             <?php if ($user['moderatorstatus']): ?>
-                                <form method="post" style="display:inline;"><input type="hidden" name="userid" value="<?php echo $user['userid']; ?>"><button type="submit" name="revoke_admin" style="background:#e7dba9; color:#232323; border:none; padding:4px 10px; border-radius:3px; cursor:pointer;">Revoke Admin</button></form>
+                                <form class="user-action-form" method="post" style="display:inline;"><input type="hidden" name="userid" value="<?php echo $user['userid']; ?>"><button type="submit" name="revoke_admin" style="background:#e7dba9; color:#232323; border:none; padding:4px 10px; border-radius:3px; cursor:pointer;">Revoke Admin</button></form>
                             <?php else: ?>
-                                <form method="post" style="display:inline;"><input type="hidden" name="userid" value="<?php echo $user['userid']; ?>"><button type="submit" name="grant_admin" style="background:#e7dba9; color:#232323; border:none; padding:4px 10px; border-radius:3px; cursor:pointer;">Grant Admin</button></form>
+                                <form class="user-action-form" method="post" style="display:inline;"><input type="hidden" name="userid" value="<?php echo $user['userid']; ?>"><button type="submit" name="grant_admin" style="background:#e7dba9; color:#232323; border:none; padding:4px 10px; border-radius:3px; cursor:pointer;">Grant Admin</button></form>
                             <?php endif; ?>
-                            <form method="post" style="display:inline; margin-left:5px;"><input type="hidden" name="userid" value="<?php echo $user['userid']; ?>"><button type="submit" name="delete_user" style="background:#c0392b; color:#fff; border:none; padding:4px 10px; border-radius:3px; cursor:pointer;">Delete</button></form>
+                            <form class="user-action-form" method="post" style="display:inline; margin-left:5px;"><input type="hidden" name="userid" value="<?php echo $user['userid']; ?>"><button type="submit" name="delete_user" style="background:#c0392b; color:#fff; border:none; padding:4px 10px; border-radius:3px; cursor:pointer;">Delete</button></form>
                         </td>
                     </tr>
                 <?php endwhile; } ?>
                 </tbody>
             </table>
+            </div>
+            </div>
         </div>
         <div id="audio" class="admin-section">
             <h2>Audio</h2>
@@ -125,5 +130,93 @@ if (!$is_admin) {
         </div>
     </div>
 </div>
+<!-- Scroll to Top Button -->
+<button id="scroll-to-top-btn" style="position: fixed; right: 32px; bottom: 32px; width: 64px; height: 64px; border-radius: 50%; background: #232323; color: #e7dba9; border: 2px solid #464646; display: flex; align-items: center; justify-content: center; font-size: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.2); cursor: pointer; z-index: 1000; transition: background 0.2s;" title="Scroll to Top">
+    <span style="display: inline-block; transform: rotate(-90deg); position: relative; top: -3px; left: -1px;">&#9654;</span>
+</button>
+<script>
+// Collapse/Expand Users Section
+const toggleBtn = document.getElementById('toggle-users-btn');
+const usersContent = document.getElementById('users-content');
+const arrow = document.getElementById('toggle-users-arrow');
+let usersCollapsed = false;
+toggleBtn.addEventListener('click', function() {
+    usersCollapsed = !usersCollapsed;
+    usersContent.style.display = usersCollapsed ? 'none' : '';
+    arrow.style.transform = usersCollapsed ? 'rotate(-90deg )' : 'rotate(0deg)';
+});
+// Scroll to Top Button
+const scrollBtn = document.getElementById('scroll-to-top-btn');
+scrollBtn.addEventListener('click', function() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+// Offset scroll for anchor navigation (navbar height)
+function offsetAnchorScroll() {
+    const navbar = document.querySelector('.navbar-spacer');
+    const offset = navbar ? navbar.offsetHeight : 60;
+    if (window.location.hash) {
+        const el = document.getElementById(window.location.hash.substring(1));
+        if (el) {
+            const y = el.getBoundingClientRect().top + window.pageYOffset - offset - 10;
+            window.scrollTo({top: y, behavior: 'smooth'});
+        }
+    }
+}
+document.querySelectorAll('.admin-nav a').forEach(link => {
+    link.addEventListener('click', function(e) {
+        // Let the hash update, then scroll
+        setTimeout(offsetAnchorScroll, 10);
+    });
+});
+// On page load with hash
+window.addEventListener('DOMContentLoaded', function() {
+    if (window.location.hash) {
+        setTimeout(offsetAnchorScroll, 10);
+    }
+    // Delete user confirmation
+    document.querySelectorAll("form button[name='delete_user']").forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+                e.preventDefault();
+            }
+        });
+    });
+});
+// AJAX for user action forms
+function attachUserActionAJAX() {
+    document.querySelectorAll('.user-action-form').forEach(form => {
+        // Track which button was clicked
+        form.querySelectorAll('button[type=submit]').forEach(btn => {
+            btn.addEventListener('click', function(event) {
+                form._clickedButton = btn;
+            });
+        });
+        form.onsubmit = function(e) {
+            e.preventDefault();
+            const formData = new FormData(form);
+            // Add the clicked button's name/value
+            if (form._clickedButton && form._clickedButton.name) {
+                formData.append(form._clickedButton.name, form._clickedButton.value || '1');
+            }
+            // Confirmation for delete
+            if (form._clickedButton && form._clickedButton.name === 'delete_user') {
+                if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+                    return;
+                }
+            }
+            fetch('admin_users_table.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.text())
+            .then(html => {
+                document.getElementById('users-table-container').innerHTML = html;
+                attachUserActionAJAX(); // re-attach to new forms
+            });
+        };
+    });
+}
+attachUserActionAJAX();
+</script>
 </body>
 </html> 

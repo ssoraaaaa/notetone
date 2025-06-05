@@ -69,9 +69,9 @@ if ($thread_result->num_rows > 0) {
     <div class="navbar-spacer"></div>
     <div class="container">
         <div class="wrapper" style="width: 80%; max-width: 1200px; margin: 0 auto;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                <h2 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #fff; font-size: 2rem; margin: 0;">My Threads</h2>
-                <a href="add_thread.php" class="btn btn-primary" style="text-decoration: none;">Create New Thread</a>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h1 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">My Threads</h1>
+                <a href="add_thread.php?from=mythreads" class="btn btn-primary" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-decoration: none;">Create Thread</a>
             </div>
             <?php if (empty($threads)): ?>
                 <p style="color: #888; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1rem;">No threads found.</p>

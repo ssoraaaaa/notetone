@@ -280,4 +280,116 @@ textarea {
     width: 100%;
     text-align: center;
     font-size: 1rem;
-} 
+}
+
+/* Profile Page Form Styling */
+.wrapper-profile {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 24px 0;
+}
+.profile-form {
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: 20px;
+}
+.input-box {
+  width: 100%;
+  margin-bottom: 15px;
+}
+.profile-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  background: #2a2a2a;
+  color: #fff;
+  border: 1px solid #464646;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  outline: none;
+  transition: border 0.2s;
+}
+.profile-input:focus {
+  border: 1.5px solid #3399ff;
+}
+.profile-btn {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s;
+}
+.btn-primary.profile-btn {
+  background: #178aff;
+  color: #fff;
+}
+.btn-primary.profile-btn:hover {
+  background: #0f6fd1;
+}
+.btn-delete-profile.profile-btn {
+  background: #ff6b6b;
+  color: #fff;
+}
+.btn-delete-profile.profile-btn:hover {
+  background: #d94c4c;
+}
+@media (max-width: 600px) {
+  .wrapper-profile {
+    padding: 12px 0;
+  }
+  .profile-box {
+    font-size: 0.95rem;
+  }
+  .profile-btn, .profile-input {
+    font-size: 0.95rem;
+    padding: 10px;
+  }
+}
+
+/* Admin Panel Collapse/Expand and Scroll-to-Top Button */
+#toggle-users-btn {
+  background: #232323;
+  color: #e7dba9;
+  border: 1px solid #464646;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+#toggle-users-btn:hover {
+  background: #e7dba9;
+  color: #232323;
+}
+#scroll-to-top-btn {
+  position: fixed;
+  right: 32px;
+  bottom: 32px;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #232323;
+  color: #e7dba9;
+  border: 2px solid #464646;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  cursor: pointer;
+  z-index: 1000;
+  transition: background 0.2s;
+}
+#scroll-to-top-btn:hover {
+  background: #e7dba9;
+  color: #232323;
+}

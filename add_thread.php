@@ -7,6 +7,11 @@ if (!isLoggedIn()) {
     exit();
 }
 
+// Get the source page from URL parameter
+$from = isset($_GET['from']) ? $_GET['from'] : 'threads';
+$backLink = ($from === 'dashboard') ? 'dashboard.php' : 
+           (($from === 'mythreads') ? 'mythreads.php' : 'threads.php');
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $title = $_POST['title'];
     $content = $_POST['content'];
@@ -48,7 +53,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div class="form-group" style="width: 100%;">
                 <textarea name="content" class="form-control" placeholder="What's on your mind?" required style="height: 100px; resize: none; width: 100%; background: #2a2a2a; color: #fff; border: 1px solid #464646; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"></textarea>
             </div>
-            <button type="submit" name="add_thread" class="btn btn-primary" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin-top: 20px;">Create Thread</button>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="submit" name="add_thread" class="btn btn-primary" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">Create Thread</button>
+                <a href="<?php echo $backLink; ?>" class="btn btn-primary" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-decoration: none;">Back</a>
+            </div>
         </form>
     </div>
 </body>

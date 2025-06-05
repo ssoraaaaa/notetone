@@ -52,19 +52,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="navbar-spacer"></div>
     <div class="auth-container">
         <div class="auth-box">
-            <h2>Login</h2>
-            <?php if ($error): ?>
-                <div class="error"><?php echo $error; ?></div>
-            <?php endif; ?>
-            <form method="post" action="">
-                <div class="form-group">
-                    <input type="text" id="username" name="username" class="form-control" placeholder="Username" required>
-                </div>
-                <div class="form-group">
-                    <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Login</button>
-            </form>
+        <h2>Login</h2>
+        <?php if ($error): ?>
+            <div class="error"><?php echo $error; ?></div>
+        <?php endif; ?>
+        <form method="post" action="">
+            <div class="form-group">
+                <input type="text" id="username" name="username" class="form-control" placeholder="Username" required>
+            </div>
+            <div class="form-group">
+                <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Login</button>
+        </form>
             <p style="margin-top: 18px;">Don't have an account? <a href="register.php" style="color: #4faaff;">Register here</a></p>
         </div>
     </div>

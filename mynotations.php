@@ -92,8 +92,6 @@ if ($notation_result->num_rows > 0) {
                     </a>
                 <?php endforeach; ?>
             <?php endif; ?>
-            <?php $backLink = (isset($_GET['from']) && $_GET['from'] === 'dashboard') ? 'dashboard.php' : '/'; ?>
-            <a href="<?php echo $backLink; ?>" class="btn btn-primary" style="text-decoration: none;">&larr; Back</a>
         </div>
     </div>
 </body>
