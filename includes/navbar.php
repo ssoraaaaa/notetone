@@ -26,17 +26,15 @@ require_once 'includes/session.php';
             <li class="navbar-item">
                 <a class="navbar-link" href="profile.php">Profile</a>
             </li>
-            <li class="navbar-item">
-                <a class="navbar-link" href="logout.php">Logout</a>
-            </li>
-        <?php else: ?>
-            <li class="navbar-item">
-                <a class="navbar-link" href="login.php">Login</a>
-            </li>
-            <li class="navbar-item">
-                <a class="navbar-link" href="register.php">Register</a>
-            </li>
         <?php endif; ?>
     </ul>
+    <div class="navbar-auth">
+        <?php if (isLoggedIn()): ?>
+            <a class="navbar-link" href="logout.php">Logout</a>
+        <?php else: ?>
+            <a class="navbar-link" href="login.php">Login</a>
+            <a class="navbar-link" href="register.php">Register</a>
+        <?php endif; ?>
+    </div>
 </nav>
 <div class="navbar-spacer"></div> 

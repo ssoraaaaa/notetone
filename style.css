@@ -70,12 +70,6 @@ body {
     box-sizing: border-box;
 }
 
-.notation-box, #vf-container, {
-    width: 100%;
-    overflow-x: none;
-    margin: 0 auto;
-}
-
 .input-box {
     margin-bottom: 20px;
 }
@@ -214,4 +208,76 @@ textarea {
     word-break: break-word;
     overflow-y: hidden;
     min-height: 120px;
+}
+
+.auth-container {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+}
+
+.auth-box {
+    background: #232323;
+    padding: 36px 32px 28px 32px;
+    border-radius: 10px;
+    box-shadow: 0 2px 16px #0004;
+    min-width: 480px;
+    max-width: 95vw;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.auth-box h2 {
+    margin-bottom: 18px;
+    color: #fff;
+    font-size: 2rem;
+    text-align: center;
+}
+
+.auth-box .form-group {
+    width: 100%;
+    margin-bottom: 18px;
+}
+
+.auth-box .form-control {
+    width: 100%;
+    padding: 16px 24px;
+    border-radius: 5px;
+    border: 1px solid #464646;
+    background: #2a2a2a;
+    color: #fff;
+    font-size: 1.1rem;
+    box-sizing: border-box;
+}
+
+.auth-box .btn-primary {
+    width: 100%;
+    padding: 12px 0;
+    font-size: 1.1rem;
+    border-radius: 5px;
+    background: #4faaff;
+    color: #fff;
+    border: none;
+    margin-top: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.auth-box .btn-primary:hover {
+    background: #238be6;
+}
+
+.auth-box .error {
+    color: #ff6b6b;
+    background: #2a1a1a;
+    border-radius: 4px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    width: 100%;
+    text-align: center;
+    font-size: 1rem;
 } 

@@ -263,13 +263,17 @@ EOT;
                 <button type="submit" class="btn btn-primary"><?php echo $button_text; ?></button>
                 <a href="<?php echo $backLink; ?>" class="btn btn-primary" style="text-decoration: none;">&larr; Back</a>
                 <?php if ($edit_mode): ?>
-                    <form method="POST" action="" onsubmit="return confirm('Are you sure you want to delete this notation? This cannot be undone.');" style="display:inline; margin:0; padding:0;">
-                        <button type="submit" name="delete_notation" class="btn btn-delete-notation" style="background: #ff6b6b; color: #fff; border: none; border-radius: 4px; padding: 10px 22px; font-size: 1rem; cursor: pointer;">Delete Notation</button>
-                    </form>
+                    <button type="button" id="delete-notation-btn" class="btn btn-delete-notation" style="background: #ff6b6b; color: #fff; border: none; border-radius: 4px; padding: 10px 22px; font-size: 1rem; cursor: pointer;">Delete Notation</button>
                 <?php endif; ?>
             </div>
         </form>
         <div id="notation-message" style="margin-top: 15px;"></div>
+        <?php if ($edit_mode): ?>
+        <form id="delete-notation-form" method="POST" action="" style="display:none;">
+            <input type="hidden" name="delete_notation" value="1">
+        </form>
+        <?php include 'components/notation/delete_modal.php'; ?>
+        <?php endif; ?>
     </div>
     <?php include('includes/footer.php'); ?>
     <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.2/build/cjs/vexflow.js"></script>
@@ -414,7 +418,7 @@ EOT;
             previewDiv.innerHTML = '';
             const VF = Vex.Flow;
             
-            const fixedStaveWidth = 1100;
+            const fixedStaveWidth = 1200;
             const lineHeight = 200;
             const staveStartX = 10;
             const staveContentStartX = 80; // After TAB clef

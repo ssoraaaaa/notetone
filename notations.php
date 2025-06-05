@@ -21,6 +21,7 @@ if ($notation_result->num_rows > 0) {
 </head>
 <body>
     <?php include 'includes/navbar.php'; ?>
+    <div class="navbar-spacer"></div>
     <div class="container">
         <div class="wrapper" style="width: 80%; max-width: 1200px; margin: 0 auto;">
             <div class="container-header">

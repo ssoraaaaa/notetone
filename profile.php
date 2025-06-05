@@ -147,7 +147,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_profile'])) {
             <div class="input-box">
                 <input type="text" name="new_username" placeholder="New Username">
             </div>
-            <button class="btn-change-username" type="submit" name="change_username">Change Username</button>
+            <button class="btn btn-primary" type="submit" name="change_username">Change Username</button>
         </form>
         <form method="POST" action="">
             <div class="input-box">
@@ -159,7 +159,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_profile'])) {
             <div class="input-box">
                 <input type="password" name="confirm_password" placeholder="Confirm New Password">
             </div>
-            <button class="btn-change-password" type="submit" name="change_password">Change Password</button>
+            <button class="btn btn-primary" type="submit" name="change_password">Change Password</button>
         </form>
         <form method="POST" action="">
             <button class="btn-delete-profile" type="submit" name="delete_profile">Delete Profile</button>

@@ -118,10 +118,12 @@ if (strpos($back_url, 'edit.php') !== false) {
         </div>
     </div>
     <?php if (isLoggedIn() && isset($notation['userid']) && $notation['userid'] == $_SESSION['userid'] && $from === 'mynotations'): ?>
-    <form method="POST" action="" style="display:inline-block; margin-right: 10px;">
-        <button class="btn-delete-notation" type="submit" name="delete" style="background: #ff6b6b; color: #fff; border: none; border-radius: 4px; padding: 10px 22px; font-size: 1rem; cursor: pointer;">Delete Notation</button>
+    <button type="button" id="delete-notation-btn" class="btn btn-delete-notation" style="background: #ff6b6b; color: #fff; border: none; border-radius: 4px; padding: 10px 22px; font-size: 1rem; cursor: pointer; display:inline-block; margin-right: 10px;">Delete Notation</button>
+    <form id="delete-notation-form" method="POST" action="" style="display:none;">
+        <input type="hidden" name="delete" value="1">
     </form>
     <a href="edit.php?id=<?php echo $notation['notationid']; ?>&from=mynotations&back=<?php echo urlencode($back_url); ?>" class="btn btn-primary" style="text-decoration: none; padding: 10px 22px; font-size: 1rem; border-radius: 4px; background: #4faaff; color: #fff; border: none; margin-left: 10px;">Edit</a>
+    <?php include 'components/notation/delete_modal.php'; ?>
     <?php endif; ?>
     <a href="<?php echo htmlspecialchars($back_url); ?>" class="btn btn-primary" style="text-decoration: none; margin-left: 10px;">&larr; Back</a>
 
@@ -175,7 +177,7 @@ if (strpos($back_url, 'edit.php') !== false) {
         const div = document.getElementById('vf-container');
         div.innerHTML = '';
         const lines = splitNotesIntoLines(notes, 16); // You can adjust max notes per line
-        const fixedStaveWidth = 1100;
+        const fixedStaveWidth = 1200;
         const lineHeight = 200;
         const svgHeight = lines.length * lineHeight + 60;
         const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
