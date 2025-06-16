@@ -62,6 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="navbar-spacer"></div>
 <div class="container">
     <div class="wrapper" style="max-width: 600px; margin: 40px auto; background: #232323; border-radius: 8px; padding: 32px 24px; box-shadow: 0 2px 16px #0002;">
+        <a href="dashboard.php" class="btn btn-primary" style="margin-bottom: 18px; display: inline-block;">&larr; Back</a>
         <h2 style="color: #fff;">Add Song</h2>
         <?php if (!empty($errors)): ?>
             <div style="color: #ff6b6b; margin-bottom: 16px;">

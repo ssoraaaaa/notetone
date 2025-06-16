@@ -18,18 +18,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_SESSION['username'];
 
     // Fetch user id based on username
-    $user_sql = "SELECT userid FROM users WHERE username='$username'";
-    $user_result = $conn->query($user_sql);
-    $user_row = $user_result->fetch_assoc();
+    $user_sql = "SELECT userid FROM users WHERE username = ?";
+    $stmt = $conn->prepare($user_sql);
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user_row = $result->fetch_assoc();
     $userid = $user_row['userid'];
 
     // Insert thread into database
-    $sql = "INSERT INTO threads (title, content, createdby) VALUES ('$title', '$content', '$userid')";
-    if ($conn->query($sql) === TRUE) {
+    $sql = "INSERT INTO threads (title, content, createdby) VALUES (?, ?, ?)";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ssi", $title, $content, $userid);
+    
+    if ($stmt->execute()) {
         header('Location: threads.php');
         exit;
     } else {
-        echo "Error: " . $sql . "<br>" . $conn->error;
+        echo "Error: " . $stmt->error;
     }
 }
 ?>

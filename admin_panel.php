@@ -35,16 +35,67 @@ if (!$is_admin) {
 <div class="navbar-spacer"></div>
 <div class="container">
     <div class="wrapper" style="max-width: 1500px; margin: 0 auto;">
-    <h1><yle="color:#e7dba9;">Admin Panel</h1>
+    <h1 style="color:#e7dba9;">Admin Panel</h1>
         <div class="admin-nav">
+            <a href="#stats">Statistics</a>
             <a href="#users">Users</a>
-            <a href="#audio">Audio</a>
-            <a href="#songs">Songs</a>
             <a href="#song-approval">Song Request Approval</a>
-            <a href="#threads">Threads</a>
-            <a href="#comments">Thread Comments</a>
-            <a href="#categories">Notation Categories</a>
-            <a href="#settings">System Settings</a>
+        </div>
+        <div id="stats" class="admin-section">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                <h2 style="margin: 0;">Website Statistics</h2>
+                <button id="toggle-stats-btn" style="background: #232323; color: #e7dba9; border: 1px solid #464646; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; transition: background 0.3s;" title="Collapse/Expand Statistics">
+                    <span id="toggle-stats-arrow" style="display: inline-block; transition: transform 0.3s;">&#9660;</span>
+                </button>
+            </div>
+            <div id="stats-content">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                    <?php
+                    // Total Users
+                    $total_users = $conn->query("SELECT COUNT(*) as count FROM users")->fetch_assoc()['count'];
+                    // Total Songs
+                    $total_songs = $conn->query("SELECT COUNT(*) as count FROM songs WHERE status = 'approved'")->fetch_assoc()['count'];
+                    // Total Notations
+                    $total_notations = $conn->query("SELECT COUNT(*) as count FROM notations")->fetch_assoc()['count'];
+                    // Total Threads
+                    $total_threads = $conn->query("SELECT COUNT(*) as count FROM threads")->fetch_assoc()['count'];
+                    // Total Comments
+                    $total_comments = $conn->query("SELECT COUNT(*) as count FROM threadcomments")->fetch_assoc()['count'];
+                    // Pending Songs
+                    $pending_songs = $conn->query("SELECT COUNT(*) as count FROM songs WHERE status = 'pending'")->fetch_assoc()['count'];
+                    ?>
+                    <div style="background: #181818; padding: 1.5rem; border-radius: 8px; text-align: center;">
+                        <i class="fas fa-users" style="font-size: 2rem; color: #e7dba9; margin-bottom: 0.5rem;"></i>
+                        <h3 style="color: #e7dba9; margin: 0.5rem 0;">Total Users</h3>
+                        <p style="font-size: 1.5rem; color: #fff; margin: 0;"><?php echo $total_users; ?></p>
+                    </div>
+                    <div style="background: #181818; padding: 1.5rem; border-radius: 8px; text-align: center;">
+                        <i class="fas fa-music" style="font-size: 2rem; color: #e7dba9; margin-bottom: 0.5rem;"></i>
+                        <h3 style="color: #e7dba9; margin: 0.5rem 0;">Total Songs</h3>
+                        <p style="font-size: 1.5rem; color: #fff; margin: 0;"><?php echo $total_songs; ?></p>
+                    </div>
+                    <div style="background: #181818; padding: 1.5rem; border-radius: 8px; text-align: center;">
+                        <i class="fas fa-file-alt" style="font-size: 2rem; color: #e7dba9; margin-bottom: 0.5rem;"></i>
+                        <h3 style="color: #e7dba9; margin: 0.5rem 0;">Total Notations</h3>
+                        <p style="font-size: 1.5rem; color: #fff; margin: 0;"><?php echo $total_notations; ?></p>
+                    </div>
+                    <div style="background: #181818; padding: 1.5rem; border-radius: 8px; text-align: center;">
+                        <i class="fas fa-comments" style="font-size: 2rem; color: #e7dba9; margin-bottom: 0.5rem;"></i>
+                        <h3 style="color: #e7dba9; margin: 0.5rem 0;">Total Threads</h3>
+                        <p style="font-size: 1.5rem; color: #fff; margin: 0;"><?php echo $total_threads; ?></p>
+                    </div>
+                    <div style="background: #181818; padding: 1.5rem; border-radius: 8px; text-align: center;">
+                        <i class="fas fa-reply-all" style="font-size: 2rem; color: #e7dba9; margin-bottom: 0.5rem;"></i>
+                        <h3 style="color: #e7dba9; margin: 0.5rem 0;">Total Comments</h3>
+                        <p style="font-size: 1.5rem; color: #fff; margin: 0;"><?php echo $total_comments; ?></p>
+                    </div>
+                    <div style="background: #181818; padding: 1.5rem; border-radius: 8px; text-align: center;">
+                        <i class="fas fa-clock" style="font-size: 2rem; color: #e7dba9; margin-bottom: 0.5rem;"></i>
+                        <h3 style="color: #e7dba9; margin: 0.5rem 0;">Pending Songs</h3>
+                        <p style="font-size: 1.5rem; color: #fff; margin: 0;"><?php echo $pending_songs; ?></p>
+                    </div>
+                </div>
+            </div>
         </div>
         <div id="users" class="admin-section">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
@@ -90,18 +141,6 @@ if (!$is_admin) {
             </table>
             </div>
             </div>
-        </div>
-        <div id="audio" class="admin-section">
-            <h2>Audio</h2>
-            <ul>
-                <li>Replace or delete any audio attached to a notation</li>
-            </ul>
-        </div>
-        <div id="songs" class="admin-section">
-            <h2>Songs</h2>
-            <ul>
-                <li>Manage song records or data</li>
-            </ul>
         </div>
         <div id="song-approval" class="admin-section">
             <h2>Approve or Decline Song Requests</h2>
@@ -158,32 +197,6 @@ if (!$is_admin) {
                     <?php endforeach; ?>
                 </table>
             <?php endif; ?>
-        </div>
-        <div id="threads" class="admin-section">
-            <h2>Threads</h2>
-            <ul>
-                <li>Edit any user-created thread</li>
-                <li>Delete threads that violate rules or contain unwanted content</li>
-            </ul>
-        </div>
-        <div id="comments" class="admin-section">
-            <h2>Thread Comments</h2>
-            <ul>
-                <li>Edit any comment</li>
-                <li>Delete comments that are offensive, spam, or violate site policy</li>
-            </ul>
-        </div>
-        <div id="categories" class="admin-section">
-            <h2>Notation Categories</h2>
-            <ul>
-                <li>Manage (create, edit, delete) categories for filtering/searching notations (e.g., "classical", "pop", "jazz", etc.)</li>
-            </ul>
-        </div>
-        <div id="settings" class="admin-section">
-            <h2>System Settings</h2>
-            <ul>
-                <li>Configure global parameters (e.g., max audio/notation size, PDF generation standards, access restrictions)</li>
-            </ul>
         </div>
     </div>
 </div>
@@ -274,6 +287,16 @@ function attachUserActionAJAX() {
     });
 }
 attachUserActionAJAX();
+// Toggle Stats Section
+const toggleStatsBtn = document.getElementById('toggle-stats-btn');
+const statsContent = document.getElementById('stats-content');
+const statsArrow = document.getElementById('toggle-stats-arrow');
+let statsCollapsed = false;
+toggleStatsBtn.addEventListener('click', function() {
+    statsCollapsed = !statsCollapsed;
+    statsContent.style.display = statsCollapsed ? 'none' : '';
+    statsArrow.style.transform = statsCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)';
+});
 </script>
 </body>
 </html> 

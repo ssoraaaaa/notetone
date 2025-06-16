@@ -227,6 +227,7 @@ EOT;
                     <?php endforeach; ?>
                 </select>
             </div>
+            <a href="add_song.php" class="btn btn-secondary" style="margin-bottom: 20px;">Request a Song</a>
             <div class="form-group" style="width: 100%; margin-bottom: 20px;">
                 <select name="instrumentid" id="notation-instrumentid" required style="width: 100%; height: 45px; background: #2a2a2a; color: #fff; border: 1px solid #464646; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 0 10px;">
                     <option value="">Select Instrument</option>
@@ -236,17 +237,17 @@ EOT;
                 </select>
             </div>
             <div style="margin-bottom: 20px;">
-                <button type="button" id="tab-mode-btn" class="btn" style="margin-right: 10px; <?php if ($prefill_mode === 'tab') echo 'background: #4faaff; color: #fff;'; ?>">Tab Editor</button>
-                <button type="button" id="text-mode-btn" class="btn" <?php if ($prefill_mode === 'text') echo 'style="background: #4faaff; color: #fff;"'; ?>>Text Notation</button>
+                <button type="button" id="tab-mode-btn" class="btn btn-secondary" style="margin-right: 10px;">Tab Editor</button>
+                <button type="button" id="text-mode-btn" class="btn btn-secondary">Text Notation</button>
             </div>
             <div id="tab-editor" style="display: <?php echo $prefill_mode === 'tab' ? '' : 'none'; ?>;">
                 <div class="form-group" style="width: 100%;">
                     <div id="tab-editor-controls" style="display: flex; flex-direction: column; gap: 10px; align-items: flex-start; margin-bottom: 10px;">
                         <div id="fretboard-app"></div>
                         <div style="display: flex; gap: 10px;">
-                            <button type="button" id="add-chord" class="btn btn-primary">Add Chord</button>
-                            <button type="button" id="add-tact" class="btn btn-primary">Add Bar Line</button>
-                            <button type="button" id="clear-chord" class="btn btn-primary">Clear Chord</button>
+                            <button type="button" id="add-chord" class="btn btn-secondary">Add Chord</button>
+                            <button type="button" id="add-tact" class="btn btn-secondary">Add Bar Line</button>
+                            <button type="button" id="clear-chord" class="btn btn-secondary">Clear Chord</button>
                         </div>
                     </div>
                     <div id="tab-note-list" style="display: none;"></div>
@@ -270,10 +271,10 @@ EOT;
                 </div>
             </div>
             <div style="display: flex; gap: 10px; margin-top: 20px; align-items: center;">
-                <button type="submit" class="btn btn-primary"><?php echo $button_text; ?></button>
-                <a href="<?php echo $backLink; ?>" class="btn btn-primary" style="text-decoration: none;">&larr; Back</a>
+                <button type="submit" class="btn btn-primary" style="color: #fff; border: none; box-shadow: none;"><?php echo $button_text; ?></button>
+                <a href="<?php echo $backLink; ?>" class="btn btn-primary" style="text-decoration: none; color: #fff; border: none; box-shadow: none;">&larr; Back</a>
                 <?php if ($edit_mode): ?>
-                    <button type="button" id="delete-notation-btn" class="btn btn-delete-notation" style="background: #ff6b6b; color: #fff; border: none; border-radius: 4px; padding: 10px 22px; font-size: 1rem; cursor: pointer;">Delete Notation</button>
+                    <button type="button" id="delete-notation-btn" class="btn btn-primary" style="background: #ff6b6b; color: #fff;">Delete Notation</button>
                 <?php endif; ?>
             </div>
         </form>
@@ -311,8 +312,9 @@ EOT;
         const messageDiv = document.getElementById('notation-message');
 
         let tabNotes = [];
-        let selectedNoteIdx = null; // Track selected note index for deletion
-        let tabCursorIdx = tabNotes.length; // Cursor defaults to end
+        let selectedNoteIdx = null;
+        let tabCursorIdx = tabNotes.length;
+
         // Prefill logic
         if (editMode) {
             // Set all fields
@@ -323,10 +325,6 @@ EOT;
             if (prefillMode === 'tab') {
                 tabEditor.style.display = '';
                 textEditor.style.display = 'none';
-                tabModeBtn.style.background = '#4faaff';
-                tabModeBtn.style.color = '#fff';
-                textModeBtn.style.background = '';
-                textModeBtn.style.color = '';
                 try {
                     tabNotes = JSON.parse(prefill.content);
                 } catch (e) {
@@ -340,10 +338,6 @@ EOT;
             } else {
                 tabEditor.style.display = 'none';
                 textEditor.style.display = '';
-                textModeBtn.style.background = '#4faaff';
-                textModeBtn.style.color = '#fff';
-                tabModeBtn.style.background = '';
-                tabModeBtn.style.color = '';
                 textContent.value = prefill.content.replace(/\\n/g, "\n");
                 tabJsonContent.name = '';
                 textContent.name = 'content';
@@ -356,10 +350,6 @@ EOT;
             tabModeBtn.addEventListener('click', function() {
                 tabEditor.style.display = '';
                 textEditor.style.display = 'none';
-                tabModeBtn.style.background = '#4faaff';
-                tabModeBtn.style.color = '#fff';
-                textModeBtn.style.background = '';
-                textModeBtn.style.color = '';
                 tabJsonContent.name = 'content';
                 textContent.name = '';
                 renderVexflowTab();
@@ -367,10 +357,6 @@ EOT;
             textModeBtn.addEventListener('click', function() {
                 tabEditor.style.display = 'none';
                 textEditor.style.display = '';
-                textModeBtn.style.background = '#4faaff';
-                textModeBtn.style.color = '#fff';
-                tabModeBtn.style.background = '';
-                tabModeBtn.style.color = '';
                 tabJsonContent.name = '';
                 textContent.name = 'content';
             });

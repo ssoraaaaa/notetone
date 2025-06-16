@@ -88,7 +88,7 @@ if ($notation_result->num_rows > 0) {
                                 </div>
                             </div>
                             <div style="margin-left: 20px; z-index: 2; position: relative;">
-                                <a href="edit.php?id=<?php echo $notation['notationid']; ?>&from=mynotations&back=mynotations.php" class="btn btn-primary" style="text-decoration: none; padding: 8px 16px;">Edit</a>
+                                <a href="edit.php?id=<?php echo $notation['notationid']; ?>&from=mynotations&back=mynotations.php" class="btn btn-secondary" style="text-decoration: none; padding: 8px 16px;">Edit</a>
                             </div>
                         </div>
                     </a>

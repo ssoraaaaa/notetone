@@ -1,4 +1,4 @@
-# NoteTone
+# NoteTone - Mūzikas notāciju un diskusiju platforma
 
 NoteTone is a web application designed for music enthusiasts to share, view, and manage musical notations and threads. Users can create accounts, log in, create notations and threads.
 
@@ -28,54 +28,82 @@ The database contains the following tables:
 - `videocomments`: Stores comments on videos (not used in this version)
 - `videos`: Stores video information (not used in this version)
 
-## Installation
+## Sistēmas prasības
+- PHP 7.4 vai jaunāka versija
+- MySQL 5.7 vai jaunāka versija
+- XAMPP vai līdzīgs lokālais serveris
+- Node.js un npm (jaunākā versija)
 
-1. Clone the repository:
-    ```bash
-    git clone https://github.com/yourusername/notetone.git
-    ```
+## Instalācijas norādījumi
 
-2. Navigate to the project directory:
-    ```bash
-    cd notetone
-    ```
+### 1. Servera iestatīšana
+1. Lejupielādējiet un instalējiet XAMPP no [oficiālās mājaslapas](https://www.apachefriends.org/)
+2. Palaidiet XAMPP Control Panel
+3. Startējiet Apache un MySQL servisus
 
-3. Set up the database:
-    - Import the `notetone_db.sql` file into your MySQL database.
+### 2. Projekta instalācija
+1. Klonējiet repozitoriju vai lejupielādējiet projekta failus
+2. Novietojiet projekta failus XAMPP htdocs mapē (parasti `C:\xampp\htdocs\notetone`)
+3. Atveriet phpMyAdmin (http://localhost/phpmyadmin)
+4. Izveidojiet jaunu datubāzi ar nosaukumu `notetone_db`
+5. Importējiet datubāzes struktūru no `database/notetone_db.sql` faila
 
-4. Configure the database connection:
-    - Update the `db.php` file with your database credentials.
+### 3. Projekta konfigurācija
+1. Atveriet `includes/db.php` failu
+2. Pārliecinieties, ka datubāzes piekļuves dati ir pareizi:
+   ```php
+   $servername = "localhost";
+   $username = "root";
+   $password = "";
+   $dbname = "notetone_db";
+   ```
 
-5. Start your web server (e.g., using XAMPP or MAMP).
+### 4. Frontend atkarību instalācija
+1. Atveriet termināli projekta mapē
+2. Izpildiet komandu:
+   ```bash
+   npm install
+   ```
 
-6. Open your browser and navigate to the project directory.
+## Sistēmas palaišana
 
-## Usage
+1. Palaidiet XAMPP Control Panel
+2. Startējiet Apache un MySQL servisus
+3. Atveriet pārlūkprogrammu un dodieties uz:
+   ```
+   http://localhost/notetone
+   ```
 
-### User Registration and Login
+## Pirmā lietotāja reģistrācija
 
-- Navigate to the registration page to create a new account.
-- After registration, you can log in with your credentials.
+1. Atveriet http://localhost/notetone/register.php
+2. Aizpildiet reģistrācijas formu
+3. Pēc reģistrācijas varat pieteikties sistēmā
 
-### Dashboard
+## Administratora piekļuve
 
-- The dashboard displays all notations and threads in the system.
-- Use the dropdown filters to filter notations by creator, song, or instrument.
+1. Piesakieties sistēmā ar administratora kontu
+2. Administratora panelis ir pieejams caur:
+   ```
+   http://localhost/notetone/admin_panel.php
+   ```
 
-### Creating Notations and Threads
+## Problēmu risināšana
 
-- Navigate to the notations or threads page to create new entries.
-- Provide the required information and submit the form.
+Ja rodas problēmas ar datubāzes savienojumu:
+1. Pārbaudiet, vai MySQL serviss ir aktīvs
+2. Pārbaudiet datubāzes piekļuves datus `includes/db.php` failā
+3. Pārliecinieties, ka datubāze `notetone_db` eksistē
 
-### Profile Management
+Ja rodas problēmas ar frontend:
+1. Pārbaudiet, vai visas npm atkarības ir instalētas
+2. Pārbaudiet pārlūkprogrammas konsoleļa kļūdas
 
-- Navigate to the profile page to change your username or password.
-- You can also delete your profile from the profile page.
+## Papildu informācija
 
-### Deleting Notations and Threads
-
-- Only the creator of a notation or thread can delete it.
-- Navigate to the details page of the notation or thread to delete it.
+- Sistēma izmanto PHP sesijas lietotāju autentifikācijai
+- Failu augšupielādei tiek izmantota `assets/uploads` mape
+- Sistēma atbalsta dažādus mūzikas failu formātus
 
 ## Project Structure
 

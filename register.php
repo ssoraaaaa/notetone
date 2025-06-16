@@ -24,8 +24,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $error = "Username can only contain letters, numbers, and underscores";
     } elseif ($password !== $confirm_password) {
         $error = "Passwords do not match";
-    } elseif (strlen($password) < 6) {
-        $error = "Password must be at least 6 characters long";
+    } elseif (strlen($password) < 8) {
+        $error = "Password must be at least 8 characters long";
     } else {
         // Check if username already exists
         $sql = "SELECT * FROM users WHERE username = ?";

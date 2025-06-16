@@ -7,12 +7,6 @@ if (!isLoggedIn()) {
     exit();
 }
 
-// Debug information
-echo "Session data:<br>";
-echo "Username: " . $_SESSION['username'] . "<br>";
-echo "User ID: " . (isset($_SESSION['userid']) ? $_SESSION['userid'] : 'Not set') . "<br>";
-
-// Fetch user's threads
 $username = $_SESSION['username'];
 if (!isset($_SESSION['userid'])) {
     // If userid is not set, try to fetch it from the database
@@ -24,7 +18,6 @@ if (!isset($_SESSION['userid'])) {
         $result = $stmt->get_result();
         if ($row = $result->fetch_assoc()) {
             $_SESSION['userid'] = $row['userid'];
-            echo "Retrieved user ID from database: " . $row['userid'] . "<br>";
         } else {
             die("Error: Could not find user ID");
         }
@@ -44,9 +37,6 @@ if (!$stmt) {
 $stmt->bind_param("i", $userid);
 $stmt->execute();
 $thread_result = $stmt->get_result();
-
-// Debug query results
-// echo "Number of threads found: " . $thread_result->num_rows . "<br>";
 
 $threads = [];
 if ($thread_result->num_rows > 0) {

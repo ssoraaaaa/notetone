@@ -674,3 +674,199 @@ em {
 
 
   /* padding: wdsa */
+
+/* --- Unified Modern Dark Theme Additions --- */
+
+.wrapper, .wrapper-profile, .wrapper-notation, .wrapper-thread {
+  background: rgba(35, 35, 35, 0.98);
+  border: 2px solid #474747;
+  color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 16px #0002;
+  padding: 32px 24px;
+  margin: 40px auto;
+  max-width: 700px;
+  position: static;
+  left: unset;
+  top: unset;
+  transform: none;
+}
+
+.section-title, .wrapper h2, .wrapper-profile h2, .wrapper-notation h2, .wrapper-thread h2 {
+  color: #e7dba9;
+  font-size: 2.2rem;
+  margin-bottom: 24px;
+  text-align: center;
+  font-family: 'Barlow', sans-serif;
+  font-weight: 700;
+}
+
+.form-group {
+  width: 100%;
+  margin-bottom: 18px;
+}
+
+.input-box {
+  margin: 18px 0 32px 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.input-box label {
+  color: #e7dba9;
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.input-box input,
+.input-box select,
+.input-box textarea,
+.form-control {
+  background: #232323;
+  color: #fff;
+  border: 1.5px solid #464646;
+  border-radius: 5px;
+  font-size: 1rem;
+  padding: 12px 14px;
+  margin-bottom: 0;
+  font-family: 'Barlow', sans-serif;
+  transition: border 0.2s, background 0.2s;
+}
+
+.input-box input:focus,
+.input-box select:focus,
+.input-box textarea:focus,
+.form-control:focus {
+  border: 1.5px solid #e7dba9;
+  outline: none;
+  background: #181818;
+}
+
+.input-box input::placeholder,
+.input-box textarea::placeholder {
+  color: #b0b0b0;
+  opacity: 1;
+}
+
+.input-box textarea,
+.form-control[type="textarea"],
+textarea.form-control {
+  min-height: 100px;
+  resize: vertical;
+  font-family: 'Barlow', monospace, sans-serif;
+}
+
+.btn, .btn-primary, .btn-outline {
+  background: #616161;
+  color: #fff;
+  border: none;
+  border-radius: 40px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: 'Barlow', sans-serif;
+  padding: 12px 32px;
+  margin: 0 4px 0 0;
+  transition: background 0.2s, color 0.2s;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-primary {
+  background: #e7dba9;
+  color: #232323;
+}
+
+.btn-primary:hover, .btn:hover {
+  background: #989898;
+  color: #fff;
+}
+
+.btn-outline {
+  background: transparent;
+  color: #e7dba9;
+  border: 2px solid #e7dba9;
+}
+
+.btn-outline:hover {
+  background: #e7dba9;
+  color: #232323;
+}
+
+/* Card/Box Styles */
+.box, .notation-box, .thread-box, .notation-card {
+  background: rgba(255,255,255,0.08);
+  border: 2px solid #474747;
+  border-radius: 8px;
+  color: #fff;
+  padding: 22px 20px;
+  margin-bottom: 18px;
+  box-shadow: 0 2px 8px #0001;
+  font-family: 'Barlow', sans-serif;
+}
+
+.thread-box h4, .notation-card h4, .notation-box h4 {
+  color: #e7dba9;
+  margin-top: 0;
+}
+
+.genre-tag {
+  display: inline-block;
+  background: #232323;
+  color: #e7dba9;
+  border: 1px solid #e7dba9;
+  border-radius: 16px;
+  padding: 2px 12px;
+  font-size: 0.95rem;
+  margin-right: 6px;
+  margin-bottom: 4px;
+}
+
+.error {
+  color: #ff6b6b;
+  background: #2a1818;
+  border: 1px solid #a82a2a;
+  border-radius: 5px;
+  padding: 10px 18px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.success {
+  color: #4caf50;
+  background: #182a18;
+  border: 1px solid #2a8a2a;
+  border-radius: 5px;
+  padding: 10px 18px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  .wrapper, .wrapper-profile, .wrapper-notation, .wrapper-thread {
+    max-width: 98vw;
+    padding: 18px 4vw;
+  }
+}
+@media (max-width: 600px) {
+  .wrapper, .wrapper-profile, .wrapper-notation, .wrapper-thread {
+    max-width: 100vw;
+    padding: 8px 2vw;
+  }
+  .section-title {
+    font-size: 1.3rem;
+  }
+  .btn, .btn-primary, .btn-outline {
+    padding: 10px 12px;
+    font-size: 0.98rem;
+  }
+}
+
+/* Remove selected/active mode styling for tab/text editor buttons */
+.tab-toggle-active, #tab-mode-btn.active, #text-mode-btn.active, .tab-toggle-inactive {
+  /* No special styling for selected/unselected state */
+}

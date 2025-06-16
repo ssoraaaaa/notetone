@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 25, 2024 at 05:12 AM
+-- Generation Time: Jun 06, 2025 at 08:27 AM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- PHP Version: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -24,25 +24,64 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `audio`
+--
+
+CREATE TABLE `audio` (
+  `audioid` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `data` longblob NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `genres`
+--
+
+CREATE TABLE `genres` (
+  `genreid` int(11) NOT NULL,
+  `name` varchar(50) NOT NULL,
+  `description` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `genres`
+--
+
+INSERT INTO `genres` (`genreid`, `name`, `description`) VALUES
+(1, 'Rock', 'Rock music and its subgenres'),
+(2, 'Pop', 'Popular music'),
+(3, 'Jazz', 'Jazz music and its variations'),
+(4, 'Classical', 'Classical music'),
+(5, 'Electronic', 'Electronic and dance music'),
+(6, 'Hip Hop', 'Hip hop and rap music'),
+(7, 'Metal', 'Heavy metal and its subgenres'),
+(8, 'Folk', 'Folk music'),
+(9, 'Blues', 'Blues music'),
+(10, 'Country', 'Country music');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `instruments`
 --
 
 CREATE TABLE `instruments` (
   `instrumentid` int(11) NOT NULL,
-  `name` varchar(50) NOT NULL,
-  `type` varchar(50) NOT NULL
+  `name` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `instruments`
 --
 
-INSERT INTO `instruments` (`instrumentid`, `name`, `type`) VALUES
-(1, 'Electric guitar', 'String'),
-(4, 'Piano', 'Classical'),
-(5, 'Drums', 'Hittable'),
-(6, 'Synth', 'Electrical'),
-(7, 'Xylophone', 'Hittable');
+INSERT INTO `instruments` (`instrumentid`, `name`) VALUES
+(1, 'Acoustic Guitar'),
+(2, 'Electric Guitar'),
+(3, 'Classic Guitar');
 
 -- --------------------------------------------------------
 
@@ -65,21 +104,15 @@ CREATE TABLE `notations` (
 --
 
 INSERT INTO `notations` (`notationid`, `title`, `dateadded`, `content`, `songid`, `instrumentid`, `userid`) VALUES
-(11, 'The pretender', '2024-06-24', 'laallaal', 21, 1, 16),
-(13, 'w', '2024-06-25', 'w', 20, 4, 16),
-(15, 'asas', '2024-06-25', 'asdad', 20, 4, 16),
-(16, '12312', '2024-06-25', '123123', 21, 4, 16),
-(17, 'asdasdads', '2024-06-25', 'asdasdaad', 21, 4, 16),
-(18, '1d1wd1wd', '2024-06-25', '1wd1d', 21, 1, 16),
-(19, 'My notation', '2024-06-25', 'ad1w1g1eg1', 21, 4, 18),
-(20, 'asdas', '2024-06-25', 'asdasd', 24, 4, 18),
-(21, 'asa', '2024-06-25', 'asdasd', 20, 4, 18),
-(23, 'asdasdadsad', '2024-06-25', 'asda', 24, 1, 18),
-(24, 'asdas', '2024-06-25', 'asdsad', 20, 1, 18),
-(25, 'asdasd', '2024-06-25', 'asdasda', 21, 1, 18),
-(27, 'asdasdd', '2024-06-25', 'asdasda', 20, 4, 18),
-(28, 'asdads', '2024-06-25', 'asdasdasd', 20, 1, 18),
-(29, 'Bazooka by haroldtheguy', '2024-06-25', '------d------------', 24, 5, 21);
+(72, 'newar', '2025-06-04', '[{\"positions\":[{\"str\":3,\"fret\":3},{\"str\":1,\"fret\":2}]},{\"tact\":true},{\"positions\":[{\"str\":2,\"fret\":2},{\"str\":1,\"fret\":1}]},{\"positions\":[{\"str\":3,\"fret\":5},{\"str\":2,\"fret\":6}]},{\"tact\":true},{\"positions\":[{\"str\":3,\"fret\":4},{\"str\":1,\"fret\":2}]},{\"tact\":true},{\"positions\":[{\"str\":3,\"fret\":6}]},{\"tact\":true},{\"positions\":[{\"str\":3,\"fret\":4},{\"str\":2,\"fret\":3}]},{\"positions\":[{\"str\":3,\"fret\":4},{\"str\":2,\"fret\":4}]},{\"tact\":true},{\"positions\":[{\"str\":4,\"fret\":4},{\"str\":2,\"fret\":3}]},{\"tact\":true},{\"positions\":[{\"str\":3,\"fret\":3},{\"str\":2,\"fret\":3}]},{\"tact\":true},{\"positions\":[{\"str\":1,\"fret\":2}]},{\"tact\":true},{\"positions\":[{\"str\":1,\"fret\":2}]},{\"tact\":true},{\"positions\":[{\"str\":1,\"fret\":2}]},{\"tact\":true},{\"positions\":[{\"str\":3,\"fret\":3},{\"str\":2,\"fret\":2}]},{\"tact\":true},{\"positions\":[{\"str\":1,\"fret\":3}]},{\"positions\":[{\"str\":3,\"fret\":3}]},{\"positions\":[{\"str\":1,\"fret\":3}]},{\"positions\":[{\"str\":1,\"fret\":2}]},{\"positions\":[{\"str\":2,\"fret\":10}]},{\"positions\":[{\"str\":5,\"fret\":11}]},{\"positions\":[{\"str\":3,\"fret\":4}]},{\"tact\":true},{\"positions\":[{\"str\":2,\"fret\":4}]},{\"positions\":[{\"str\":1,\"fret\":6}]},{\"positions\":[{\"str\":1,\"fret\":4}]},{\"positions\":[{\"str\":1,\"fret\":3}]},{\"positions\":[{\"str\":1,\"fret\":2}]},{\"positions\":[{\"str\":5,\"fret\":6}]},{\"positions\":[{\"str\":4,\"fret\":3}]},{\"positions\":[{\"str\":4,\"fret\":2}]},{\"positions\":[{\"str\":3,\"fret\":3}]},{\"positions\":[{\"str\":3,\"fret\":4}]},{\"positions\":[{\"str\":2,\"fret\":2}]},{\"tact\":true},{\"positions\":[{\"str\":3,\"fret\":5}]},{\"positions\":[{\"str\":2,\"fret\":3}]},{\"positions\":[{\"str\":3,\"fret\":3}]},{\"tact\":true},{\"tact\":true}]', 20, 1, 22),
+(73, 'krsiter', '2025-06-04', '[{\"positions\":[{\"str\":6,\"fret\":0},{\"str\":5,\"fret\":0},{\"str\":1,\"fret\":0}]},{\"positions\":[{\"str\":1,\"fret\":1}]},{\"positions\":[{\"str\":3,\"fret\":3},{\"str\":2,\"fret\":3},{\"str\":1,\"fret\":3}]},{\"positions\":[{\"str\":2,\"fret\":0},{\"str\":1,\"fret\":0}]},{\"tact\":true},{\"positions\":[{\"str\":5,\"fret\":2},{\"str\":4,\"fret\":2},{\"str\":2,\"fret\":0},{\"str\":1,\"fret\":0}]}]', 21, 1, 24),
+(85, '1', '2025-06-05', 'e--------------------------------------------------------------------------------------------------------------------------------------------------------------------1\\nB---------------------------------------------------------------------------------------------------------------------------------------------------------------------\\nG---------1-----------------------------------------------------------------------------------------------------------------------------------------------------------\\nD------------------------------2-------------------------------------------------------------------------------------------------------------------------------------1\\nA---------------------------------------------------------------------------------------------------------------------------------------------------------------------\\nE---------------------------------------------------------------------------------------------------------------------------------------------------------------------', 20, 1, 1),
+(86, 'asda', '2025-06-05', 'e---------------------------------------------------------------------------------------------------------------------------------------------------------------------\\nB---------------------------------------------------------------------------------------------------------------------------------------------------------------------\\nG---------------------------------------------------------------------------------------------------------------------------------------------------------------------\\nD---------------------------------------------------------------------------------------------------------------------------------------------------------------------\\nA---------------------------------------------------------------------------------------------------------------------------------------------------------------------\\nE---------------------------------------------------------------------------------------------------------------------------------------------------------------------', 20, 1, 1),
+(87, 'spokoynaya noch solo', '2025-06-05', '[{\"positions\":[{\"str\":2,\"fret\":8}]},{\"positions\":[{\"str\":3,\"fret\":7}]},{\"positions\":[{\"str\":5,\"fret\":8}]},{\"tact\":true},{\"positions\":[{\"str\":4,\"fret\":10}]},{\"positions\":[{\"str\":4,\"fret\":9}]},{\"positions\":[{\"str\":3,\"fret\":9}]},{\"tact\":true},{\"positions\":[{\"str\":3,\"fret\":9}]},{\"positions\":[{\"str\":3,\"fret\":10}]},{\"positions\":[{\"str\":3,\"fret\":12}]},{\"tact\":true},{\"positions\":[{\"str\":3,\"fret\":9}]},{\"positions\":[{\"str\":3,\"fret\":10}]},{\"positions\":[{\"str\":4,\"fret\":12}]},{\"tact\":true},{\"positions\":[{\"str\":2,\"fret\":8}]},{\"positions\":[{\"str\":3,\"fret\":7}]},{\"positions\":[{\"str\":5,\"fret\":8}]},{\"tact\":true},{\"positions\":[{\"str\":3,\"fret\":10}]},{\"positions\":[{\"str\":3,\"fret\":12}]},{\"positions\":[{\"str\":3,\"fret\":9}]},{\"tact\":true},{\"positions\":[{\"str\":3,\"fret\":9}]},{\"positions\":[{\"str\":3,\"fret\":10}]},{\"positions\":[{\"str\":3,\"fret\":12}]},{\"positions\":[{\"str\":3,\"fret\":12}]},{\"positions\":[{\"str\":3,\"fret\":10}]},{\"positions\":[{\"str\":3,\"fret\":9}]},{\"tact\":true},{\"positions\":[{\"str\":3,\"fret\":9}]},{\"positions\":[{\"str\":3,\"fret\":10}]},{\"positions\":[{\"str\":3,\"fret\":12}]},{\"positions\":[{\"str\":4,\"fret\":12}]},{\"positions\":[{\"str\":4,\"fret\":10}]},{\"positions\":[{\"str\":4,\"fret\":9}]},{\"tact\":true}]', 27, 2, 1),
+(88, 'Offspring parody', '2025-06-05', '[{\"positions\":[{\"str\":2,\"fret\":1}]},{\"positions\":[{\"str\":2,\"fret\":1}]},{\"positions\":[{\"str\":1,\"fret\":1}]},{\"positions\":[{\"str\":2,\"fret\":1}]},{\"positions\":[{\"str\":1,\"fret\":1}]},{\"positions\":[{\"str\":2,\"fret\":1}]},{\"positions\":[{\"str\":3,\"fret\":6}]},{\"positions\":[{\"str\":5,\"fret\":6},{\"str\":4,\"fret\":6}]},{\"tact\":true},{\"positions\":[{\"str\":3,\"fret\":3},{\"str\":2,\"fret\":2}]},{\"positions\":[{\"str\":4,\"fret\":5},{\"str\":2,\"fret\":4}]},{\"positions\":[{\"str\":1,\"fret\":3},{\"str\":2,\"fret\":3}]},{\"positions\":[{\"str\":2,\"fret\":2},{\"str\":3,\"fret\":2},{\"str\":1,\"fret\":0},{\"str\":4,\"fret\":0},{\"str\":5,\"fret\":0},{\"str\":6,\"fret\":0}]},{\"tact\":true}]', 28, 3, 1),
+(89, 'New random notes', '2025-06-05', '[{\"positions\":[{\"str\":4,\"fret\":3},{\"str\":3,\"fret\":3}]},{\"positions\":[{\"str\":4,\"fret\":6},{\"str\":2,\"fret\":6}]},{\"positions\":[{\"str\":5,\"fret\":4},{\"str\":3,\"fret\":4}]},{\"tact\":true},{\"positions\":[{\"str\":5,\"fret\":5},{\"str\":3,\"fret\":5}]},{\"positions\":[{\"str\":5,\"fret\":9},{\"str\":3,\"fret\":9}]},{\"tact\":true},{\"positions\":[{\"str\":5,\"fret\":4},{\"str\":3,\"fret\":3}]},{\"tact\":true},{\"positions\":[{\"str\":3,\"fret\":5},{\"str\":2,\"fret\":5}]},{\"tact\":true},{\"positions\":[{\"str\":4,\"fret\":4}]},{\"tact\":true}]', 26, 3, 1),
+(90, 'MY FIRST NOTATION', '2025-06-05', 'e---------------------------------------------------------------------------------------------------------------------------------------------------------------------\\nB--------------------------------1--------------------------------3---------------------------------------------------------------------------------------------------\\nG---------0-----------------------------------------------------------------------------------------------------------------------------------------------------------\\nD---------------------------------------------------------------------------------------------------------------------------------------------------------------------\\nA-----------------------2---------------------------------------------------------------------------------------------------------------------------------------------\\nE---------------------------------------------------------------------------------------------------------------------------------------------------------------------\\n\\ne---------------------------------------------------------------------------------------------------------------------------------------------------------------------\\nB--------------------------------1--------------------------------3---------------------------------------------------------------------------------------------------\\nG---------0-----------------------------------------------------------------------------------------------------------------------------------------------------------\\nD---------------------------------------------------------------------------------------------------------------------------------------------------------------------\\nA-----------------------2---------------------------------------------------------------------------------------------------------------------------------------------\\nE---------------------------------------------------------------------------------------------------------------------------------------------------------------------\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n', 20, 1, 39),
+(91, '2', '2025-06-05', '[{\"positions\":[{\"str\":1,\"fret\":0}]},{\"positions\":[{\"str\":5,\"fret\":1},{\"str\":4,\"fret\":1},{\"str\":1,\"fret\":2},{\"str\":2,\"fret\":2},{\"str\":3,\"fret\":2},{\"str\":6,\"fret\":2}]},{\"positions\":[{\"str\":4,\"fret\":3},{\"str\":2,\"fret\":3}]},{\"positions\":[{\"str\":3,\"fret\":4},{\"str\":2,\"fret\":3}]},{\"positions\":[{\"str\":2,\"fret\":4},{\"str\":3,\"fret\":4}]},{\"tact\":true},{\"positions\":[{\"str\":1,\"fret\":4},{\"str\":2,\"fret\":4},{\"str\":3,\"fret\":5},{\"str\":4,\"fret\":5},{\"str\":5,\"fret\":3},{\"str\":6,\"fret\":3}]},{\"positions\":[{\"str\":3,\"fret\":5},{\"str\":2,\"fret\":5},{\"str\":1,\"fret\":3},{\"str\":4,\"fret\":3},{\"str\":5,\"fret\":3},{\"str\":6,\"fret\":3}]}]', 26, 3, 39);
 
 -- --------------------------------------------------------
 
@@ -92,17 +125,41 @@ CREATE TABLE `songs` (
   `title` varchar(100) NOT NULL,
   `performer` varchar(100) NOT NULL,
   `noteentrycount` int(11) DEFAULT 0,
-  `userid` int(11) DEFAULT NULL
+  `userid` int(11) DEFAULT NULL,
+  `status` enum('pending','approved','rejected') NOT NULL DEFAULT 'pending'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `songs`
 --
 
-INSERT INTO `songs` (`songid`, `title`, `performer`, `noteentrycount`, `userid`) VALUES
-(20, 'Everlong', 'Foo Fighters', 0, 16),
-(21, 'The Pretender', 'Foo Fighters', 0, 16),
-(24, 'Wrath', 'Freddie Dredd', 0, 16);
+INSERT INTO `songs` (`songid`, `title`, `performer`, `noteentrycount`, `userid`, `status`) VALUES
+(20, 'Everlong', 'Foo Fighters', 0, 16, 'approved'),
+(21, 'The Pretender', 'Foo Fighters', 0, 16, 'approved'),
+(26, 'Wesside', 'Linkin Park', 0, 22, 'approved'),
+(27, 'Spokoynaya noch', 'Kino', 0, 1, 'approved'),
+(28, 'The Kids Aren\'t Alright', 'The Offspring', 0, 1, 'approved'),
+(29, 'BAD', 'Micheal Jacksons', 0, 39, 'approved');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `song_genres`
+--
+
+CREATE TABLE `song_genres` (
+  `songid` int(11) NOT NULL,
+  `genreid` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `song_genres`
+--
+
+INSERT INTO `song_genres` (`songid`, `genreid`) VALUES
+(27, 1),
+(28, 1),
+(29, 2);
 
 -- --------------------------------------------------------
 
@@ -118,6 +175,22 @@ CREATE TABLE `threadcomments` (
   `threadid` int(11) DEFAULT NULL,
   `userid` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `threadcomments`
+--
+
+INSERT INTO `threadcomments` (`commentid`, `content`, `replytocommentid`, `likecount`, `threadid`, `userid`) VALUES
+(48, 'asd', 0, 0, 21, 1),
+(49, 'xd', 0, 0, 21, 1),
+(50, 'asdas', 0, 0, 22, 1),
+(65, 'Gan jau, viņš ir viscītīgākais.', 0, 0, 19, 1),
+(66, 'posti', 0, 0, 21, 1),
+(67, 'Jimmy Hendrix!!!', 0, 0, 32, 39),
+(68, 'NOTEIKTI NOKARTOS', 0, 0, 19, 39),
+(69, 'aliexpress.com', 0, 0, 31, 39),
+(70, 'She is alright', 0, 0, 30, 39),
+(71, 'no, sorry, ss.lv', 69, 0, 31, 39);
 
 -- --------------------------------------------------------
 
@@ -137,9 +210,12 @@ CREATE TABLE `threads` (
 --
 
 INSERT INTO `threads` (`threadid`, `title`, `content`, `createdby`) VALUES
-(11, 'how to use threads?', 'idk ask your mom', 18),
-(13, 'Marka threads', '123123123123123123', 20),
-(14, 'Do you like Bazooka?', 'I want to know your opinion', 21);
+(19, 'Zhenja nodos eksamenu', 'gribu zinat jusu domas?\r\n', 22),
+(29, 'Any tips for begginners?', 'I just started playing guitar, wanted to see if any of you guys had any tips', 1),
+(30, 'New Linking Park lead singer?', 'What do you guys think about her?', 1),
+(31, 'Cheap capo\'s?', 'Does anyone know where i can order capos for cheap?', 34),
+(32, 'Who is best guitarist of all time????', ':D', 34),
+(33, 'What is a must learn?', 'What is a must learn for complete begginners when starting out playing guitar?', 39);
 
 -- --------------------------------------------------------
 
@@ -159,83 +235,30 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`userid`, `username`, `password`, `moderatorstatus`) VALUES
-(16, 'anceooo', '$2y$10$rod.O/5TzOMes2adPRFYwuAyDkHuGpiEovhgINiALx9nK6kXFd9NG', 0),
-(18, 'tomass', '$2y$10$SRjC9ScH73NU79CH4GgPsep3qLk4deRdzTquIcl.hxSOVS.OkJMwG', 0);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `video`
---
-
-CREATE TABLE `video` (
-  `video_id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `song_id` int(11) NOT NULL,
-  `instrument_id` int(11) NOT NULL,
-  `caption` varchar(255) NOT NULL,
-  `like_count` int(11) DEFAULT 0,
-  `comment_count` int(11) DEFAULT 0,
-  `length` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `video_comment`
---
-
-CREATE TABLE `video_comment` (
-  `video_comment_id` int(11) NOT NULL,
-  `video_id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `like_count` int(11) DEFAULT 0,
-  `contains` text NOT NULL,
-  `replies_to` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Table structure for table `genres`
---
-
-CREATE TABLE `genres` (
-  `genreid` int(11) NOT NULL,
-  `name` varchar(50) NOT NULL,
-  `description` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Table structure for table `song_genres`
---
-
-CREATE TABLE `song_genres` (
-  `songid` int(11) NOT NULL,
-  `genreid` int(11) NOT NULL,
-  PRIMARY KEY (`songid`, `genreid`),
-  KEY `genreid` (`genreid`),
-  CONSTRAINT `song_genres_ibfk_1` FOREIGN KEY (`songid`) REFERENCES `songs` (`songid`) ON DELETE CASCADE,
-  CONSTRAINT `song_genres_ibfk_2` FOREIGN KEY (`genreid`) REFERENCES `genres` (`genreid`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `genres`
---
-
-INSERT INTO `genres` (`genreid`, `name`, `description`) VALUES
-(1, 'Rock', 'Rock music and its subgenres'),
-(2, 'Pop', 'Popular music'),
-(3, 'Jazz', 'Jazz music and its variations'),
-(4, 'Classical', 'Classical music'),
-(5, 'Electronic', 'Electronic and dance music'),
-(6, 'Hip Hop', 'Hip hop and rap music'),
-(7, 'Metal', 'Heavy metal and its subgenres'),
-(8, 'Folk', 'Folk music'),
-(9, 'Blues', 'Blues music'),
-(10, 'Country', 'Country music');
+(1, 'god', '$2y$10$vSkMJAOc8Q9jBmUIXIiCC.Dm7P4.OPeW.T2sH/I7.y8VzOlOUKLi2', 1),
+(22, 'testuser1', '$2y$10$Mmo/OGP5VOoyN0b2tOSVduxSq255ZqVF56jimiv9R8xGwDgRRHele', 0),
+(23, 'testuser2', '$2y$10$DEL38UFkEM8Nw8eE9bKgPOey8GQSXsJz7JSWOLvIDoJ1uk8YoYVl2', 0),
+(24, 'mrkrister', '$2y$10$wCCcTGx2WH8Nvy39QzsM4OWHS6fe7K23v699jeXtk/AMq0AOpLXa2', 0),
+(34, 'dog', '$2y$10$THv9qJQixHQ2tymikfHghel0QkYjvWmDaufPO3RQ09Yw6pPokqQ9S', 0),
+(37, 'DAWG', '$2y$10$uGUOgZFggySsmqdOPQvrk.8xZDdhBIesxh7pDWD.Sov1leatKebhK', 0),
+(38, 'user3', '$2y$10$eNe5Wl.5uv37erfuAYox1.oEGOZVmj7f2AFEvqYFyFwPwKxBNdvna', 0),
+(39, 'user4', '$2y$10$kF9bI.HQaCZddg1tg1A36O2AoBmVlu2nBwOqyvIPLR6xRLplhu4mu', 0);
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `audio`
+--
+ALTER TABLE `audio`
+  ADD PRIMARY KEY (`audioid`);
+
+--
+-- Indexes for table `genres`
+--
+ALTER TABLE `genres`
+  ADD PRIMARY KEY (`genreid`);
 
 --
 -- Indexes for table `instruments`
@@ -256,6 +279,13 @@ ALTER TABLE `songs`
   ADD PRIMARY KEY (`songid`);
 
 --
+-- Indexes for table `song_genres`
+--
+ALTER TABLE `song_genres`
+  ADD PRIMARY KEY (`songid`,`genreid`),
+  ADD KEY `genreid` (`genreid`);
+
+--
 -- Indexes for table `threadcomments`
 --
 ALTER TABLE `threadcomments`
@@ -274,32 +304,20 @@ ALTER TABLE `users`
   ADD PRIMARY KEY (`userid`);
 
 --
--- Indexes for table `video`
---
-ALTER TABLE `video`
-  ADD PRIMARY KEY (`video_id`),
-  ADD KEY `user_id` (`user_id`),
-  ADD KEY `song_id` (`song_id`),
-  ADD KEY `instrument_id` (`instrument_id`);
-
---
--- Indexes for table `video_comment`
---
-ALTER TABLE `video_comment`
-  ADD PRIMARY KEY (`video_comment_id`),
-  ADD KEY `video_id` (`video_id`),
-  ADD KEY `user_id` (`user_id`),
-  ADD KEY `replies_to` (`replies_to`);
-
---
--- Indexes for table `genres`
---
-ALTER TABLE `genres`
-  ADD PRIMARY KEY (`genreid`);
-
---
 -- AUTO_INCREMENT for dumped tables
 --
+
+--
+-- AUTO_INCREMENT for table `audio`
+--
+ALTER TABLE `audio`
+  MODIFY `audioid` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `genres`
+--
+ALTER TABLE `genres`
+  MODIFY `genreid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `instruments`
@@ -311,69 +329,42 @@ ALTER TABLE `instruments`
 -- AUTO_INCREMENT for table `notations`
 --
 ALTER TABLE `notations`
-  MODIFY `notationid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `notationid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=92;
 
 --
 -- AUTO_INCREMENT for table `songs`
 --
 ALTER TABLE `songs`
-  MODIFY `songid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `songid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- AUTO_INCREMENT for table `threadcomments`
 --
 ALTER TABLE `threadcomments`
-  MODIFY `commentid` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `commentid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=72;
 
 --
 -- AUTO_INCREMENT for table `threads`
 --
 ALTER TABLE `threads`
-  MODIFY `threadid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `threadid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `userid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
-
---
--- AUTO_INCREMENT for table `video`
---
-ALTER TABLE `video`
-  MODIFY `video_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `video_comment`
---
-ALTER TABLE `video_comment`
-  MODIFY `video_comment_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `genres`
---
-ALTER TABLE `genres`
-  MODIFY `genreid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `userid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- Constraints for dumped tables
 --
 
 --
--- Constraints for table `video`
+-- Constraints for table `song_genres`
 --
-ALTER TABLE `video`
-  ADD CONSTRAINT `video_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`userid`),
-  ADD CONSTRAINT `video_ibfk_2` FOREIGN KEY (`song_id`) REFERENCES `songs` (`songid`),
-  ADD CONSTRAINT `video_ibfk_3` FOREIGN KEY (`instrument_id`) REFERENCES `instruments` (`instrumentid`);
-
---
--- Constraints for table `video_comment`
---
-ALTER TABLE `video_comment`
-  ADD CONSTRAINT `video_comment_ibfk_1` FOREIGN KEY (`video_id`) REFERENCES `video` (`video_id`),
-  ADD CONSTRAINT `video_comment_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`userid`),
-  ADD CONSTRAINT `video_comment_ibfk_3` FOREIGN KEY (`replies_to`) REFERENCES `video_comment` (`video_comment_id`);
+ALTER TABLE `song_genres`
+  ADD CONSTRAINT `song_genres_ibfk_1` FOREIGN KEY (`songid`) REFERENCES `songs` (`songid`) ON DELETE CASCADE,
+  ADD CONSTRAINT `song_genres_ibfk_2` FOREIGN KEY (`genreid`) REFERENCES `genres` (`genreid`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -8,11 +8,11 @@ if (!isLoggedIn()) {
 }
 
 $username = $_SESSION['username'];
+if (!isset($_SESSION['userid'])) {
+    header("Location: login.php");
+    exit();
+}
 $user_id = $_SESSION['userid'];
-
-// Debug session
-error_log("Profile page - Session contents: " . print_r($_SESSION, true));
-error_log("Profile page - User ID: " . $user_id);
 
 // Fetch the count of threads and notations
 $thread_count_sql = "SELECT COUNT(*) as thread_count FROM threads WHERE createdby = '$user_id'";
@@ -129,52 +129,52 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_profile'])) {
 <body>
     <?php include 'includes/navbar.php'; ?>
     <div class="navbar-spacer"></div>
-        <div class="wrapper-profile">
-            <h1>Your Profile</h1>
-             <div class="profile-box">
+    <div class="wrapper-profile">
+        <h2>My Profile</h2>
+        <div class="profile-box">
             <p><strong>Username:</strong> <?php echo htmlspecialchars($username) . $admin_symbol; ?></p>
-                <p><strong>Threads Created:</strong> <?php echo $thread_count; ?></p>
-                <p><strong>Notations Created:</strong> <?php echo $notation_count; ?></p>
+            <p><strong>Threads Created:</strong> <?php echo $thread_count; ?></p>
+            <p><strong>Notations Created:</strong> <?php echo $notation_count; ?></p>
             <?php if ($is_admin): ?>
-            <p><a href="admin_panel.php" class="btn btn-primary" style="margin-top:10px; display:inline-block;">Admin Panel</a></p>
+            <p><a href="admin_panel.php" class="btn btn-secondary" style="margin-top:10px; display:inline-block;">Admin Panel</a></p>
             <?php endif; ?>
-            </div>
+        </div>
 
-            <?php if (isset($success_message)): ?>
-                <p class="success" style="color:#7CFC98;"><?php echo $success_message; ?></p>
-            <?php endif; ?>
-            <?php if (isset($error_message)): ?>
-                <p class="error"><?php echo $error_message; ?></p>
-            <?php endif; ?>
-           
-            <form method="POST" action="" class="profile-form">
-                <div class="input-box">
-                    <input type="text" name="new_username" placeholder="New Username" class="profile-input">
-                </div>
-                <div class="input-box">
-                    <button class="btn btn-primary profile-btn" type="submit" name="change_username">Change Username</button>
-                </div>
-            </form>
-            <form method="POST" action="" class="profile-form">
-                <div class="input-box">
-                    <input type="password" name="old_password" placeholder="Old Password" class="profile-input">
-                </div>
-                <div class="input-box">
-                    <input type="password" name="new_password" placeholder="New Password" class="profile-input">
-                </div>
-                <div class="input-box">
-                    <input type="password" name="confirm_password" placeholder="Confirm New Password" class="profile-input">
-                </div>
-                <div class="input-box">
-                    <button class="btn btn-primary profile-btn" type="submit" name="change_password">Change Password</button>
-                </div>
-            </form>
-            <form method="POST" action="" class="profile-form">
-                <div class="input-box">
-                    <button type="button" id="delete-profile-btn" class="btn-delete-profile profile-btn">Delete Profile</button>
-                </div>
-            </form>
-            <?php include 'components/profile/delete_account_modal.php'; ?>
+        <?php if (isset($success_message)): ?>
+            <p class="success" style="color:#7CFC98;"><?php echo $success_message; ?></p>
+        <?php endif; ?>
+        <?php if (isset($error_message)): ?>
+            <p class="error"><?php echo $error_message; ?></p>
+        <?php endif; ?>
+       
+        <form method="POST" action="" class="profile-form">
+            <div class="input-box">
+                <input type="text" name="new_username" placeholder="New Username" class="profile-input">
+            </div>
+            <div class="input-box">
+                <button class="btn btn-secondary profile-btn" type="submit" name="change_username">Change Username</button>
+            </div>
+        </form>
+        <form method="POST" action="" class="profile-form">
+            <div class="input-box">
+                <input type="password" name="old_password" placeholder="Old Password" class="profile-input">
+            </div>
+            <div class="input-box">
+                <input type="password" name="new_password" placeholder="New Password" class="profile-input">
+            </div>
+            <div class="input-box">
+                <input type="password" name="confirm_password" placeholder="Confirm New Password" class="profile-input">
+            </div>
+            <div class="input-box">
+                <button class="btn btn-secondary profile-btn" type="submit" name="change_password">Change Password</button>
+            </div>
+        </form>
+        <form method="POST" action="" class="profile-form">
+            <div class="input-box">
+                <button type="button" id="delete-profile-btn" class="btn-delete-profile profile-btn">Delete Profile</button>
+            </div>
+        </form>
+        <?php include 'components/profile/delete_account_modal.php'; ?>
     </div>
 </body>
 </html>

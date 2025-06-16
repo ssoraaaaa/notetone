@@ -2,10 +2,65 @@
 require_once 'includes/session.php';
 require_once 'includes/db.php';
 
-$thread_sql = "SELECT t.*, u.username AS user_name, u.moderatorstatus AS user_moderator FROM threads t LEFT JOIN users u ON t.createdby = u.userid ORDER BY t.threadid DESC";
-$thread_result = $conn->query($thread_sql);
+// Get filter parameters
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+$created_by = isset($_GET['created_by']) ? trim($_GET['created_by']) : '';
+$sort = isset($_GET['sort']) ? $_GET['sort'] : 'date_desc';
+
+// Build the query
+$sql = "SELECT DISTINCT t.*, u.username AS user_name, u.moderatorstatus AS user_moderator
+    FROM threads t 
+    LEFT JOIN users u ON t.createdby = u.userid 
+    LEFT JOIN threadcomments tc ON t.threadid = tc.threadid
+    WHERE 1=1";
+
+$params = [];
+$types = "";
+
+if ($search) {
+    $sql .= " AND (t.title LIKE ? OR t.content LIKE ? OR u.username LIKE ? OR tc.content LIKE ?)";
+    $search_param = "%$search%";
+    $params[] = $search_param;
+    $params[] = $search_param;
+    $params[] = $search_param;
+    $params[] = $search_param;
+    $types .= "ssss";
+}
+
+if ($created_by) {
+    $sql .= " AND u.username LIKE ?";
+    $params[] = "%$created_by%";
+    $types .= "s";
+}
+
+// Add sorting
+switch (
+    $sort) {
+    case 'title_asc':
+        $sql .= " ORDER BY t.title ASC";
+        break;
+    case 'title_desc':
+        $sql .= " ORDER BY t.title DESC";
+        break;
+    case 'date_asc':
+        $sql .= " ORDER BY t.threadid ASC";
+        break;
+    case 'date_desc':
+    default:
+        $sql .= " ORDER BY t.threadid DESC";
+        break;
+}
+
+// Prepare and execute the query
+$stmt = $conn->prepare($sql);
+if (!empty($params)) {
+    $stmt->bind_param($types, ...$params);
+}
+$stmt->execute();
+$thread_result = $stmt->get_result();
+
 $threads = [];
-if ($thread_result->num_rows > 0) {
+if ($thread_result && $thread_result->num_rows > 0) {
     while ($row = $thread_result->fetch_assoc()) {
         $threads[] = $row;
     }
@@ -22,40 +77,50 @@ if ($thread_result->num_rows > 0) {
 <body>
     <?php include 'includes/navbar.php'; ?>
     <div class="navbar-spacer"></div>
-    <div class="container">
-        <div class="wrapper" style="width: 80%; max-width: 1200px; margin: 0 auto;">
-            <div class="container-header">
-                <h2>Threads</h2>
-            </div>
-            <?php if (empty($threads)): ?>
-                <p style="color: #888; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1rem;">No threads found.</p>
-            <?php else: ?>
+    <div class="wrapper">
+        <section class="container-header">
+            <h2>Threads</h2>
+            <a href="add_thread.php" class="btn btn-primary">Start New Thread</a>
+        </section>
+        <!-- Search and Filter Form -->
+        <section class="filter-section" style="background: #232323; padding: 24px; border-radius: 8px; margin-bottom: 32px;">
+            <form method="GET" action="" class="search-form" style="display: flex; flex-direction: column; gap: 16px;">
+                <div style="width: 100%;">
+                    <input type="text" name="search" class="form-control" placeholder="Search threads, content, users..." value="<?php echo htmlspecialchars($search); ?>" style="width: 100%;">
+                </div>
+                <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; width: 100%;">
+                    <div style="flex: 1; min-width: 160px;">
+                        <input type="text" name="created_by" class="form-control" placeholder="Created by..." value="<?php echo htmlspecialchars($created_by); ?>">
+                    </div>
+                    <div style="flex: 1; min-width: 160px;">
+                        <select name="sort" class="form-control">
+                            <option value="date_desc" <?php echo $sort == 'date_desc' ? 'selected' : ''; ?>>Newest First</option>
+                            <option value="date_asc" <?php echo $sort == 'date_asc' ? 'selected' : ''; ?>>Oldest First</option>
+                            <option value="title_asc" <?php echo $sort == 'title_asc' ? 'selected' : ''; ?>>Title A-Z</option>
+                            <option value="title_desc" <?php echo $sort == 'title_desc' ? 'selected' : ''; ?>>Title Z-A</option>
+                        </select>
+                    </div>
+                    <div style="flex: 1; min-width: 120px; display: flex; gap: 8px;">
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">Apply</button>
+                        <a href="threads.php" class="btn btn-secondary" style="width: 100%; text-align: center;">Reset</a>
+                    </div>
+                </div>
+            </form>
+        </section>
+        <section class="threads-section">
+            <div class="threads-grid">
                 <?php foreach ($threads as $thread): ?>
-                    <a href="thread.php?id=<?php echo $thread['threadid']; ?>" style="text-decoration: none; color: inherit;">
-                        <div style="background: #2a2a2a; border: 1px solid #464646; border-left: 5px solid #464646; padding: 20px; margin-bottom: 20px; border-radius: 4px; transition: box-shadow 0.2s;">
-                            <h3 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0 0 10px 0; color: #fff; font-size: 1.5rem;">
-                                <?php echo htmlspecialchars($thread['title']); ?>
-                            </h3>
-                            <div style="background: #1a1a1a; padding: 15px; border-radius: 4px; margin-bottom: 15px;">
-                                <p style="color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; font-size: 1rem;">
-                                    <?php echo nl2br(htmlspecialchars($thread['content'])); ?>
-                                </p>
-                            </div>
-                            <div style="color: #888; font-size: 0.9rem; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
-                                Created by: <?php 
-                                    $is_admin = isset($thread['user_moderator']) && $thread['user_moderator'] == 1;
-                                    $admin_symbol = $is_admin ? ' <span title="Admin" style="color:#ffcc00 !important; display:inline-block;">&#9812;</span>' : '';
-                                    echo $thread['user_name'] ? '<span>' . htmlspecialchars($thread['user_name']) . '</span>' . $admin_symbol : '<em>deleted user</em>'; 
-                                ?>
-                                <?php if (isset($thread['datecreated'])): ?>
-                                    <br>Created: <?php echo date('F j, Y', strtotime($thread['datecreated'])); ?>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    </a>
+                <div class="thread-box">
+                    <h3><?php echo htmlspecialchars($thread['title']); ?></h3>
+                    <p class="thread-author">by <?php echo htmlspecialchars($thread['user_name']); ?></p>
+                    <?php if (isset($thread['datecreated'])): ?>
+                        <p class="thread-date" style="color: #888; font-size: 0.9rem; margin: 5px 0;">Created: <?php echo date('F j, Y', strtotime($thread['datecreated'])); ?></p>
+                    <?php endif; ?>
+                    <a href="thread.php?id=<?php echo $thread['threadid']; ?>" class="btn btn-outline">View Thread</a>
+                </div>
                 <?php endforeach; ?>
-            <?php endif; ?>
-        </div>
+            </div>
+        </section>
     </div>
 </body>
 </html> 
