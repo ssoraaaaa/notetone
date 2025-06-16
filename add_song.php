@@ -28,6 +28,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = 'Title and performer are required.';
     }
 
+    if (empty($selected_genres)) {
+        $errors[] = 'Please select at least one genre.';
+    }
+
     if (empty($errors)) {
         $stmt = $conn->prepare('INSERT INTO songs (title, performer, userid, status) VALUES (?, ?, ?, "pending")');
         $stmt->bind_param('ssi', $title, $performer, $userid);
@@ -200,6 +204,24 @@ document.addEventListener('click', function(e) {
 // On submit, set hidden input as array
 const form = document.querySelector('form');
 form.addEventListener('submit', function(e) {
+    if (selectedGenres.length === 0) {
+        e.preventDefault();
+        const errorDiv = document.createElement('div');
+        errorDiv.style.color = '#ff6b6b';
+        errorDiv.style.marginBottom = '16px';
+        errorDiv.textContent = 'Please select at least one genre.';
+        
+        // Remove any existing error message
+        const existingError = document.querySelector('.genre-error');
+        if (existingError) {
+            existingError.remove();
+        }
+        
+        errorDiv.className = 'genre-error';
+        form.insertBefore(errorDiv, form.firstChild);
+        return;
+    }
+    
     // Convert comma string to array for PHP
     let arr = selectedGenres.map(String);
     genresHidden.name = 'genres[]';

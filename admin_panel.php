@@ -95,6 +95,42 @@ if (!$is_admin) {
                         <p style="font-size: 1.5rem; color: #fff; margin: 0;"><?php echo $pending_songs; ?></p>
                     </div>
                 </div>
+                <div style="margin-top: 2rem;">
+                    <h3 style="color: #e7dba9; margin-bottom: 1rem;">Time-based Statistics</h3>
+                    <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                        <select id="time-period" style="background: #232323; color: #e7dba9; border: 1px solid #464646; padding: 8px; border-radius: 4px;">
+                            <option value="day">Past Day</option>
+                            <option value="week">Past Week</option>
+                            <option value="month">Past Month</option>
+                            <option value="year">Past Year</option>
+                        </select>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                        <?php
+                        function getTimeBasedStats($conn, $time_period) {
+                            $time_conditions = [
+                                'day' => 'DATE(dateadded) = CURDATE()',
+                                'week' => 'dateadded >= DATE_SUB(CURDATE(), INTERVAL 1 WEEK)',
+                                'month' => 'dateadded >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)',
+                                'year' => 'dateadded >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR)'
+                            ];
+                            
+                            $condition = $time_conditions[$time_period];
+                            $query = "SELECT COUNT(*) as count FROM notations WHERE $condition";
+                            $result = $conn->query($query);
+                            return $result ? $result->fetch_assoc()['count'] : 0;
+                        }
+
+                        $time_period = isset($_GET['time_period']) ? $_GET['time_period'] : 'day';
+                        $notations_count = getTimeBasedStats($conn, $time_period);
+                        ?>
+                        <div style="background: #181818; padding: 1.5rem; border-radius: 8px; text-align: center;">
+                            <i class="fas fa-file-alt" style="font-size: 2rem; color: #e7dba9; margin-bottom: 0.5rem;"></i>
+                            <h3 style="color: #e7dba9; margin: 0.5rem 0;">Created Notations</h3>
+                            <p style="font-size: 1.5rem; color: #fff; margin: 0;"><?php echo $notations_count; ?></p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <div id="users" class="admin-section">
@@ -296,6 +332,20 @@ toggleStatsBtn.addEventListener('click', function() {
     statsCollapsed = !statsCollapsed;
     statsContent.style.display = statsCollapsed ? 'none' : '';
     statsArrow.style.transform = statsCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)';
+});
+// Time Period Selection
+document.getElementById('time-period').addEventListener('change', function() {
+    const timePeriod = this.value;
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.set('time_period', timePeriod);
+    window.location.href = currentUrl.toString();
+});
+
+// Set the selected time period in the dropdown
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const timePeriod = urlParams.get('time_period') || 'day';
+    document.getElementById('time-period').value = timePeriod;
 });
 </script>
 </body>

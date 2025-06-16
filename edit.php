@@ -131,7 +131,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 // Handle delete notation
 if (
-    $_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_notation']) && $edit_mode && $notation
+    $_SERVER["REQUEST_METHOD"] == "POST" && 
+    isset($_POST['delete_notation']) && 
+    isset($_POST['notation_id']) && 
+    $edit_mode && 
+    $notation &&
+    $_POST['notation_id'] == $notation_id
 ) {
     $delete_sql = "DELETE FROM notations WHERE notationid = ? AND userid = ?";
     $stmt = $conn->prepare($delete_sql);
@@ -282,6 +287,7 @@ EOT;
         <?php if ($edit_mode): ?>
         <form id="delete-notation-form" method="POST" action="" style="display:none;">
             <input type="hidden" name="delete_notation" value="1">
+            <input type="hidden" name="notation_id" value="<?php echo $notation_id; ?>">
         </form>
         <?php include 'components/notation/delete_modal.php'; ?>
         <?php endif; ?>

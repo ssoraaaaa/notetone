@@ -126,7 +126,7 @@ if (strpos($back_url, 'edit.php') !== false) {
     <form id="delete-notation-form" method="POST" action="" style="display:none;">
         <input type="hidden" name="delete" value="1">
     </form>
-    <a href="edit.php?id=<?php echo $notation['notationid']; ?>&from=mynotations&back=<?php echo urlencode($back_url); ?>" class="btn btn-primary" style="text-decoration: none; padding: 10px 22px; font-size: 1rem; border-radius: 4px; background: #808080; color: #fff; border: none; box-shadow: none; margin-left: 10px;">Edit</a>
+    <a href="edit.php?id=<?php echo $notation['notationid']; ?>&from=mynotations&back=<?php echo urlencode($back_url); ?>" class="btn btn-secondary">Edit</a>
     <?php include 'components/notation/delete_modal.php'; ?>
     <?php endif; ?>
     <a href="<?php echo htmlspecialchars($back_url); ?>" class="btn btn-primary" style="text-decoration: none; margin-left: 10px;">&larr; Back</a>
